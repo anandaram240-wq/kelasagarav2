@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Complete Your Profile — KelasaGaara</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+Tamma+2:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --saffron:#E8600A;--saffron-light:#FEF0E6;--saffron-dark:#C04E06;
+      --jade:#2D6A4F;--jade-light:#E8F5EE;
+      --paper:#FAF8F5;--ink:#1A1A2E;--muted:#6B7280;--border:#E5E2DC;
+    }
+    body{font-family:'DM Sans',sans-serif;background:var(--paper);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px}
+
+    .card{background:#fff;border:1px solid var(--border);border-radius:20px;padding:40px 36px;width:100%;max-width:520px;box-shadow:0 8px 32px rgba(0,0,0,0.08)}
+
+    .step-header{text-align:center;margin-bottom:32px}
+    .avatar-wrap{position:relative;display:inline-block;margin-bottom:16px}
+    .user-avatar{width:72px;height:72px;border-radius:50%;border:3px solid var(--saffron);object-fit:cover}
+    .avatar-placeholder{width:72px;height:72px;border-radius:50%;background:var(--saffron-light);border:3px solid var(--saffron);display:flex;align-items:center;justify-content:center;font-size:1.6rem;color:var(--saffron);font-weight:700}
+    .role-dot{position:absolute;bottom:2px;right:2px;width:22px;height:22px;border-radius:50%;background:var(--jade);border:2px solid #fff;display:flex;align-items:center;justify-content:center;font-size:0.7rem}
+    h1{font-family:'Baloo Tamma 2',sans-serif;font-size:1.5rem;font-weight:800;color:var(--ink);margin-bottom:4px}
+    .subtitle{font-size:0.88rem;color:var(--muted)}
+
+    /* Progress bar */
+    .progress{display:flex;gap:6px;margin-bottom:28px}
+    .progress-step{flex:1;height:4px;border-radius:2px;background:var(--border);transition:background 0.3s}
+    .progress-step.done{background:var(--jade)}
+    .progress-step.active{background:var(--saffron)}
+
+    /* Form */
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .form-group{display:flex;flex-direction:column;gap:6px}
+    .form-group.full{grid-column:1/-1}
+    label{font-size:0.82rem;font-weight:600;color:var(--ink)}
+    label .required{color:var(--saffron)}
+    input,select,textarea{padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:0.88rem;font-family:'DM Sans',sans-serif;color:var(--ink);background:#fff;outline:none;transition:border 0.2s;width:100%}
+    input:focus,select:focus,textarea:focus{border-color:var(--saffron)}
+    input.error,select.error{border-color:#DC2626}
+    .field-hint{font-size:0.75rem;color:var(--muted)}
+
+    /* Trade pills */
+    .trade-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+    .trade-pill{padding:9px 6px;border:1.5px solid var(--border);border-radius:10px;text-align:center;font-size:0.8rem;cursor:pointer;transition:all 0.2s;background:#fff;color:var(--ink)}
+    .trade-pill:hover{border-color:var(--saffron);background:var(--saffron-light)}
+    .trade-pill.selected{border-color:var(--saffron);background:var(--saffron);color:#fff;font-weight:600}
+    .trade-pill .emoji{display:block;font-size:1.2rem;margin-bottom:2px}
+
+    /* Experience buttons */
+    .exp-row{display:flex;gap:8px;flex-wrap:wrap}
+    .exp-btn{padding:8px 16px;border:1.5px solid var(--border);border-radius:8px;background:#fff;font-size:0.82rem;cursor:pointer;color:var(--muted);transition:all 0.2s;font-family:'DM Sans',sans-serif}
+    .exp-btn.selected{border-color:var(--jade);background:var(--jade-light);color:var(--jade);font-weight:600}
+
+    /* Submit */
+    .btn-submit{width:100%;padding:14px;background:var(--saffron);color:#fff;border:none;border-radius:12px;font-size:1rem;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;margin-top:24px;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:8px}
+    .btn-submit:hover{background:var(--saffron-dark);transform:translateY(-1px)}
+    .btn-submit:disabled{opacity:0.6;cursor:not-allowed;transform:none}
+
+    /* Toast */
+    #toast{position:fixed;bottom:20px;right:20px;padding:12px 20px;border-radius:10px;font-size:0.88rem;font-weight:500;transform:translateY(60px);opacity:0;transition:all 0.3s;z-index:999;max-width:320px}
+    #toast.show{transform:translateY(0);opacity:1}
+    #toast.success{background:#2D6A4F;color:#fff}
+    #toast.error{background:#DC2626;color:#fff}
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <!-- Step progress -->
+  <div class="progress">
+    <div class="progress-step done"></div>
+    <div class="progress-step active"></div>
+    <div class="progress-step"></div>
+  </div>
+
+  <!-- Header -->
+  <div class="step-header">
+    <div class="avatar-wrap">
+      <div id="avatar-el" class="avatar-placeholder">👤</div>
+      <div class="role-dot" id="role-dot">👷</div>
+    </div>
+    <h1>Complete Your Profile</h1>
+    <p class="subtitle" id="greeting-sub">Tell us about yourself so hirers can find you</p>
+  </div>
+
+  <!-- WORKER FORM -->
+  <div id="worker-form">
+    <div class="form-grid">
+
+      <!-- District -->
+      <div class="form-group">
+        <label>District <span class="required">*</span></label>
+        <select id="district" required>
+          <option value="">Select District</option>
+        </select>
+      </div>
+
+      <!-- Taluk -->
+      <div class="form-group">
+        <label>Taluk / ತಾಲ್ಲೂಕು <span class="required">*</span></label>
+        <input id="taluk" type="text" placeholder="e.g. Mysuru, Hunsur"/>
+      </div>
+
+      <!-- Trade / Skill -->
+      <div class="form-group full">
+        <label>Your Trade / ಕೌಶಲ್ಯ <span class="required">*</span></label>
+        <div class="trade-grid" id="trade-grid"></div>
+        <input id="trade-other" type="text" placeholder="Other trade (type here)" style="margin-top:8px;display:none"/>
+      </div>
+
+      <!-- Experience -->
+      <div class="form-group full">
+        <label>Experience / ಅನುಭವ <span class="required">*</span></label>
+        <div class="exp-row" id="exp-row"></div>
+      </div>
+
+      <!-- Daily Rate -->
+      <div class="form-group">
+        <label>Daily Rate (₹) <span class="required">*</span></label>
+        <input id="daily-rate" type="number" placeholder="e.g. 600" min="100" max="10000"/>
+        <span class="field-hint">Your expected daily wage</span>
+      </div>
+
+      <!-- Phone (optional) -->
+      <div class="form-group">
+        <label>Phone (optional)</label>
+        <input id="phone" type="tel" placeholder="e.g. 9876543210" maxlength="10"/>
+        <span class="field-hint">Visible only to hirers</span>
+      </div>
+
+    </div>
+    <button class="btn-submit" id="btn-save" onclick="saveWorkerProfile()">
+      ✅ Save &amp; Go to Dashboard
+    </button>
+  </div>
+
+  <!-- HIRER FORM -->
+  <div id="hirer-form" style="display:none">
+    <div class="form-grid">
+      <div class="form-group">
+        <label>District <span class="required">*</span></label>
+        <select id="hirer-district" required>
+          <option value="">Select District</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Company / Name <span class="required">*</span></label>
+        <input id="hirer-company" type="text" placeholder="e.g. Ramesh Constructions"/>
+      </div>
+      <div class="form-group full">
+        <label>Phone (optional)</label>
+        <input id="hirer-phone" type="tel" placeholder="e.g. 9876543210" maxlength="10"/>
+      </div>
+    </div>
+    <button class="btn-submit" id="btn-save-hirer" onclick="saveHirerProfile()">
+      ✅ Save &amp; Go to Dashboard
+    </button>
+  </div>
+
+</div>
+
+<div id="toast"></div>
+
+<script type="module">
+  import { auth, db } from './js/firebase-config.js';
+  import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { doc, getDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const DISTRICTS = ["Bagalkot","Ballari","Belagavi","Bengaluru Rural","Bengaluru Urban","Bidar","Chamarajanagar","Chikkaballapura","Chikkamagaluru","Chitradurga","Dakshina Kannada","Davanagere","Dharwad","Gadag","Hassan","Haveri","Kalaburagi","Kodagu","Kolar","Koppal","Mandya","Mysuru","Raichur","Ramanagera","Shivamogga","Tumakuru","Udupi","Uttara Kannada","Vijayapura","Yadgir","Vijayanagara"];
+  const TRADES = [
+    {emoji:"🧱",label:"Mason / ಮೇಸ್ತ್ರಿ",en:"Mason"},
+    {emoji:"🔧",label:"Plumber / ಪ್ಲಂಬರ್",en:"Plumber"},
+    {emoji:"⚡",label:"Electrician",en:"Electrician"},
+    {emoji:"🪵",label:"Carpenter / ಮರಗೆಲಸ",en:"Carpenter"},
+    {emoji:"🎨",label:"Painter / ಪೇಂಟರ್",en:"Painter"},
+    {emoji:"🚗",label:"Driver / ಡ್ರೈವರ್",en:"Driver"},
+    {emoji:"🍳",label:"Cook / ಅಡಿಗೆ",en:"Cook"},
+    {emoji:"🌿",label:"Gardener / ತೋಟಗಾರ",en:"Gardener"},
+    {emoji:"🔒",label:"Security Guard",en:"Security Guard"},
+    {emoji:"🤝",label:"Helper / ಸಹಾಯಕ",en:"Helper"},
+    {emoji:"🏗️",label:"Labour / ಕೂಲಿ",en:"Labour"},
+    {emoji:"✏️",label:"Other / ಇತರ",en:"Other"}
+  ];
+  const EXP = ["< 1 Year","1–2 Years","3–5 Years","5–10 Years","10+ Years"];
+
+  let currentUser = null, userRole = null, selectedTrade = '', selectedExp = '';
+
+  // Populate district dropdowns
+  ['district','hirer-district'].forEach(id => {
+    const sel = document.getElementById(id);
+    if (!sel) return;
+    DISTRICTS.forEach(d => { const o = document.createElement('option'); o.value = d; o.textContent = d; sel.appendChild(o); });
+  });
+
+  // Build trade grid
+  const tg = document.getElementById('trade-grid');
+  TRADES.forEach(t => {
+    const btn = document.createElement('button');
+    btn.className = 'trade-pill';
+    btn.innerHTML = `<span class="emoji">${t.emoji}</span>${t.label}`;
+    btn.onclick = () => {
+      document.querySelectorAll('.trade-pill').forEach(p => p.classList.remove('selected'));
+      btn.classList.add('selected');
+      selectedTrade = t.en;
+      document.getElementById('trade-other').style.display = t.en === 'Other' ? 'block' : 'none';
+    };
+    tg.appendChild(btn);
+  });
+
+  // Build experience buttons
+  const er = document.getElementById('exp-row');
+  EXP.forEach(e => {
+    const btn = document.createElement('button');
+    btn.className = 'exp-btn';
+    btn.textContent = e;
+    btn.onclick = () => {
+      document.querySelectorAll('.exp-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      selectedExp = e;
+    };
+    er.appendChild(btn);
+  });
+
+  // Auth guard
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) { window.location.href = 'login.html'; return; }
+    currentUser = user;
+
+    const snap = await getDoc(doc(db, 'users', user.uid));
+    if (!snap.exists()) { window.location.href = 'login.html'; return; }
+    const data = snap.data();
+    userRole = data.role;
+
+    // If profile already set up, skip this page
+    if (data.district && data.profileComplete) {
+      window.location.href = userRole === 'worker' ? 'worker-dashboard.html' : 'hirer-dashboard.html';
+      return;
+    }
+
+    // Show user avatar
+    const avatarEl = document.getElementById('avatar-el');
+    if (user.photoURL) {
+      avatarEl.outerHTML = `<img class="user-avatar" id="avatar-el" src="${user.photoURL}" alt=""/>`;
+    } else {
+      const initials = (user.displayName||'U').split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase();
+      avatarEl.textContent = initials;
+    }
+
+    // Show role dot & correct form
+    if (userRole === 'hirer') {
+      document.getElementById('role-dot').textContent = '🏗️';
+      document.getElementById('greeting-sub').textContent = `${user.displayName} — Tell us about your business`;
+      document.getElementById('worker-form').style.display = 'none';
+      document.getElementById('hirer-form').style.display = 'block';
+    } else {
+      document.getElementById('greeting-sub').textContent = `${user.displayName} — Hirers will find you by your profile`;
+    }
+  });
+
+  // ── Save Worker Profile ───────────────────────────────────────
+  window.saveWorkerProfile = async function() {
+    const district  = document.getElementById('district').value;
+    const taluk     = document.getElementById('taluk').value.trim();
+    const trade     = selectedTrade === 'Other' ? document.getElementById('trade-other').value.trim() : selectedTrade;
+    const exp       = selectedExp;
+    const rate      = document.getElementById('daily-rate').value;
+    const phone     = document.getElementById('phone').value.trim();
+
+    if (!district)  return toast('Please select your district', 'error');
+    if (!taluk)     return toast('Please enter your taluk', 'error');
+    if (!trade)     return toast('Please select your trade / skill', 'error');
+    if (!exp)       return toast('Please select your experience', 'error');
+    if (!rate || rate < 100) return toast('Please enter a valid daily rate (min ₹100)', 'error');
+
+    const btn = document.getElementById('btn-save');
+    btn.disabled = true; btn.textContent = 'Saving…';
+
+    try {
+      await updateDoc(doc(db, 'users', currentUser.uid), {
+        district,
+        taluk,
+        skills:          [trade],
+        experience:      exp,
+        dailyRate:       parseInt(rate),
+        phone:           phone || null,
+        profileComplete: true,
+        updatedAt:       serverTimestamp()
+      });
+      toast('Profile saved! 🎉', 'success');
+      setTimeout(() => window.location.href = 'worker-dashboard.html', 1200);
+    } catch(e) {
+      btn.disabled = false; btn.textContent = '✅ Save & Go to Dashboard';
+      toast('Failed to save. Please try again.', 'error');
+    }
+  };
+
+  // ── Save Hirer Profile ────────────────────────────────────────
+  window.saveHirerProfile = async function() {
+    const district = document.getElementById('hirer-district').value;
+    const company  = document.getElementById('hirer-company').value.trim();
+    const phone    = document.getElementById('hirer-phone').value.trim();
+
+    if (!district) return toast('Please select your district', 'error');
+    if (!company)  return toast('Please enter your company or business name', 'error');
+
+    const btn = document.getElementById('btn-save-hirer');
+    btn.disabled = true; btn.textContent = 'Saving…';
+
+    try {
+      await updateDoc(doc(db, 'users', currentUser.uid), {
+        district, company,
+        phone:           phone || null,
+        profileComplete: true,
+        updatedAt:       serverTimestamp()
+      });
+      toast('Profile saved! 🎉', 'success');
+      setTimeout(() => window.location.href = 'hirer-dashboard.html', 1200);
+    } catch(e) {
+      btn.disabled = false; btn.textContent = '✅ Save & Go to Dashboard';
+      toast('Failed to save. Please try again.', 'error');
+    }
+  };
+
+  function toast(msg, type) {
+    const el = document.getElementById('toast');
+    el.textContent = msg; el.className = `show ${type}`;
+    setTimeout(() => el.className = '', 3000);
+  }
+</script>
+</body>
+</html>

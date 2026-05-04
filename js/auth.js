@@ -50,24 +50,33 @@ export async function signInWithGoogle(selectedRole, opts = {}) {
     const userSnap = await getDoc(userRef);
 
     if (!userSnap.exists()) {
+      // NEW USER — create Firestore doc, then send to profile setup
       await setDoc(userRef, {
-        uid:       user.uid,
-        name:      user.displayName,
-        email:     user.email,
-        photo:     user.photoURL,
-        role:      selectedRole,
-        skills:    [],
-        createdAt: serverTimestamp(),
-        lastLogin: serverTimestamp()
+        uid:             user.uid,
+        name:            user.displayName,
+        email:           user.email,
+        photo:           user.photoURL,
+        role:            selectedRole,
+        skills:          [],
+        profileComplete: false,        // ← must complete setup-profile.html first
+        createdAt:       serverTimestamp(),
+        lastLogin:       serverTimestamp()
       });
-      showToast(`Welcome to KelasaGaara, ${user.displayName}! 🎉`, 'success');
+      showToast(`Welcome! Let's set up your profile 👷`, 'success');
+      window.location.href = 'setup-profile.html';  // ← collect district/taluk/trade
+      return user;
     } else {
+      // EXISTING USER — update last login
       await updateDoc(userRef, { lastLogin: serverTimestamp() });
+      const savedData = (await getDoc(userRef)).data();
+      // If profile not complete, send back to setup
+      if (!savedData.profileComplete) {
+        window.location.href = 'setup-profile.html';
+        return user;
+      }
       showToast(`Welcome back, ${user.displayName}! 👋`, 'info');
+      redirectByRole(savedData.role);
     }
-
-    const savedData = (await getDoc(userRef)).data();
-    redirectByRole(savedData.role);
     return user;
 
   } catch (err) {
