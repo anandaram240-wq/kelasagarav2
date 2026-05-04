@@ -1,310 +1,332 @@
 <!DOCTYPE html>
-<!--
-  index.html — KelasaGaara Landing Page
-  Shows what the app does and lets users choose their role.
-  Two CTA buttons: "I am a Worker" and "I am a Hirer" → both go to login.html
--->
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <title>KelasaGaara — Karnataka Daily Worker Marketplace</title>
-  <meta name="description" content="KelasaGaara connects daily wage workers and hirers across Karnataka. Find jobs or hire workers — simple, fast, and free." />
-  <link rel="stylesheet" href="css/style.css" />
+  <meta name="description" content="Find skilled daily wage workers across all 31 Karnataka districts. Painters, plumbers, electricians, masons and 40+ trades. 0% commission."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+Tamma+2:wght@500;700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
   <style>
-    /* ===== HERO SECTION ===== */
-    .hero {
-      min-height: calc(100vh - 64px);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding: 3rem 1.5rem;
-      background: linear-gradient(160deg, #fff9f4 0%, var(--paper) 60%, #edf5f0 100%);
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --saffron:#E8600A; --saffron-light:#FEF0E6; --saffron-dark:#C04E06;
+      --jade:#2D6A4F;    --jade-light:#E8F5EE;
+      --paper:#FAF8F5;   --ink:#1A1A2E;
+      --muted:#6B7280;   --border:#E5E2DC;
     }
+    body{font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--ink);min-height:100vh}
 
-    .hero-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.35rem 1rem;
-      background: rgba(232, 89, 12, 0.1);
-      color: var(--saffron);
-      border-radius: 20px;
-      font-size: 0.85rem;
-      font-weight: 600;
-      margin-bottom: 1.5rem;
-      border: 1px solid rgba(232, 89, 12, 0.2);
-    }
+    /* ── NAVBAR ── */
+    .navbar{background:#fff;border-bottom:1px solid var(--border);padding:0 32px;height:64px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 1px 8px rgba(0,0,0,0.06)}
+    .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+    .brand-icon{width:40px;height:40px;background:var(--saffron);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;color:#fff;font-family:'Baloo Tamma 2',sans-serif;font-weight:800}
+    .brand-text{font-family:'Baloo Tamma 2',sans-serif;font-size:1.15rem;font-weight:800;color:var(--ink)}
+    .brand-text span{color:var(--saffron)}
+    .brand-sub{font-size:0.65rem;color:var(--muted);display:block;font-weight:400}
+    .nav-links{display:flex;align-items:center;gap:4px}
+    .nav-link{padding:8px 14px;border-radius:8px;text-decoration:none;font-size:0.85rem;font-weight:500;color:var(--muted);transition:all 0.2s}
+    .nav-link:hover{background:var(--paper);color:var(--ink)}
+    .nav-link.active{color:var(--saffron);background:var(--saffron-light)}
+    .nav-btn{padding:8px 18px;background:var(--saffron);color:#fff;border:none;border-radius:8px;font-size:0.85rem;font-weight:600;cursor:pointer;text-decoration:none;transition:all 0.2s;font-family:'DM Sans',sans-serif}
+    .nav-btn:hover{background:var(--saffron-dark);transform:translateY(-1px)}
+    .nav-btn.outline{background:transparent;color:var(--saffron);border:1.5px solid var(--saffron)}
+    .nav-btn.outline:hover{background:var(--saffron-light)}
 
-    .hero h1 {
-      font-size: clamp(2.2rem, 5vw, 3.5rem);
-      font-weight: 800;
-      max-width: 700px;
-      margin-bottom: 1.25rem;
-      line-height: 1.15;
-    }
+    /* ── HERO ── */
+    .hero{background:linear-gradient(135deg,var(--ink) 0%,#2a1a3e 100%);color:#fff;padding:56px 32px 48px;position:relative;overflow:hidden}
+    .hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 70% 50%,rgba(232,96,10,0.15),transparent 60%)}
+    .hero-inner{max-width:1100px;margin:0 auto;position:relative}
+    .hero-badges{display:flex;gap:10px;margin-bottom:24px;flex-wrap:wrap}
+    .hero-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:20px;font-size:0.78rem;font-weight:600;border:1px solid}
+    .badge-green{background:rgba(45,106,79,0.2);border-color:rgba(45,106,79,0.5);color:#6EE7B7}
+    .badge-orange{background:rgba(232,96,10,0.2);border-color:rgba(232,96,10,0.5);color:#FDBA74}
+    .pulse{width:7px;height:7px;border-radius:50%;background:currentColor;animation:pulse 1.5s ease-in-out infinite}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+    .hero h1{font-family:'Baloo Tamma 2',sans-serif;font-size:clamp(2.2rem,5vw,3.8rem);font-weight:800;line-height:1.1;margin-bottom:10px}
+    .hero h1 .accent{color:var(--saffron)}
+    .hero-kannada{font-size:1rem;color:rgba(255,255,255,0.55);margin-bottom:8px}
+    .hero-sub{font-size:0.95rem;color:rgba(255,255,255,0.6);margin-bottom:32px;max-width:480px;line-height:1.6}
+    .hero-stats{display:flex;gap:32px;flex-wrap:wrap}
+    .stat{text-align:left}
+    .stat-num{font-family:'Baloo Tamma 2',sans-serif;font-size:2rem;font-weight:800;color:var(--saffron);line-height:1}
+    .stat-label{font-size:0.75rem;color:rgba(255,255,255,0.45);margin-top:2px}
+    .stat-label-kn{font-size:0.7rem;color:rgba(255,255,255,0.3)}
 
-    .hero h1 .highlight { color: var(--saffron); }
-    .hero h1 .highlight-green { color: var(--jade); }
+    /* ── TICKER ── */
+    .ticker{background:var(--saffron);color:#fff;padding:10px 0;overflow:hidden;white-space:nowrap}
+    .ticker-inner{display:inline-flex;animation:ticker 30s linear infinite;gap:0}
+    .ticker-inner:hover{animation-play-state:paused}
+    @keyframes ticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+    .ticker-item{display:inline-flex;align-items:center;gap:6px;font-size:0.82rem;font-weight:600;padding:0 24px}
+    .ticker-dot{width:4px;height:4px;border-radius:50%;background:rgba(255,255,255,0.5)}
 
-    .hero-sub {
-      font-size: 1.1rem;
-      color: var(--muted);
-      max-width: 540px;
-      margin-bottom: 2.5rem;
-      line-height: 1.7;
-    }
+    /* ── SEARCH SECTION ── */
+    .search-section{background:#fff;border-bottom:1px solid var(--border);padding:20px 32px}
+    .search-inner{max-width:1100px;margin:0 auto}
+    .search-row{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
+    .search-select{flex:1;min-width:160px;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:0.88rem;font-family:'DM Sans',sans-serif;background:#fff;color:var(--ink);cursor:pointer;outline:none;transition:border 0.2s}
+    .search-select:focus{border-color:var(--saffron)}
+    .search-input{flex:2;min-width:200px;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:0.88rem;font-family:'DM Sans',sans-serif;outline:none;transition:border 0.2s}
+    .search-input:focus{border-color:var(--saffron)}
+    .search-input::placeholder{color:var(--muted)}
+    .btn-search{padding:11px 24px;background:var(--saffron);color:#fff;border:none;border-radius:10px;font-size:0.9rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;transition:all 0.2s}
+    .btn-search:hover{background:var(--saffron-dark)}
+    /* Category pills */
+    .category-pills{display:flex;gap:8px;flex-wrap:wrap}
+    .pill{padding:7px 14px;border-radius:20px;border:1.5px solid var(--border);background:#fff;font-size:0.82rem;cursor:pointer;transition:all 0.2s;white-space:nowrap;color:var(--ink)}
+    .pill:hover{border-color:var(--saffron);color:var(--saffron);background:var(--saffron-light)}
+    .pill.active{background:var(--saffron);color:#fff;border-color:var(--saffron)}
+    /* Sort bar */
+    .sort-bar{display:flex;align-items:center;justify-content:space-between;max-width:1100px;margin:14px auto 0;padding:0 32px;font-size:0.82rem;color:var(--muted)}
+    .sort-options{display:flex;gap:4px}
+    .sort-btn{padding:5px 12px;border:1px solid var(--border);border-radius:6px;background:#fff;font-size:0.8rem;cursor:pointer;color:var(--muted);font-family:'DM Sans',sans-serif;transition:all 0.2s}
+    .sort-btn.active{background:var(--saffron-light);color:var(--saffron);border-color:var(--saffron)}
 
-    /* ===== ROLE BUTTONS ===== */
-    .cta-row {
-      display: flex;
-      gap: 1rem;
-      flex-wrap: wrap;
-      justify-content: center;
-      margin-bottom: 3.5rem;
-    }
+    /* ── WORKERS GRID ── */
+    .workers-section{max-width:1100px;margin:28px auto;padding:0 32px}
+    .workers-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin-top:16px}
+    .worker-card{background:#fff;border:1px solid var(--border);border-radius:14px;padding:18px;transition:all 0.2s;cursor:pointer}
+    .worker-card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,0.1);border-color:var(--saffron)}
+    .wc-top{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+    .wc-avatar{width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid var(--border)}
+    .wc-avatar-ph{width:44px;height:44px;border-radius:50%;background:var(--saffron-light);border:2px solid var(--saffron);display:flex;align-items:center;justify-content:center;font-size:1rem;color:var(--saffron);font-weight:700}
+    .wc-name{font-weight:600;font-size:0.92rem}
+    .wc-trade{font-size:0.78rem;color:var(--muted)}
+    .wc-district{display:inline-flex;align-items:center;gap:4px;font-size:0.75rem;background:var(--jade-light);color:var(--jade);padding:3px 9px;border-radius:10px;margin-bottom:8px}
+    .wc-skills{display:flex;gap:5px;flex-wrap:wrap}
+    .wc-skill{font-size:0.72rem;padding:3px 8px;background:var(--paper);border:1px solid var(--border);border-radius:8px;color:var(--muted)}
+    .wc-btn{margin-top:12px;width:100%;padding:9px;background:var(--saffron);color:#fff;border:none;border-radius:8px;font-size:0.85rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s}
+    .wc-btn:hover{background:var(--saffron-dark)}
 
-    .cta-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.75rem;
-      padding: 1rem 2rem;
-      border-radius: 14px;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 1.05rem;
-      font-weight: 600;
-      cursor: pointer;
-      border: none;
-      transition: all 0.22s ease;
-      text-decoration: none;
-    }
+    /* ── EMPTY / LOADING ── */
+    .state-box{text-align:center;padding:60px 20px;color:var(--muted)}
+    .spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--saffron);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 14px}
+    @keyframes spin{to{transform:rotate(360deg)}}
 
-    .cta-worker {
-      background: var(--jade);
-      color: #fff;
-      box-shadow: 0 6px 20px rgba(27, 107, 69, 0.28);
-    }
-    .cta-worker:hover {
-      background: #155538;
-      transform: translateY(-3px);
-      box-shadow: 0 10px 28px rgba(27, 107, 69, 0.38);
-      color: #fff;
-      text-decoration: none;
-    }
+    /* ── FAB ── */
+    .fab{position:fixed;bottom:28px;right:28px;width:52px;height:52px;border-radius:50%;background:var(--saffron);color:#fff;border:none;font-size:1.5rem;cursor:pointer;box-shadow:0 4px 16px rgba(232,96,10,0.4);transition:all 0.2s;z-index:99}
+    .fab:hover{transform:scale(1.1);box-shadow:0 6px 24px rgba(232,96,10,0.5)}
 
-    .cta-hirer {
-      background: var(--saffron);
-      color: #fff;
-      box-shadow: 0 6px 20px rgba(232, 89, 12, 0.28);
-    }
-    .cta-hirer:hover {
-      background: #c94a08;
-      transform: translateY(-3px);
-      box-shadow: 0 10px 28px rgba(232, 89, 12, 0.38);
-      color: #fff;
-      text-decoration: none;
-    }
-
-    .cta-btn .cta-icon { font-size: 1.4rem; }
-
-    /* ===== FEATURE CARDS ===== */
-    .features {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 1.25rem;
-      max-width: 860px;
-      width: 100%;
-    }
-
-    @media (max-width: 640px) {
-      .features { grid-template-columns: 1fr; }
-    }
-
-    .feature-card {
-      background: var(--white);
-      border-radius: 16px;
-      border: 1px solid var(--border);
-      padding: 1.5rem;
-      text-align: left;
-      box-shadow: var(--shadow);
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-    .feature-card:hover {
-      transform: translateY(-3px);
-      box-shadow: var(--shadow-lg);
-    }
-
-    .feature-icon { font-size: 2rem; margin-bottom: 0.75rem; }
-
-    .feature-card h4 {
-      font-size: 1rem;
-      margin-bottom: 0.35rem;
-    }
-
-    .feature-card p {
-      font-size: 0.85rem;
-      color: var(--muted);
-      line-height: 1.55;
-    }
-
-    /* ===== SIMPLE NAVBAR for landing ===== */
-    .landing-nav {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      background: rgba(255,255,255,0.92);
-      backdrop-filter: blur(8px);
-      border-bottom: 1px solid var(--border);
-      padding: 0 2rem;
-      height: 64px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      text-decoration: none;
-    }
-    .brand-icon {
-      width: 36px; height: 36px;
-      background: linear-gradient(135deg, var(--saffron), var(--gold));
-      border-radius: 10px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1.2rem;
-    }
-    .brand-name {
-      font-family: 'Baloo Tamma 2', cursive;
-      font-size: 1.3rem;
-      font-weight: 800;
-      color: var(--ink);
-    }
-    .brand-name span { color: var(--saffron); }
-    .nav-login-btn {
-      padding: 0.45rem 1.1rem;
-      background: var(--saffron);
-      color: #fff;
-      border-radius: 10px;
-      font-size: 0.9rem;
-      font-weight: 600;
-      text-decoration: none;
-      transition: background 0.2s;
-    }
-    .nav-login-btn:hover { background: #c94a08; text-decoration: none; color: #fff; }
-
-    /* ===== STATS BAR ===== */
-    .stats-bar {
-      display: flex;
-      gap: 2.5rem;
-      justify-content: center;
-      flex-wrap: wrap;
-      margin-bottom: 3rem;
-    }
-    .stat { text-align: center; }
-    .stat-number {
-      font-family: 'Baloo Tamma 2', cursive;
-      font-size: 1.8rem;
-      font-weight: 800;
-      color: var(--saffron);
-    }
-    .stat-label { font-size: 0.82rem; color: var(--muted); }
-
-    /* ===== FOOTER ===== */
-    .footer {
-      text-align: center;
-      padding: 2rem 1rem;
-      border-top: 1px solid var(--border);
-      color: var(--muted);
-      font-size: 0.85rem;
-      margin-top: 2rem;
-    }
+    /* ── FOOTER ── */
+    footer{border-top:1px solid var(--border);padding:20px 32px;text-align:center;font-size:0.8rem;color:var(--muted);margin-top:40px}
   </style>
 </head>
 <body>
 
-  <!-- ===== NAVIGATION ===== -->
-  <nav class="landing-nav">
-    <a class="brand" href="index.html">
-      <div class="brand-icon">🌾</div>
-      <div class="brand-name">Kelasa<span>Gaara</span></div>
-    </a>
-    <a class="nav-login-btn" href="login.html">Login / Sign Up</a>
-  </nav>
+<!-- NAVBAR -->
+<nav class="navbar">
+  <a href="index.html" class="brand">
+    <div class="brand-icon">ಕ</div>
+    <div>
+      <div class="brand-text">Kelasa<span>Gaara</span></div>
+      <span class="brand-sub">ಕೆಲಸಗಾರ — KelasaGaara</span>
+    </div>
+  </a>
+  <div class="nav-links">
+    <a href="index.html" class="nav-link active">🏠 Home</a>
+    <a href="find-jobs.html" class="nav-link">💼 Jobs</a>
+    <a href="worker-dashboard.html" class="nav-link">👷 Worker</a>
+    <a href="hirer-dashboard.html" class="nav-link">🏗️ Hirer</a>
+    <a href="admin-login.html" class="nav-link">🛡️ Admin</a>
+    <a href="login.html" class="nav-btn" style="margin-left:8px">Login</a>
+  </div>
+</nav>
 
-  <!-- ===== HERO ===== -->
-  <section class="hero">
-
-    <!-- Tagline badge -->
-    <div class="hero-badge">🌾 Karnataka's Daily Worker Marketplace</div>
-
-    <!-- Main heading -->
-    <h1>
-      Connect <span class="highlight-green">Workers</span> &amp;
-      <span class="highlight">Hirers</span><br />across Karnataka
-    </h1>
-
-    <!-- Sub heading -->
-    <p class="hero-sub">
-      KelasaGaara helps daily wage workers find jobs and hirers find workers —
-      no middleman, no fees, just a simple Google login.
-    </p>
-
-    <!-- Quick stat numbers -->
-    <div class="stats-bar">
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-badges">
+      <span class="hero-badge badge-green"><span class="pulse"></span><span id="worker-count">100</span> Workers across Karnataka</span>
+      <span class="hero-badge badge-orange"><span class="pulse"></span><span id="online-count">0</span> online now</span>
+    </div>
+    <h1>Find Skilled <span class="accent">Workers</span></h1>
+    <p class="hero-kannada">ನಿಮ್ಮ ಹತ್ತಿರದಲ್ಲಿರುವ ಕುಶಲ ಕಾರ್ಮಿಕರನ್ನು ಹುಡುಕಿ</p>
+    <p class="hero-sub">ಪೇಂಟರ್, ಪ್ಲಂಬರ್, ಎಲೆಕ್ಟ್ರಿಶಿಯನ್, ಮೇಸ್ತ್ರಿ ಮತ್ತು 40+ ಕೌಶಲ್ಯ ಕಾರ್ಮಿಕರನ್ನು<br>ಕರ್ನಾಟಕದ ಎಲ್ಲ 31 ಜಿಲ್ಲೆಗಳಲ್ಲಿ ಹುಡುಕಿ.</p>
+    <div class="hero-stats">
       <div class="stat">
-        <div class="stat-number">31</div>
-        <div class="stat-label">Karnataka Districts</div>
-      </div>
-      <div class="stat">
-        <div class="stat-number">10</div>
-        <div class="stat-label">Job Categories</div>
+        <div class="stat-num" id="stat-workers">—</div>
+        <div class="stat-label">Workers / ಕಾರ್ಮಿಕರು</div>
       </div>
       <div class="stat">
-        <div class="stat-number">Free</div>
-        <div class="stat-label">No Charges</div>
+        <div class="stat-num">31</div>
+        <div class="stat-label">Districts / ಜಿಲ್ಲೆ</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num" id="stat-jobs">—</div>
+        <div class="stat-label">Jobs Posted / ಕೆಲಸಗಳು</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">0%</div>
+        <div class="stat-label">Commission / ಕಮಿಷನ್</div>
       </div>
     </div>
+  </div>
+</section>
 
-    <!-- Role choice buttons — both link to login.html -->
-    <div class="cta-row">
-      <a class="cta-btn cta-worker" href="login.html?role=worker" id="worker-cta">
-        <span class="cta-icon">👷</span>
-        I am a Worker
-      </a>
-      <a class="cta-btn cta-hirer" href="login.html?role=hirer" id="hirer-cta">
-        <span class="cta-icon">🏗️</span>
-        I am a Hirer
-      </a>
+<!-- TICKER -->
+<div class="ticker">
+  <div class="ticker-inner" id="ticker">
+    <span class="ticker-item">🗺️ 31 Karnataka Districts</span><span class="ticker-dot"></span>
+    <span class="ticker-item">⭐ Google Login — No Password</span><span class="ticker-dot"></span>
+    <span class="ticker-item">💰 0% Commission</span><span class="ticker-dot"></span>
+    <span class="ticker-item">👷 Find Workers Instantly</span><span class="ticker-dot"></span>
+    <span class="ticker-item">🏗️ Post Jobs in 2 Minutes</span><span class="ticker-dot"></span>
+    <span class="ticker-item">🔐 Secure Google Auth</span><span class="ticker-dot"></span>
+    <span class="ticker-item">🗺️ 31 Karnataka Districts</span><span class="ticker-dot"></span>
+    <span class="ticker-item">⭐ Google Login — No Password</span><span class="ticker-dot"></span>
+    <span class="ticker-item">💰 0% Commission</span><span class="ticker-dot"></span>
+    <span class="ticker-item">👷 Find Workers Instantly</span><span class="ticker-dot"></span>
+    <span class="ticker-item">🏗️ Post Jobs in 2 Minutes</span><span class="ticker-dot"></span>
+    <span class="ticker-item">🔐 Secure Google Auth</span><span class="ticker-dot"></span>
+  </div>
+</div>
+
+<!-- SEARCH SECTION -->
+<div class="search-section">
+  <div class="search-inner">
+    <div class="search-row">
+      <select class="search-select" id="filter-district" onchange="applyFilter()">
+        <option value="">All Districts</option>
+      </select>
+      <input class="search-input" id="search-name" type="text" placeholder="🔍 Search name, trade..." oninput="applyFilter()"/>
+      <button class="btn-search" onclick="applyFilter()">🔍 Search</button>
     </div>
+    <div class="category-pills" id="category-pills"></div>
+  </div>
+</div>
 
-    <!-- Feature summary cards -->
-    <div class="features">
-      <div class="feature-card">
-        <div class="feature-icon">🔍</div>
-        <h4>Find Jobs Easily</h4>
-        <p>Browse daily wage jobs by district and category. Filter, read details, and apply with one click.</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">📋</div>
-        <h4>Post Jobs Instantly</h4>
-        <p>Hirers post a job in under 2 minutes. Set pay, district, and category — workers apply right away.</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">🔐</div>
-        <h4>Google Login Only</h4>
-        <p>No passwords. No OTPs. Just sign in with your existing Google account — safe and simple.</p>
-      </div>
+<!-- SORT BAR -->
+<div class="sort-bar">
+  <div id="result-count" style="font-weight:600;color:var(--ink)">Loading workers…</div>
+  <div class="sort-options">
+    <span style="margin-right:8px">Sort by:</span>
+    <button class="sort-btn active" onclick="sortWorkers('name',this)">👤 Name</button>
+    <button class="sort-btn" onclick="sortWorkers('district',this)">📍 District</button>
+  </div>
+</div>
+
+<!-- WORKERS GRID -->
+<div class="workers-section">
+  <div class="workers-grid" id="workers-grid">
+    <div class="state-box" style="grid-column:1/-1">
+      <div class="spinner"></div>
+      Loading workers from Firestore…
     </div>
+  </div>
+</div>
 
-  </section>
+<!-- FAB — Hirer CTA -->
+<button class="fab" title="Post a Job" onclick="window.location.href='login.html?role=hirer'">+</button>
 
-  <!-- ===== FOOTER ===== -->
-  <footer class="footer">
-    <p>KelasaGaara (ಕೆಲಸಗಾರ) — Karnataka Daily Worker Marketplace &nbsp;|&nbsp; Built with Firebase &amp; ❤️</p>
-  </footer>
+<footer>KelasaGaara (ಕೆಲಸಗಾರ) — Karnataka Daily Worker Marketplace &nbsp;|&nbsp; Built with Firebase &amp; ❤️</footer>
 
+<script type="module">
+  import { db } from './js/firebase-config.js';
+  import { collection, getDocs, query, where, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const DISTRICTS = ["Bagalkot","Ballari","Belagavi","Bengaluru Rural","Bengaluru Urban","Bidar","Chamarajanagar","Chikkaballapura","Chikkamagaluru","Chitradurga","Dakshina Kannada","Davanagere","Dharwad","Gadag","Hassan","Haveri","Kalaburagi","Kodagu","Kolar","Koppal","Mandya","Mysuru","Raichur","Ramanagara","Shivamogga","Tumakuru","Udupi","Uttara Kannada","Vijayapura","Yadgir","Vijayanagara"];
+  const CATEGORIES = [
+    {label:"ಎಲ್ಲ",en:"All"},
+    {label:"🎨 ಪೇಂಟರ್",en:"Painter"},
+    {label:"🔧 ಪ್ಲಂಬರ್",en:"Plumber"},
+    {label:"⚡ ಎಲೆಕ್ಟ್ರಿಶಿಯನ್",en:"Electrician"},
+    {label:"🧱 ಮೇಸ್ತ್ರಿ",en:"Mason"},
+    {label:"🪵 ಮರಗೆಲಸ",en:"Carpenter"},
+    {label:"🚗 ಡ್ರೈವರ್",en:"Driver"},
+    {label:"🍳 ಅಡಿಗೆ",en:"Cook"},
+    {label:"🌿 ತೋಟಗಾರ",en:"Gardener"},
+    {label:"🔒 ಸೆಕ್ಯೂರಿಟಿ",en:"Security Guard"},
+    {label:"🤝 ಸಹಾಯಕ",en:"Helper"}
+  ];
+
+  let allWorkers = [], activeCategory = 'All';
+
+  // Populate district dropdown
+  const distSel = document.getElementById('filter-district');
+  DISTRICTS.forEach(d => {
+    const o = document.createElement('option');
+    o.value = d; o.textContent = d;
+    distSel.appendChild(o);
+  });
+
+  // Build category pills
+  const pillsEl = document.getElementById('category-pills');
+  CATEGORIES.forEach(c => {
+    const btn = document.createElement('button');
+    btn.className = 'pill' + (c.en === 'All' ? ' active' : '');
+    btn.textContent = c.label;
+    btn.onclick = () => {
+      activeCategory = c.en;
+      document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      applyFilter();
+    };
+    pillsEl.appendChild(btn);
+  });
+
+  // Load workers from Firestore (role = 'worker')
+  async function loadWorkers() {
+    try {
+      const q = query(collection(db,'users'), where('role','==','worker'));
+      const snap = await getDocs(q);
+      allWorkers = snap.docs.map(d => d.data());
+      document.getElementById('stat-workers').textContent = allWorkers.length;
+      document.getElementById('worker-count').textContent = allWorkers.length;
+    } catch(e) {
+      allWorkers = [];
+    }
+    // Load job count
+    try {
+      const js = await getDocs(collection(db,'jobs'));
+      document.getElementById('stat-jobs').textContent = js.size;
+    } catch(e){}
+    applyFilter();
+  }
+
+  window.applyFilter = function() {
+    const district = document.getElementById('filter-district').value;
+    const search = document.getElementById('search-name').value.toLowerCase().trim();
+    let filtered = allWorkers;
+    if (district) filtered = filtered.filter(w => w.district === district || (w.skills||[]).length > 0);
+    if (activeCategory !== 'All') filtered = filtered.filter(w => (w.skills||[]).some(s => s.toLowerCase().includes(activeCategory.toLowerCase())));
+    if (search) filtered = filtered.filter(w => (w.name||'').toLowerCase().includes(search) || (w.skills||[]).some(s => s.toLowerCase().includes(search)));
+    renderWorkers(filtered);
+  };
+
+  window.sortWorkers = function(by, btn) {
+    document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    allWorkers.sort((a,b) => (a[by]||'').localeCompare(b[by]||''));
+    applyFilter();
+  };
+
+  function renderWorkers(workers) {
+    const grid = document.getElementById('workers-grid');
+    document.getElementById('result-count').textContent = `${workers.length} workers found`;
+    if (!workers.length) {
+      grid.innerHTML = `<div class="state-box" style="grid-column:1/-1">👷 No workers found. <a href="login.html?role=worker" style="color:var(--saffron)">Register as a Worker →</a></div>`;
+      return;
+    }
+    grid.innerHTML = workers.map(w => {
+      const initials = (w.name||'U').split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase();
+      const avatar = w.photo
+        ? `<img class="wc-avatar" src="${w.photo}" alt="" onerror="this.style.display='none'"/>`
+        : `<div class="wc-avatar-ph">${initials}</div>`;
+      const skills = (w.skills||[]).slice(0,3).map(s=>`<span class="wc-skill">${s}</span>`).join('');
+      const trade = (w.skills||[])[0] || 'Daily Worker';
+      return `
+        <div class="worker-card">
+          <div class="wc-top">${avatar}<div><div class="wc-name">${esc(w.name||'Worker')}</div><div class="wc-trade">${esc(trade)}</div></div></div>
+          <div class="wc-district">📍 ${esc(w.district||'Karnataka')}</div>
+          <div class="wc-skills">${skills||'<span class="wc-skill">Available</span>'}</div>
+          <button class="wc-btn" onclick="window.location.href='find-jobs.html'">View Jobs →</button>
+        </div>`;
+    }).join('');
+  }
+
+  function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+  loadWorkers();
+</script>
 </body>
 </html>

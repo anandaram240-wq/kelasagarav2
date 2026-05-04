@@ -29,54 +29,51 @@ provider.setCustomParameters({ prompt: 'select_account' });
 // ===== GOOGLE SIGN-IN FUNCTION =====
 // Called when user clicks "Continue with Google" on login.html.
 // selectedRole is either 'worker' or 'hirer', chosen before clicking.
-export async function signInWithGoogle(selectedRole) {
-  // Validate that the user has chosen a role before trying to sign in.
-  if (!selectedRole) {
+// opts.skipRoleCheck = true is used by admin-login.html (no role needed)
+export async function signInWithGoogle(selectedRole, opts = {}) {
+  // For normal login, require a role selection
+  if (!selectedRole && !opts.skipRoleCheck) {
     showToast('Please select a role first — Worker or Hirer.', 'error');
-    return;
+    return null;
   }
 
   try {
     // Open the Google sign-in popup window.
     const result = await signInWithPopup(auth, provider);
-    const user = result.user; // The Google user object (name, email, photo, uid)
+    const user = result.user;
+
+    // Admin flow: skip Firestore write, just return the raw user
+    if (opts.skipRoleCheck) return user;
 
     // Check if this user already exists in Firestore.
-    const userRef = doc(db, 'users', user.uid);
+    const userRef  = doc(db, 'users', user.uid);
     const userSnap = await getDoc(userRef);
 
     if (!userSnap.exists()) {
-      // NEW USER: Create their Firestore document with their selected role.
       await setDoc(userRef, {
         uid:       user.uid,
         name:      user.displayName,
         email:     user.email,
         photo:     user.photoURL,
-        role:      selectedRole,       // 'worker' or 'hirer'
-        skills:    [],                 // Workers start with empty skills list
-        createdAt: serverTimestamp(),  // When they first joined
+        role:      selectedRole,
+        skills:    [],
+        createdAt: serverTimestamp(),
         lastLogin: serverTimestamp()
       });
       showToast(`Welcome to KelasaGaara, ${user.displayName}! 🎉`, 'success');
     } else {
-      // EXISTING USER: Only update their last login time, keep role unchanged.
-      await updateDoc(userRef, {
-        lastLogin: serverTimestamp()
-      });
+      await updateDoc(userRef, { lastLogin: serverTimestamp() });
       showToast(`Welcome back, ${user.displayName}! 👋`, 'info');
     }
 
-    // Read their role from Firestore (use saved role for existing users).
     const savedData = (await getDoc(userRef)).data();
-    const role = savedData.role;
-
-    // Redirect to the correct dashboard based on role.
-    redirectByRole(role);
+    redirectByRole(savedData.role);
+    return user;
 
   } catch (err) {
-    // Show an error toast if sign-in fails.
     console.error('Sign-in error:', err);
     showToast('Sign-in failed. Please try again.', 'error');
+    return null;
   }
 }
 
@@ -147,7 +144,16 @@ export async function checkAuth() {
 }
 
 // ===== GET CURRENT USER =====
-// Simple helper to get the currently signed-in Firebase user object.
 export function getCurrentUser() {
   return auth.currentUser;
+}
+
+// ===== ON AUTH READY =====
+// Calls callback once Firebase auth state is resolved.
+// Used by admin-login.html to auto-redirect if already signed in.
+export function onAuthReady(callback) {
+  const unsub = onAuthStateChanged(auth, (user) => {
+    unsub();
+    callback(user);
+  });
 }

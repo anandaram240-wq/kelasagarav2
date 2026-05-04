@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard — KelasaGaara</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --saffron: #E8600A;
+      --jade: #2D6A4F;
+      --paper: #FAF8F5;
+      --ink: #1A1A2E;
+      --muted: #6B7280;
+      --bg: #0F0F1A;
+      --surface: #16162A;
+      --border: rgba(255,255,255,0.08);
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: #fff;
+      min-height: 100vh;
+    }
+
+    /* ── Navbar ── */
+    .navbar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 32px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 1rem;
+    }
+    .nav-brand .shield { font-size: 1.2rem; }
+    .nav-brand .app-name { color: var(--saffron); }
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .admin-badge {
+      background: rgba(232,96,10,0.15);
+      border: 1px solid rgba(232,96,10,0.35);
+      color: var(--saffron);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      font-weight: 600;
+    }
+    .btn-logout {
+      background: rgba(255,255,255,0.07);
+      border: 1px solid var(--border);
+      color: rgba(255,255,255,0.7);
+      padding: 6px 16px;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      transition: all 0.2s;
+    }
+    .btn-logout:hover { background: rgba(255,255,255,0.12); color: #fff; }
+
+    /* ── Page layout ── */
+    .page { max-width: 1100px; margin: 0 auto; padding: 40px 24px; }
+
+    /* ── Stats row ── */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 36px;
+    }
+    .stat-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 24px 20px;
+      text-align: center;
+    }
+    .stat-num {
+      font-size: 2.2rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .stat-num.orange { color: var(--saffron); }
+    .stat-num.green  { color: #34D399; }
+    .stat-num.blue   { color: #60A5FA; }
+    .stat-label { color: rgba(255,255,255,0.45); font-size: 0.82rem; }
+
+    /* ── Section header ── */
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .section-title { font-size: 1.1rem; font-weight: 700; }
+    .section-count {
+      background: rgba(255,255,255,0.08);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      color: rgba(255,255,255,0.5);
+    }
+
+    /* ── Filter tabs ── */
+    .filter-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .tab {
+      padding: 8px 18px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: rgba(255,255,255,0.5);
+      font-size: 0.85rem;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      transition: all 0.2s;
+    }
+    .tab.active { background: var(--saffron); border-color: var(--saffron); color: #fff; font-weight: 600; }
+    .tab:hover:not(.active) { background: rgba(255,255,255,0.06); color: #fff; }
+
+    /* ── Users Table ── */
+    .table-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    thead th {
+      background: rgba(255,255,255,0.04);
+      padding: 14px 20px;
+      text-align: left;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: rgba(255,255,255,0.4);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      border-bottom: 1px solid var(--border);
+    }
+    tbody tr { border-bottom: 1px solid var(--border); transition: background 0.15s; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: rgba(255,255,255,0.03); }
+    td { padding: 14px 20px; font-size: 0.88rem; vertical-align: middle; }
+
+    .user-cell {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .user-avatar {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--border);
+      flex-shrink: 0;
+    }
+    .avatar-placeholder {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: rgba(232,96,10,0.2);
+      border: 2px solid rgba(232,96,10,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      flex-shrink: 0;
+    }
+    .user-name { font-weight: 600; color: #fff; }
+    .user-email { font-size: 0.77rem; color: rgba(255,255,255,0.4); margin-top: 1px; }
+
+    .role-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .role-worker { background: rgba(45,106,79,0.2); color: #6EE7B7; border: 1px solid rgba(45,106,79,0.4); }
+    .role-hirer  { background: rgba(232,96,10,0.15); color: #FDBA74; border: 1px solid rgba(232,96,10,0.3); }
+
+    .skills-cell { color: rgba(255,255,255,0.5); font-size: 0.82rem; max-width: 180px; }
+    .skill-pill {
+      display: inline-block;
+      background: rgba(45,106,79,0.2);
+      border: 1px solid rgba(45,106,79,0.3);
+      color: #6EE7B7;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 0.72rem;
+      margin: 2px 2px 2px 0;
+    }
+
+    .date-cell { color: rgba(255,255,255,0.45); font-size: 0.8rem; }
+
+    /* ── Loading / Empty states ── */
+    .loading, .empty {
+      text-align: center;
+      padding: 60px 20px;
+      color: rgba(255,255,255,0.35);
+    }
+    .spinner {
+      width: 32px; height: 32px;
+      border: 3px solid rgba(255,255,255,0.1);
+      border-top-color: var(--saffron);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 16px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Toast ── */
+    #toast {
+      position: fixed;
+      bottom: 24px; right: 24px;
+      background: #1F2937;
+      border: 1px solid rgba(255,255,255,0.1);
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-size: 0.88rem;
+      transform: translateY(80px);
+      opacity: 0;
+      transition: all 0.3s;
+      z-index: 999;
+    }
+    #toast.show { transform: translateY(0); opacity: 1; }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="nav-brand">
+      <span class="shield">🛡️</span>
+      <span>Kelasa<span class="app-name">Gaara</span> Admin</span>
+    </div>
+    <div class="nav-right">
+      <span class="admin-badge">ADMIN</span>
+      <span id="admin-name" style="color:rgba(255,255,255,0.5);font-size:0.85rem"></span>
+      <button class="btn-logout" onclick="doLogout()">Logout</button>
+    </div>
+  </nav>
+
+  <!-- Page Content -->
+  <div class="page">
+
+    <!-- Stats -->
+    <div class="stats-row">
+      <div class="stat-box">
+        <div class="stat-num orange" id="stat-total">—</div>
+        <div class="stat-label">Total Users</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num green" id="stat-workers">—</div>
+        <div class="stat-label">Workers</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num blue" id="stat-hirers">—</div>
+        <div class="stat-label">Hirers</div>
+      </div>
+    </div>
+
+    <!-- Table Header -->
+    <div class="section-header">
+      <div class="section-title">Google Authenticated Users</div>
+      <div class="section-count" id="user-count">Loading…</div>
+    </div>
+
+    <!-- Filter Tabs -->
+    <div class="filter-tabs">
+      <button class="tab active" onclick="filterUsers('all',this)">All Users</button>
+      <button class="tab" onclick="filterUsers('worker',this)">Workers</button>
+      <button class="tab" onclick="filterUsers('hirer',this)">Hirers</button>
+    </div>
+
+    <!-- Users Table -->
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>User</th>
+            <th>Role</th>
+            <th>Skills / Posts</th>
+            <th>Registered</th>
+            <th>Last Login</th>
+          </tr>
+        </thead>
+        <tbody id="users-tbody">
+          <tr>
+            <td colspan="5">
+              <div class="loading">
+                <div class="spinner"></div>
+                Loading users from Firestore…
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div id="toast"></div>
+
+  <script type="module">
+    import { db, auth } from './js/firebase-config.js';
+    import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { collection, getDocs, orderBy, query } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    const ADMIN_EMAILS = ['anandakiccha240@gmail.com', 'anandaananda16919@gmail.com'];
+
+    let allUsers = [];
+
+    // ── Route guard ──────────────────────────────────────────────
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) { window.location.href = 'admin-login.html'; return; }
+      if (!ADMIN_EMAILS.includes(user.email)) {
+        await signOut(auth);
+        window.location.href = 'admin-login.html';
+        return;
+      }
+      document.getElementById('admin-name').textContent = user.displayName || user.email;
+      loadUsers();
+    });
+
+    // ── Load all users ───────────────────────────────────────────
+    async function loadUsers() {
+      try {
+        const q = query(collection(db, 'users'), orderBy('createdAt', 'desc'));
+        const snap = await getDocs(q);
+        allUsers = snap.docs.map(d => d.data());
+        renderStats(allUsers);
+        renderUsers(allUsers);
+      } catch (e) {
+        document.getElementById('users-tbody').innerHTML =
+          `<tr><td colspan="5"><div class="empty">⚠️ Failed to load users. Check Firestore rules.</div></td></tr>`;
+      }
+    }
+
+    function renderStats(users) {
+      const workers = users.filter(u => u.role === 'worker').length;
+      const hirers  = users.filter(u => u.role === 'hirer').length;
+      document.getElementById('stat-total').textContent   = users.length;
+      document.getElementById('stat-workers').textContent = workers;
+      document.getElementById('stat-hirers').textContent  = hirers;
+    }
+
+    // ── Render table rows ────────────────────────────────────────
+    function renderUsers(users) {
+      const tbody = document.getElementById('users-tbody');
+      document.getElementById('user-count').textContent = `${users.length} users`;
+
+      if (!users.length) {
+        tbody.innerHTML = `<tr><td colspan="5"><div class="empty">No users found.</div></td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = users.map(u => {
+        const initials = (u.name || 'U').split(' ').map(n => n[0]).join('').slice(0,2).toUpperCase();
+        const avatar   = u.photo
+          ? `<img class="user-avatar" src="${u.photo}" alt="" onerror="this.style.display='none'">`
+          : `<div class="avatar-placeholder">${initials}</div>`;
+
+        const roleBadge = u.role === 'worker'
+          ? `<span class="role-badge role-worker">👷 Worker</span>`
+          : `<span class="role-badge role-hirer">🏗️ Hirer</span>`;
+
+        const skills = (u.skills && u.skills.length)
+          ? u.skills.map(s => `<span class="skill-pill">${s}</span>`).join('')
+          : `<span style="color:rgba(255,255,255,0.3);font-size:0.78rem">—</span>`;
+
+        const created  = u.createdAt?.seconds  ? formatDate(u.createdAt.seconds * 1000)  : '—';
+        const lastLogin= u.lastLogin?.seconds   ? formatDate(u.lastLogin.seconds * 1000)  : '—';
+
+        return `
+          <tr>
+            <td>
+              <div class="user-cell">
+                ${avatar}
+                <div>
+                  <div class="user-name">${esc(u.name || 'Unknown')}</div>
+                  <div class="user-email">${esc(u.email || '')}</div>
+                </div>
+              </div>
+            </td>
+            <td>${roleBadge}</td>
+            <td class="skills-cell">${skills}</td>
+            <td class="date-cell">${created}</td>
+            <td class="date-cell">${lastLogin}</td>
+          </tr>`;
+      }).join('');
+    }
+
+    // ── Filter ───────────────────────────────────────────────────
+    window.filterUsers = function(role, btn) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      btn.classList.add('active');
+      const filtered = role === 'all' ? allUsers : allUsers.filter(u => u.role === role);
+      renderUsers(filtered);
+    };
+
+    // ── Logout ───────────────────────────────────────────────────
+    window.doLogout = async function() {
+      await signOut(auth);
+      window.location.href = 'admin-login.html';
+    };
+
+    // ── Helpers ──────────────────────────────────────────────────
+    function formatDate(ts) {
+      return new Date(ts).toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' });
+    }
+    function esc(s) {
+      return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+  </script>
+</body>
+</html>
