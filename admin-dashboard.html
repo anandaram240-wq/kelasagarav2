@@ -1,442 +1,333 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin Dashboard — KelasaGaara</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    :root {
-      --saffron: #E8600A;
-      --jade: #2D6A4F;
-      --paper: #FAF8F5;
-      --ink: #1A1A2E;
-      --muted: #6B7280;
-      --bg: #0F0F1A;
-      --surface: #16162A;
-      --border: rgba(255,255,255,0.08);
-    }
-
-    body {
-      font-family: 'DM Sans', sans-serif;
-      background: var(--bg);
-      color: #fff;
-      min-height: 100vh;
-    }
-
-    /* ── Navbar ── */
-    .navbar {
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
-      padding: 0 32px;
-      height: 60px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
-    .nav-brand {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-weight: 700;
-      font-size: 1rem;
-    }
-    .nav-brand .shield { font-size: 1.2rem; }
-    .nav-brand .app-name { color: var(--saffron); }
-    .nav-right {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    .admin-badge {
-      background: rgba(232,96,10,0.15);
-      border: 1px solid rgba(232,96,10,0.35);
-      color: var(--saffron);
-      padding: 4px 12px;
-      border-radius: 20px;
-      font-size: 0.78rem;
-      font-weight: 600;
-    }
-    .btn-logout {
-      background: rgba(255,255,255,0.07);
-      border: 1px solid var(--border);
-      color: rgba(255,255,255,0.7);
-      padding: 6px 16px;
-      border-radius: 8px;
-      font-size: 0.82rem;
-      cursor: pointer;
-      font-family: 'DM Sans', sans-serif;
-      transition: all 0.2s;
-    }
-    .btn-logout:hover { background: rgba(255,255,255,0.12); color: #fff; }
-
-    /* ── Page layout ── */
-    .page { max-width: 1100px; margin: 0 auto; padding: 40px 24px; }
-
-    /* ── Stats row ── */
-    .stats-row {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 16px;
-      margin-bottom: 36px;
-    }
-    .stat-box {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 24px 20px;
-      text-align: center;
-    }
-    .stat-num {
-      font-size: 2.2rem;
-      font-weight: 700;
-      margin-bottom: 4px;
-    }
-    .stat-num.orange { color: var(--saffron); }
-    .stat-num.green  { color: #34D399; }
-    .stat-num.blue   { color: #60A5FA; }
-    .stat-label { color: rgba(255,255,255,0.45); font-size: 0.82rem; }
-
-    /* ── Section header ── */
-    .section-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 20px;
-    }
-    .section-title { font-size: 1.1rem; font-weight: 700; }
-    .section-count {
-      background: rgba(255,255,255,0.08);
-      padding: 4px 12px;
-      border-radius: 20px;
-      font-size: 0.8rem;
-      color: rgba(255,255,255,0.5);
-    }
-
-    /* ── Filter tabs ── */
-    .filter-tabs {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 20px;
-    }
-    .tab {
-      padding: 8px 18px;
-      border-radius: 8px;
-      border: 1px solid var(--border);
-      background: transparent;
-      color: rgba(255,255,255,0.5);
-      font-size: 0.85rem;
-      cursor: pointer;
-      font-family: 'DM Sans', sans-serif;
-      transition: all 0.2s;
-    }
-    .tab.active { background: var(--saffron); border-color: var(--saffron); color: #fff; font-weight: 600; }
-    .tab:hover:not(.active) { background: rgba(255,255,255,0.06); color: #fff; }
-
-    /* ── Users Table ── */
-    .table-wrap {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      overflow: hidden;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-    thead th {
-      background: rgba(255,255,255,0.04);
-      padding: 14px 20px;
-      text-align: left;
-      font-size: 0.75rem;
-      font-weight: 600;
-      color: rgba(255,255,255,0.4);
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-      border-bottom: 1px solid var(--border);
-    }
-    tbody tr { border-bottom: 1px solid var(--border); transition: background 0.15s; }
-    tbody tr:last-child { border-bottom: none; }
-    tbody tr:hover { background: rgba(255,255,255,0.03); }
-    td { padding: 14px 20px; font-size: 0.88rem; vertical-align: middle; }
-
-    .user-cell {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    .user-avatar {
-      width: 36px; height: 36px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 2px solid var(--border);
-      flex-shrink: 0;
-    }
-    .avatar-placeholder {
-      width: 36px; height: 36px;
-      border-radius: 50%;
-      background: rgba(232,96,10,0.2);
-      border: 2px solid rgba(232,96,10,0.3);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.85rem;
-      flex-shrink: 0;
-    }
-    .user-name { font-weight: 600; color: #fff; }
-    .user-email { font-size: 0.77rem; color: rgba(255,255,255,0.4); margin-top: 1px; }
-
-    .role-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      padding: 4px 10px;
-      border-radius: 20px;
-      font-size: 0.75rem;
-      font-weight: 600;
-    }
-    .role-worker { background: rgba(45,106,79,0.2); color: #6EE7B7; border: 1px solid rgba(45,106,79,0.4); }
-    .role-hirer  { background: rgba(232,96,10,0.15); color: #FDBA74; border: 1px solid rgba(232,96,10,0.3); }
-
-    .skills-cell { color: rgba(255,255,255,0.5); font-size: 0.82rem; max-width: 180px; }
-    .skill-pill {
-      display: inline-block;
-      background: rgba(45,106,79,0.2);
-      border: 1px solid rgba(45,106,79,0.3);
-      color: #6EE7B7;
-      padding: 2px 8px;
-      border-radius: 10px;
-      font-size: 0.72rem;
-      margin: 2px 2px 2px 0;
-    }
-
-    .date-cell { color: rgba(255,255,255,0.45); font-size: 0.8rem; }
-
-    /* ── Loading / Empty states ── */
-    .loading, .empty {
-      text-align: center;
-      padding: 60px 20px;
-      color: rgba(255,255,255,0.35);
-    }
-    .spinner {
-      width: 32px; height: 32px;
-      border: 3px solid rgba(255,255,255,0.1);
-      border-top-color: var(--saffron);
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-      margin: 0 auto 16px;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* ── Toast ── */
-    #toast {
-      position: fixed;
-      bottom: 24px; right: 24px;
-      background: #1F2937;
-      border: 1px solid rgba(255,255,255,0.1);
-      color: #fff;
-      padding: 12px 20px;
-      border-radius: 10px;
-      font-size: 0.88rem;
-      transform: translateY(80px);
-      opacity: 0;
-      transition: all 0.3s;
-      z-index: 999;
-    }
-    #toast.show { transform: translateY(0); opacity: 1; }
-  </style>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Admin — KelasaGaara</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--s:#E8600A;--sl:#FEF0E6;--j:#2D6A4F;--jl:#E8F5EE;--bg:#0F0F1A;--sur:#16162A;--bdr:rgba(255,255,255,0.08);--mut:rgba(255,255,255,0.45)}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:#fff;min-height:100vh;display:flex;flex-direction:column}
+/* Topbar */
+.topbar{background:var(--sur);border-bottom:1px solid var(--bdr);padding:0 28px;height:58px;display:flex;align-items:center;justify-content:space-between}
+.brand{font-weight:800;font-size:1rem;color:#fff}.brand em{color:var(--s);font-style:normal}
+.topbar-right{display:flex;align-items:center;gap:12px}
+.badge{background:rgba(232,96,10,.15);border:1px solid rgba(232,96,10,.35);color:var(--s);padding:3px 10px;border-radius:20px;font-size:.75rem;font-weight:700}
+.btn{padding:7px 16px;border-radius:8px;font-size:.82rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;border:none;transition:.2s}
+.btn-ghost{background:rgba(255,255,255,.07);color:rgba(255,255,255,.7);border:1px solid var(--bdr)}.btn-ghost:hover{background:rgba(255,255,255,.13);color:#fff}
+.btn-s{background:var(--s);color:#fff}.btn-s:hover{background:#C04E06}
+.btn-red{background:#DC2626;color:#fff;font-size:.75rem;padding:5px 11px}.btn-red:hover{background:#B91C1C}
+.btn-edit{background:rgba(232,96,10,.15);color:var(--s);border:1px solid rgba(232,96,10,.3);font-size:.75rem;padding:5px 11px}
+/* Tabs */
+.tabs{background:var(--sur);border-bottom:1px solid var(--bdr);padding:0 28px;display:flex;gap:4px}
+.tab{padding:14px 18px;font-size:.85rem;font-weight:600;color:var(--mut);cursor:pointer;border-bottom:2px solid transparent;transition:.2s}
+.tab.active{color:var(--s);border-bottom-color:var(--s)}
+/* Page */
+.page{max-width:1100px;margin:28px auto;padding:0 24px;width:100%}
+/* Stats */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:28px}
+.stat{background:var(--sur);border:1px solid var(--bdr);border-radius:12px;padding:18px;text-align:center}
+.stat-n{font-size:2rem;font-weight:800;line-height:1}.stat-n.o{color:var(--s)}.stat-n.g{color:#34D399}.stat-n.b{color:#60A5FA}.stat-n.p{color:#A78BFA}
+.stat-l{color:var(--mut);font-size:.78rem;margin-top:4px}
+/* Table */
+.tbl-wrap{background:var(--sur);border:1px solid var(--bdr);border-radius:14px;overflow:hidden}
+.tbl-head{background:rgba(255,255,255,.04);display:flex;align-items:center;padding:10px 18px;gap:10px;border-bottom:1px solid var(--bdr)}
+.tbl-head input{flex:1;background:rgba(255,255,255,.07);border:1px solid var(--bdr);border-radius:8px;padding:8px 12px;font-size:.84rem;color:#fff;font-family:'DM Sans',sans-serif;outline:none}
+.tbl-head select{background:rgba(255,255,255,.07);border:1px solid var(--bdr);border-radius:8px;padding:8px 12px;font-size:.82rem;color:#fff;font-family:'DM Sans',sans-serif;outline:none;cursor:pointer}
+table{width:100%;border-collapse:collapse}
+thead th{padding:11px 16px;text-align:left;font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;color:var(--mut);border-bottom:1px solid var(--bdr)}
+tbody tr{border-bottom:1px solid var(--bdr);transition:.15s}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:rgba(255,255,255,.03)}
+td{padding:12px 16px;font-size:.85rem;vertical-align:middle}
+.avatar{width:34px;height:34px;border-radius:50%;border:2px solid var(--bdr);object-fit:cover;flex-shrink:0}
+.av-ph{width:34px;height:34px;border-radius:50%;background:rgba(232,96,10,.2);border:2px solid rgba(232,96,10,.3);display:flex;align-items:center;justify-content:center;font-size:.82rem;font-weight:700;color:var(--s)}
+.user-cell{display:flex;align-items:center;gap:10px}
+.u-name{font-weight:600;font-size:.87rem}.u-email{font-size:.74rem;color:var(--mut)}
+.rbadge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:.72rem;font-weight:700}
+.rw{background:rgba(45,106,79,.2);color:#6EE7B7;border:1px solid rgba(45,106,79,.4)}
+.rh{background:rgba(232,96,10,.15);color:#FDBA74;border:1px solid rgba(232,96,10,.3)}
+.actions{display:flex;gap:6px}
+/* Modal */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;z-index:999;display:none}
+.modal-bg.open{display:flex}
+.modal{background:var(--sur);border:1px solid var(--bdr);border-radius:16px;padding:28px;width:460px;max-height:90vh;overflow-y:auto}
+.modal h2{font-size:1.1rem;font-weight:700;margin-bottom:20px}
+.fg{margin-bottom:14px}
+.fg label{display:block;font-size:.78rem;font-weight:600;color:var(--mut);margin-bottom:5px}
+.fg input,.fg select{width:100%;padding:10px 13px;background:rgba(255,255,255,.07);border:1px solid var(--bdr);border-radius:8px;color:#fff;font-size:.86rem;font-family:'DM Sans',sans-serif;outline:none}
+.fg input:focus,.fg select:focus{border-color:var(--s)}
+.fg select option{background:var(--sur)}
+.modal-btns{display:flex;gap:10px;margin-top:20px}
+.modal-btns button{flex:1;padding:11px;border-radius:10px;font-size:.9rem;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;border:none}
+/* Jobs section */
+.job-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--bdr)}
+.job-row:last-child{border-bottom:none}
+.job-emoji{font-size:1.4rem}
+.job-title{font-weight:600;font-size:.87rem}.job-meta{font-size:.76rem;color:var(--mut);margin-top:2px}
+.pay{font-weight:700;color:#34D399;font-size:.92rem;margin-left:auto}
+/* Loading */
+.loading{text-align:center;padding:40px;color:var(--mut)}
+.spinner{width:28px;height:28px;border:3px solid var(--bdr);border-top-color:var(--s);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 12px}
+@keyframes spin{to{transform:rotate(360deg)}}
+/* Toast */
+#toast{position:fixed;bottom:20px;right:20px;padding:12px 20px;border-radius:10px;font-size:.86rem;transform:translateY(60px);opacity:0;transition:.3s;z-index:9999}
+#toast.show{transform:translateY(0);opacity:1}
+#toast.s{background:var(--j);color:#fff}#toast.e{background:#DC2626;color:#fff}#toast.i{background:#1F2937;color:#fff}
+</style>
 </head>
 <body>
+<div class="topbar">
+  <div class="brand">Kelasa<em>Gaara</em> <span style="font-size:.75rem;color:var(--mut);font-weight:400;margin-left:6px">Admin Panel</span></div>
+  <div class="topbar-right">
+    <span class="badge">SUPER ADMIN</span>
+    <span id="admin-name" style="font-size:.84rem;color:var(--mut)"></span>
+    <button class="btn btn-ghost" onclick="doLogout()">Logout</button>
+  </div>
+</div>
 
-  <!-- Navbar -->
-  <nav class="navbar">
-    <div class="nav-brand">
-      <span class="shield">🛡️</span>
-      <span>Kelasa<span class="app-name">Gaara</span> Admin</span>
-    </div>
-    <div class="nav-right">
-      <span class="admin-badge">ADMIN</span>
-      <span id="admin-name" style="color:rgba(255,255,255,0.5);font-size:0.85rem"></span>
-      <button class="btn-logout" onclick="doLogout()">Logout</button>
-    </div>
-  </nav>
+<div class="tabs">
+  <div class="tab active" onclick="showTab('users',this)">👥 Users</div>
+  <div class="tab" onclick="showTab('jobs',this)">💼 Jobs</div>
+</div>
 
-  <!-- Page Content -->
-  <div class="page">
+<div class="page">
+  <!-- Stats -->
+  <div class="stats">
+    <div class="stat"><div class="stat-n o" id="s-total">—</div><div class="stat-l">Total Users</div></div>
+    <div class="stat"><div class="stat-n g" id="s-workers">—</div><div class="stat-l">Workers</div></div>
+    <div class="stat"><div class="stat-n b" id="s-hirers">—</div><div class="stat-l">Hirers</div></div>
+    <div class="stat"><div class="stat-n p" id="s-jobs">—</div><div class="stat-l">Jobs Posted</div></div>
+  </div>
 
-    <!-- Stats -->
-    <div class="stats-row">
-      <div class="stat-box">
-        <div class="stat-num orange" id="stat-total">—</div>
-        <div class="stat-label">Total Users</div>
+  <!-- Users Tab -->
+  <div id="tab-users">
+    <div class="tbl-wrap">
+      <div class="tbl-head">
+        <input id="search-user" placeholder="🔍 Search by name or email…" oninput="filterUsers()"/>
+        <select id="filter-role" onchange="filterUsers()">
+          <option value="">All Roles</option>
+          <option value="worker">Workers</option>
+          <option value="hirer">Hirers</option>
+        </select>
       </div>
-      <div class="stat-box">
-        <div class="stat-num green" id="stat-workers">—</div>
-        <div class="stat-label">Workers</div>
-      </div>
-      <div class="stat-box">
-        <div class="stat-num blue" id="stat-hirers">—</div>
-        <div class="stat-label">Hirers</div>
-      </div>
-    </div>
-
-    <!-- Table Header -->
-    <div class="section-header">
-      <div class="section-title">Google Authenticated Users</div>
-      <div class="section-count" id="user-count">Loading…</div>
-    </div>
-
-    <!-- Filter Tabs -->
-    <div class="filter-tabs">
-      <button class="tab active" onclick="filterUsers('all',this)">All Users</button>
-      <button class="tab" onclick="filterUsers('worker',this)">Workers</button>
-      <button class="tab" onclick="filterUsers('hirer',this)">Hirers</button>
-    </div>
-
-    <!-- Users Table -->
-    <div class="table-wrap">
       <table>
-        <thead>
-          <tr>
-            <th>User</th>
-            <th>Role</th>
-            <th>Skills / Posts</th>
-            <th>Registered</th>
-            <th>Last Login</th>
-          </tr>
-        </thead>
-        <tbody id="users-tbody">
-          <tr>
-            <td colspan="5">
-              <div class="loading">
-                <div class="spinner"></div>
-                Loading users from Firestore…
-              </div>
-            </td>
-          </tr>
-        </tbody>
+        <thead><tr>
+          <th>User</th><th>Role</th><th>District</th><th>Trade / Skills</th><th>Experience</th><th>Rate</th><th>Actions</th>
+        </tr></thead>
+        <tbody id="users-tbody"><tr><td colspan="7"><div class="loading"><div class="spinner"></div>Loading…</div></td></tr></tbody>
       </table>
     </div>
   </div>
 
-  <div id="toast"></div>
+  <!-- Jobs Tab -->
+  <div id="tab-jobs" style="display:none">
+    <div class="tbl-wrap">
+      <div style="padding:16px 20px;border-bottom:1px solid var(--bdr);font-weight:700">All Posted Jobs</div>
+      <div id="jobs-list" style="padding:0 20px"><div class="loading"><div class="spinner"></div>Loading…</div></div>
+    </div>
+  </div>
+</div>
 
-  <script type="module">
-    import { db, auth } from './js/firebase-config.js';
-    import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-    import { collection, getDocs, orderBy, query } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+<!-- Edit Modal -->
+<div class="modal-bg" id="edit-modal">
+  <div class="modal">
+    <h2>✏️ Edit User</h2>
+    <div class="fg"><label>Name</label><input id="m-name" type="text"/></div>
+    <div class="fg"><label>Role</label>
+      <select id="m-role"><option value="worker">Worker</option><option value="hirer">Hirer</option></select>
+    </div>
+    <div class="fg"><label>District</label>
+      <select id="m-district"><option value="">Select District</option></select>
+    </div>
+    <div class="fg"><label>Taluk</label><input id="m-taluk" type="text"/></div>
+    <div class="fg"><label>Trade / Primary Skill</label><input id="m-skill" type="text" placeholder="e.g. Mason, Plumber"/></div>
+    <div class="fg"><label>Experience</label>
+      <select id="m-exp">
+        <option value="">—</option>
+        <option>Less than 1 Year</option><option>1–2 Years</option>
+        <option>3–5 Years</option><option>5–10 Years</option><option>10+ Years</option>
+      </select>
+    </div>
+    <div class="fg"><label>Daily Rate (₹)</label><input id="m-rate" type="number"/></div>
+    <div class="fg"><label>Phone</label><input id="m-phone" type="tel"/></div>
+    <div class="modal-btns">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-s" onclick="saveEdit()">💾 Save Changes</button>
+    </div>
+  </div>
+</div>
 
-    const ADMIN_EMAILS = ['anandakiccha240@gmail.com', 'anandaananda16919@gmail.com'];
+<div id="toast"></div>
 
-    let allUsers = [];
+<script type="module">
+import { auth, db } from './js/firebase-config.js';
+import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { collection, getDocs, doc, updateDoc, deleteDoc, serverTimestamp }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-    // ── Route guard ──────────────────────────────────────────────
-    onAuthStateChanged(auth, async (user) => {
-      if (!user) { window.location.href = 'admin-login.html'; return; }
-      if (!ADMIN_EMAILS.includes(user.email)) {
-        await signOut(auth);
-        window.location.href = 'admin-login.html';
-        return;
-      }
-      document.getElementById('admin-name').textContent = user.displayName || user.email;
-      loadUsers();
-    });
+const ADMINS = ['anandakiccha240@gmail.com','anandaananda16919@gmail.com'];
+const DISTRICTS = ["Bagalkot","Ballari","Belagavi","Bengaluru Rural","Bengaluru Urban","Bidar","Chamarajanagar","Chikkaballapura","Chikkamagaluru","Chitradurga","Dakshina Kannada","Davanagere","Dharwad","Gadag","Hassan","Haveri","Kalaburagi","Kodagu","Kolar","Koppal","Mandya","Mysuru","Raichur","Ramanagara","Shivamogga","Tumakuru","Udupi","Uttara Kannada","Vijayapura","Yadgir","Vijayanagara"];
+const EMOJI = {Mason:"🧱",Plumber:"🔧",Electrician:"⚡",Carpenter:"🪵",Painter:"🎨",Driver:"🚗",Cook:"🍳",Gardener:"🌿","Security Guard":"🔒",Helper:"🤝",Labour:"🏗️"};
 
-    // ── Load all users ───────────────────────────────────────────
-    async function loadUsers() {
-      try {
-        const q = query(collection(db, 'users'), orderBy('createdAt', 'desc'));
-        const snap = await getDocs(q);
-        allUsers = snap.docs.map(d => d.data());
-        renderStats(allUsers);
-        renderUsers(allUsers);
-      } catch (e) {
-        document.getElementById('users-tbody').innerHTML =
-          `<tr><td colspan="5"><div class="empty">⚠️ Failed to load users. Check Firestore rules.</div></td></tr>`;
-      }
-    }
+let allUsers=[], allJobs=[], editUID='';
 
-    function renderStats(users) {
-      const workers = users.filter(u => u.role === 'worker').length;
-      const hirers  = users.filter(u => u.role === 'hirer').length;
-      document.getElementById('stat-total').textContent   = users.length;
-      document.getElementById('stat-workers').textContent = workers;
-      document.getElementById('stat-hirers').textContent  = hirers;
-    }
+// Populate district in modal
+const mDist = document.getElementById('m-district');
+DISTRICTS.forEach(d=>{const o=document.createElement('option');o.value=d;o.textContent=d;mDist.appendChild(o);});
 
-    // ── Render table rows ────────────────────────────────────────
-    function renderUsers(users) {
-      const tbody = document.getElementById('users-tbody');
-      document.getElementById('user-count').textContent = `${users.length} users`;
+// Auth guard
+onAuthStateChanged(auth, async user=>{
+  if(!user){window.location.href='admin-login.html';return;}
+  if(!ADMINS.includes(user.email)){await signOut(auth);window.location.href='admin-login.html';return;}
+  document.getElementById('admin-name').textContent=user.displayName||user.email;
+  await Promise.all([loadUsers(),loadJobs()]);
+});
 
-      if (!users.length) {
-        tbody.innerHTML = `<tr><td colspan="5"><div class="empty">No users found.</div></td></tr>`;
-        return;
-      }
+async function loadUsers(){
+  const snap=await getDocs(collection(db,'users'));
+  allUsers=snap.docs.map(d=>({...d.data(),uid:d.id}));
+  const workers=allUsers.filter(u=>u.role==='worker').length;
+  const hirers=allUsers.filter(u=>u.role==='hirer').length;
+  document.getElementById('s-total').textContent=allUsers.length;
+  document.getElementById('s-workers').textContent=workers;
+  document.getElementById('s-hirers').textContent=hirers;
+  renderUsers(allUsers);
+}
 
-      tbody.innerHTML = users.map(u => {
-        const initials = (u.name || 'U').split(' ').map(n => n[0]).join('').slice(0,2).toUpperCase();
-        const avatar   = u.photo
-          ? `<img class="user-avatar" src="${u.photo}" alt="" onerror="this.style.display='none'">`
-          : `<div class="avatar-placeholder">${initials}</div>`;
+async function loadJobs(){
+  const snap=await getDocs(collection(db,'jobs'));
+  allJobs=snap.docs.map(d=>({...d.data(),id:d.id}));
+  document.getElementById('s-jobs').textContent=allJobs.length;
+  renderJobs();
+}
 
-        const roleBadge = u.role === 'worker'
-          ? `<span class="role-badge role-worker">👷 Worker</span>`
-          : `<span class="role-badge role-hirer">🏗️ Hirer</span>`;
+function renderUsers(users){
+  const tb=document.getElementById('users-tbody');
+  if(!users.length){tb.innerHTML='<tr><td colspan="7" style="text-align:center;padding:30px;color:rgba(255,255,255,.4)">No users found.</td></tr>';return;}
+  tb.innerHTML=users.map(u=>{
+    const init=(u.name||'?')[0].toUpperCase();
+    const av=u.photo?`<img class="avatar" src="${u.photo}" onerror="this.outerHTML='<div class=av-ph>${init}</div>'">`:`<div class="av-ph">${init}</div>`;
+    const rb=u.role==='worker'?`<span class="rbadge rw">👷 Worker</span>`:`<span class="rbadge rh">🏗️ Hirer</span>`;
+    const skills=(u.skills||[]).join(', ')||'—';
+    return `<tr>
+      <td><div class="user-cell">${av}<div><div class="u-name">${esc(u.name||'—')}</div><div class="u-email">${esc(u.email||'')}</div></div></div></td>
+      <td>${rb}</td>
+      <td style="font-size:.82rem">${u.district||'—'}</td>
+      <td style="font-size:.82rem">${skills}</td>
+      <td style="font-size:.82rem">${u.experience||'—'}</td>
+      <td style="font-size:.82rem">${u.dailyRate?'₹'+u.dailyRate:'—'}</td>
+      <td><div class="actions">
+        <button class="btn btn-edit" onclick="openEdit('${u.uid}')">✏️ Edit</button>
+        <button class="btn btn-red" onclick="removeUser('${u.uid}','${esc(u.name||u.email)}')">🗑️</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
 
-        const skills = (u.skills && u.skills.length)
-          ? u.skills.map(s => `<span class="skill-pill">${s}</span>`).join('')
-          : `<span style="color:rgba(255,255,255,0.3);font-size:0.78rem">—</span>`;
+function renderJobs(){
+  const el=document.getElementById('jobs-list');
+  if(!allJobs.length){el.innerHTML='<div class="loading">No jobs posted yet.</div>';return;}
+  el.innerHTML=allJobs.map(j=>{
+    const em=EMOJI[j.category]||'💼';
+    const apps=(j.applicants||[]).length;
+    return `<div class="job-row">
+      <span class="job-emoji">${em}</span>
+      <div style="flex:1">
+        <div class="job-title">${esc(j.title||'Untitled')}</div>
+        <div class="job-meta">📍 ${j.district||'—'} · ${j.category||'—'} · by ${esc(j.hirerName||'Hirer')} · ${apps} applicant${apps!==1?'s':''}</div>
+      </div>
+      <span class="pay">₹${j.pay||'—'}/day</span>
+      <button class="btn btn-red" onclick="removeJob('${j.id}')">🗑️</button>
+    </div>`;
+  }).join('');
+}
 
-        const created  = u.createdAt?.seconds  ? formatDate(u.createdAt.seconds * 1000)  : '—';
-        const lastLogin= u.lastLogin?.seconds   ? formatDate(u.lastLogin.seconds * 1000)  : '—';
+window.filterUsers=function(){
+  const s=document.getElementById('search-user').value.toLowerCase();
+  const r=document.getElementById('filter-role').value;
+  let f=allUsers;
+  if(r) f=f.filter(u=>u.role===r);
+  if(s) f=f.filter(u=>(u.name||'').toLowerCase().includes(s)||(u.email||'').toLowerCase().includes(s));
+  renderUsers(f);
+};
 
-        return `
-          <tr>
-            <td>
-              <div class="user-cell">
-                ${avatar}
-                <div>
-                  <div class="user-name">${esc(u.name || 'Unknown')}</div>
-                  <div class="user-email">${esc(u.email || '')}</div>
-                </div>
-              </div>
-            </td>
-            <td>${roleBadge}</td>
-            <td class="skills-cell">${skills}</td>
-            <td class="date-cell">${created}</td>
-            <td class="date-cell">${lastLogin}</td>
-          </tr>`;
-      }).join('');
-    }
+window.openEdit=function(uid){
+  editUID=uid;
+  const u=allUsers.find(x=>x.uid===uid);
+  if(!u) return;
+  document.getElementById('m-name').value=u.name||'';
+  document.getElementById('m-role').value=u.role||'worker';
+  document.getElementById('m-district').value=u.district||'';
+  document.getElementById('m-taluk').value=u.taluk||'';
+  document.getElementById('m-skill').value=(u.skills&&u.skills[0])||'';
+  document.getElementById('m-exp').value=u.experience||'';
+  document.getElementById('m-rate').value=u.dailyRate||'';
+  document.getElementById('m-phone').value=u.phone||'';
+  document.getElementById('edit-modal').classList.add('open');
+};
 
-    // ── Filter ───────────────────────────────────────────────────
-    window.filterUsers = function(role, btn) {
-      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-      btn.classList.add('active');
-      const filtered = role === 'all' ? allUsers : allUsers.filter(u => u.role === role);
-      renderUsers(filtered);
-    };
+window.closeModal=function(){document.getElementById('edit-modal').classList.remove('open');};
 
-    // ── Logout ───────────────────────────────────────────────────
-    window.doLogout = async function() {
-      await signOut(auth);
-      window.location.href = 'admin-login.html';
-    };
+window.saveEdit=async function(){
+  if(!editUID) return;
+  const skill=document.getElementById('m-skill').value.trim();
+  const updates={
+    name:document.getElementById('m-name').value.trim(),
+    role:document.getElementById('m-role').value,
+    district:document.getElementById('m-district').value,
+    taluk:document.getElementById('m-taluk').value.trim(),
+    experience:document.getElementById('m-exp').value,
+    dailyRate:parseInt(document.getElementById('m-rate').value)||0,
+    phone:document.getElementById('m-phone').value.trim()||null,
+    updatedAt:serverTimestamp()
+  };
+  if(skill) updates.skills=[skill];
+  try{
+    await updateDoc(doc(db,'users',editUID),updates);
+    const idx=allUsers.findIndex(u=>u.uid===editUID);
+    if(idx>-1) Object.assign(allUsers[idx],updates);
+    closeModal();
+    renderUsers(allUsers);
+    toast('User updated ✅','s');
+  }catch(e){toast('Failed: '+e.message,'e');}
+};
 
-    // ── Helpers ──────────────────────────────────────────────────
-    function formatDate(ts) {
-      return new Date(ts).toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' });
-    }
-    function esc(s) {
-      return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-    }
-  </script>
+window.removeUser=async function(uid,name){
+  if(!confirm(`Delete user "${name}"? This cannot be undone.`)) return;
+  try{
+    await deleteDoc(doc(db,'users',uid));
+    allUsers=allUsers.filter(u=>u.uid!==uid);
+    document.getElementById('s-total').textContent=allUsers.length;
+    document.getElementById('s-workers').textContent=allUsers.filter(u=>u.role==='worker').length;
+    document.getElementById('s-hirers').textContent=allUsers.filter(u=>u.role==='hirer').length;
+    renderUsers(allUsers);
+    toast('User removed','i');
+  }catch(e){toast('Failed: '+e.message,'e');}
+};
+
+window.removeJob=async function(id){
+  if(!confirm('Delete this job posting?')) return;
+  try{
+    await deleteDoc(doc(db,'jobs',id));
+    allJobs=allJobs.filter(j=>j.id!==id);
+    document.getElementById('s-jobs').textContent=allJobs.length;
+    renderJobs();
+    toast('Job removed','i');
+  }catch(e){toast('Failed','e');}
+};
+
+window.showTab=function(tab,el){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('tab-users').style.display=tab==='users'?'block':'none';
+  document.getElementById('tab-jobs').style.display=tab==='jobs'?'block':'none';
+};
+
+window.doLogout=async function(){await signOut(auth);window.location.href='admin-login.html';};
+
+function toast(msg,type){const el=document.getElementById('toast');el.textContent=msg;el.className=`show ${type}`;setTimeout(()=>el.className='',3000);}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+</script>
 </body>
 </html>
