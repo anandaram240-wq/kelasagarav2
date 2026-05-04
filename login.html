@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<!--
+  login.html — Role Selection + Google Sign-In Page
+  User picks Worker or Hirer role (card UI), then clicks "Continue with Google".
+  Firebase Google OAuth fires; role saved to Firestore; user redirected to dashboard.
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login — KelasaGaara</title>
+  <meta name="description" content="Sign in to KelasaGaara with your Google account. Choose your role as Worker or Hirer." />
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background: linear-gradient(160deg, #fff9f4 0%, var(--paper) 70%);
+      padding: 2rem 1rem;
+    }
+
+    /* ===== LOGIN BOX ===== */
+    .login-box {
+      background: var(--white);
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      box-shadow: 0 12px 48px rgba(15,25,35,0.1);
+      padding: 2.5rem 2rem;
+      width: 100%;
+      max-width: 460px;
+    }
+
+    .login-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      justify-content: center;
+      margin-bottom: 1.5rem;
+      text-decoration: none;
+    }
+    .login-logo-icon {
+      width: 44px; height: 44px;
+      background: linear-gradient(135deg, var(--saffron), var(--gold));
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem;
+    }
+    .login-logo-text {
+      font-family: 'Baloo Tamma 2', cursive;
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: var(--ink);
+    }
+    .login-logo-text span { color: var(--saffron); }
+
+    .login-title {
+      text-align: center;
+      font-size: 1.4rem;
+      margin-bottom: 0.4rem;
+    }
+    .login-subtitle {
+      text-align: center;
+      font-size: 0.9rem;
+      color: var(--muted);
+      margin-bottom: 1.75rem;
+    }
+
+    /* ===== ROLE CARDS ===== */
+    .role-label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.75rem;
+    }
+
+    .role-cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.85rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .role-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 1.25rem 1rem;
+      border-radius: 14px;
+      border: 2px solid var(--border);
+      background: var(--paper);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      user-select: none;
+    }
+
+    .role-card:hover {
+      border-color: var(--saffron);
+      background: rgba(232,89,12,0.04);
+    }
+
+    /* Active/selected state for role card */
+    .role-card.selected-worker {
+      border-color: var(--jade);
+      background: rgba(27,107,69,0.08);
+    }
+    .role-card.selected-hirer {
+      border-color: var(--saffron);
+      background: rgba(232,89,12,0.08);
+    }
+
+    .role-card-icon { font-size: 2.2rem; }
+
+    .role-card-name {
+      font-family: 'Baloo Tamma 2', cursive;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--ink);
+    }
+
+    .role-card-desc {
+      font-size: 0.78rem;
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.4;
+    }
+
+    .role-card .check-dot {
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      transition: all 0.2s;
+    }
+    .role-card.selected-worker .check-dot {
+      background: var(--jade);
+      border-color: var(--jade);
+    }
+    .role-card.selected-hirer .check-dot {
+      background: var(--saffron);
+      border-color: var(--saffron);
+    }
+
+    /* ===== GOOGLE BUTTON ===== */
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      color: var(--muted);
+      font-size: 0.82rem;
+      margin-bottom: 1.25rem;
+    }
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .google-btn {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      padding: 0.85rem 1.5rem;
+      background: var(--ink);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      margin-bottom: 1rem;
+    }
+    .google-btn:hover {
+      background: #1a2a3a;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(15,25,35,0.25);
+    }
+    .google-btn:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .google-btn svg { width: 20px; height: 20px; flex-shrink: 0; }
+
+    .back-link {
+      display: block;
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+    .back-link a { color: var(--saffron); }
+
+    /* selected role indicator text */
+    .role-hint {
+      text-align: center;
+      font-size: 0.82rem;
+      color: var(--muted);
+      min-height: 1.2em;
+      margin-bottom: 0.75rem;
+    }
+    .role-hint.active { color: var(--jade); font-weight: 600; }
+  </style>
+</head>
+<body>
+
+  <div class="login-box">
+    <!-- Logo -->
+    <a class="login-logo" href="index.html">
+      <div class="login-logo-icon">🌾</div>
+      <div class="login-logo-text">Kelasa<span>Gaara</span></div>
+    </a>
+
+    <h2 class="login-title">Welcome Back!</h2>
+    <p class="login-subtitle">Select your role, then sign in with Google</p>
+
+    <!-- Step 1: Choose role -->
+    <div class="role-label">Step 1 — I am a…</div>
+    <div class="role-cards">
+      <!-- Worker card -->
+      <div class="role-card" id="card-worker" onclick="selectRole('worker')">
+        <div class="check-dot"></div>
+        <div class="role-card-icon">👷</div>
+        <div class="role-card-name">Worker</div>
+        <div class="role-card-desc">I look for daily wage jobs</div>
+      </div>
+      <!-- Hirer card -->
+      <div class="role-card" id="card-hirer" onclick="selectRole('hirer')">
+        <div class="check-dot"></div>
+        <div class="role-card-icon">🏗️</div>
+        <div class="role-card-name">Hirer</div>
+        <div class="role-card-desc">I post jobs and hire workers</div>
+      </div>
+    </div>
+
+    <!-- Hint text that updates when role is selected -->
+    <div class="role-hint" id="role-hint">Please select a role above to continue</div>
+
+    <div class="divider">Step 2 — Sign in</div>
+
+    <!-- Google Sign-In button -->
+    <button class="google-btn" id="google-btn" onclick="handleGoogleLogin()" disabled>
+      <!-- Google "G" SVG icon -->
+      <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+        <path fill="#FFC107" d="M43.6 20.1H42V20H24v8h11.3C33.7 32.7 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 2.9l5.7-5.7C34.5 6.5 29.5 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.6-.4-3.9z"/>
+        <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.5 15.8 18.9 12 24 12c3.1 0 5.8 1.1 8 2.9l5.7-5.7C34.5 6.5 29.5 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/>
+        <path fill="#4CAF50" d="M24 44c5.2 0 9.9-1.9 13.5-5.1l-6.2-5.2C29.3 35.4 26.8 36 24 36c-5.2 0-9.6-3.4-11.2-8H6.7C10.1 37.9 16.5 44 24 44z"/>
+        <path fill="#1976D2" d="M43.6 20.1H42V20H24v8h11.3c-.7 2-2 3.8-3.7 5.1l6.2 5.2C41.6 35.1 44 30 44 24c0-1.3-.1-2.6-.4-3.9z"/>
+      </svg>
+      Continue with Google
+    </button>
+
+    <p class="back-link">← <a href="index.html">Back to Home</a></p>
+  </div>
+
+  <!-- ===== FIREBASE + AUTH LOGIC ===== -->
+  <script type="module">
+    // Import shared utilities and auth functions
+    import { showToast }       from './js/app.js';
+    import { signInWithGoogle } from './js/auth.js';
+    import { auth }             from './js/firebase-config.js';
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+    // Track which role the user has selected
+    let selectedRole = null;
+
+    // Pre-select role if user came from index.html with ?role= param
+    const urlParams = new URLSearchParams(window.location.search);
+    const preRole   = urlParams.get('role');
+    if (preRole === 'worker' || preRole === 'hirer') {
+      selectRole(preRole);
+    }
+
+    // If user is already signed in, redirect to their dashboard immediately
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        // User is already logged in — fetch their role and redirect
+        const { db } = await import('./js/firebase-config.js');
+        const { doc, getDoc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+        const snap = await getDoc(doc(db, 'users', user.uid));
+        if (snap.exists()) {
+          const role = snap.data().role;
+          window.location.href = role === 'worker' ? 'worker-dashboard.html' : 'hirer-dashboard.html';
+        }
+      }
+    });
+
+    // ===== SELECT ROLE FUNCTION =====
+    // Called when user clicks a role card. Highlights the selected card and enables the button.
+    window.selectRole = function(role) {
+      selectedRole = role;
+
+      // Reset both cards
+      document.getElementById('card-worker').className = 'role-card';
+      document.getElementById('card-hirer').className  = 'role-card';
+
+      // Highlight the selected card
+      if (role === 'worker') {
+        document.getElementById('card-worker').className = 'role-card selected-worker';
+        document.getElementById('role-hint').textContent  = '✅ You selected: Worker — looking for jobs';
+        document.getElementById('role-hint').className    = 'role-hint active';
+      } else {
+        document.getElementById('card-hirer').className  = 'role-card selected-hirer';
+        document.getElementById('role-hint').textContent  = '✅ You selected: Hirer — posting jobs';
+        document.getElementById('role-hint').className    = 'role-hint active';
+      }
+
+      // Enable the Google sign-in button once a role is chosen
+      document.getElementById('google-btn').disabled = false;
+    };
+
+    // ===== HANDLE GOOGLE LOGIN =====
+    // Triggered when user clicks "Continue with Google".
+    window.handleGoogleLogin = async function() {
+      const btn = document.getElementById('google-btn');
+      btn.disabled   = true;
+      btn.innerHTML  = `<span class="spinner"></span> Signing in…`;
+
+      // Call the auth.js signInWithGoogle function with the selected role
+      await signInWithGoogle(selectedRole);
+
+      // If sign-in fails, re-enable button
+      btn.disabled   = false;
+      btn.innerHTML  = `<svg viewBox="0 0 48 48" width="20" height="20">
+        <path fill="#FFC107" d="M43.6 20.1H42V20H24v8h11.3C33.7 32.7 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 2.9l5.7-5.7C34.5 6.5 29.5 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.6-.4-3.9z"/>
+        </svg> Continue with Google`;
+    };
+  </script>
+
+  <div id="toast-container"></div>
+</body>
+</html>

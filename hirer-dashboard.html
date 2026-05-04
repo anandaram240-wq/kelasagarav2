@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<!--
+  hirer-dashboard.html — Hirer's Personal Dashboard
+  Shows profile, all jobs posted by this hirer, applicant counts,
+  and a "View Applicants" modal. Calls checkAuth() on load.
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hirer Dashboard — KelasaGaara</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    .hirer-jobs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.1rem;
+    }
+
+    .hirer-job-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      padding: 1.25rem 1.4rem;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+      transition: box-shadow 0.2s, transform 0.2s;
+    }
+    .hirer-job-card:hover {
+      box-shadow: var(--shadow-lg);
+      transform: translateY(-2px);
+    }
+
+    .hjc-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+
+    .hjc-title {
+      font-family: 'Baloo Tamma 2', cursive;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--ink);
+    }
+
+    .hjc-meta { font-size: 0.83rem; color: var(--muted); line-height: 1.6; }
+
+    .hjc-pay {
+      font-family: 'Baloo Tamma 2', cursive;
+      font-size: 1.25rem;
+      color: var(--jade);
+      font-weight: 700;
+    }
+
+    .hjc-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 0.65rem;
+      border-top: 1px solid var(--border);
+      margin-top: auto;
+    }
+
+    .applicant-count {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--saffron);
+    }
+
+    .top-action-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+
+    /* ===== APPLICANTS MODAL ===== */
+    .modal-overlay { display: none; }
+    .modal-overlay.active { display: flex; }
+
+    .applicant-list { margin-top: 0.5rem; }
+  </style>
+</head>
+<body>
+
+  <!-- ===== NAVBAR ===== -->
+  <nav class="navbar" id="main-navbar">
+    <div style="width:160px;height:36px;background:var(--paper2);border-radius:8px;"></div>
+    <div style="width:120px;height:36px;background:var(--paper2);border-radius:8px;"></div>
+  </nav>
+
+  <!-- ===== MAIN CONTENT ===== -->
+  <main class="page-container" id="main-content" style="display:none;">
+
+    <!-- Profile block -->
+    <div class="profile-block">
+      <img class="profile-avatar" id="user-photo" src="" alt="Profile" referrerpolicy="no-referrer" />
+      <div class="profile-info">
+        <h3 id="user-name">Loading…</h3>
+        <p id="user-email">—</p>
+        <span class="badge badge-orange" style="margin-top:0.4rem;">🏗️ Hirer</span>
+      </div>
+    </div>
+
+    <!-- Posted Jobs Header + CTA -->
+    <div class="top-action-bar">
+      <div>
+        <div class="section-title" style="margin-bottom:0.1rem;">📋 My Posted Jobs</div>
+        <p id="jobs-count-text" style="font-size:0.85rem;color:var(--muted);"></p>
+      </div>
+      <a class="btn btn-primary" href="post-job.html">+ Post New Job</a>
+    </div>
+
+    <!-- Jobs grid — filled by JS -->
+    <div id="hirer-jobs-container">
+      <div class="empty-state">
+        <div class="empty-icon">⏳</div>
+        <p>Loading your jobs…</p>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ===== APPLICANTS MODAL ===== -->
+  <div class="modal-overlay" id="applicants-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="modal-job-title">Applicants</h3>
+        <button class="modal-close" onclick="closeModal()">✕</button>
+      </div>
+      <p id="modal-applicant-count" style="font-size:0.85rem;color:var(--muted);margin-bottom:1rem;"></p>
+      <div class="applicant-list" id="modal-applicant-list">
+        <p style="color:var(--muted);font-size:0.9rem;">Loading applicants…</p>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast-container"></div>
+
+  <!-- ===== JAVASCRIPT ===== -->
+  <script type="module">
+    import { checkAuth, logout }          from './js/auth.js';
+    import { showToast, formatDate, CATEGORY_EMOJI, buildNavbar } from './js/app.js';
+    import { db }                         from './js/firebase-config.js';
+    import {
+      collection, query, where, getDocs, doc, getDoc
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    let currentUser = null;
+
+    // ===== PAGE INIT =====
+    async function init() {
+      try {
+        // checkAuth redirects to login.html if not signed in
+        currentUser = await checkAuth();
+
+        buildNavbar(currentUser);
+
+        document.getElementById('user-photo').src         = currentUser.photo || '';
+        document.getElementById('user-name').textContent  = currentUser.name;
+        document.getElementById('user-email').textContent = currentUser.email;
+
+        document.getElementById('main-content').style.display = 'block';
+
+        await loadHirerJobs();
+
+      } catch (err) {
+        console.error('Init error:', err);
+      }
+    }
+
+    // ===== LOAD HIRER JOBS =====
+    // Fetches all jobs from Firestore where hirerUid matches the logged-in user.
+    async function loadHirerJobs() {
+      const container = document.getElementById('hirer-jobs-container');
+
+      try {
+        // Firestore query: jobs where hirerUid === current user's UID
+        const q = query(
+          collection(db, 'jobs'),
+          where('hirerUid', '==', currentUser.uid)
+        );
+        const snapshot = await getDocs(q);
+
+        if (snapshot.empty) {
+          document.getElementById('jobs-count-text').textContent = '0 jobs posted';
+          container.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-icon">📭</div>
+              <h4>No jobs posted yet</h4>
+              <p>Post your first job to start receiving applications.</p>
+              <a class="btn btn-primary" href="post-job.html" style="margin-top:1rem;">+ Post a Job</a>
+            </div>`;
+          return;
+        }
+
+        const jobs = snapshot.docs.map(d => d.data());
+        document.getElementById('jobs-count-text').textContent =
+          `${jobs.length} job${jobs.length > 1 ? 's' : ''} posted`;
+
+        // Build the jobs grid
+        const grid = document.createElement('div');
+        grid.className = 'hirer-jobs-grid';
+
+        jobs.forEach(job => {
+          const emoji       = CATEGORY_EMOJI[job.category] || '💼';
+          const appCount    = job.applicants ? job.applicants.length : 0;
+          const card        = document.createElement('div');
+          card.className    = 'hirer-job-card';
+          card.innerHTML    = `
+            <div class="hjc-header">
+              <div>
+                <div class="hjc-title">${emoji} ${job.title}</div>
+                <div class="hjc-meta">📍 ${job.district} &nbsp;|&nbsp; 🏷️ ${job.category}</div>
+              </div>
+              <span class="badge ${job.status === 'open' ? 'badge-green' : 'badge-gold'}">
+                ${job.status === 'open' ? '🟢 Open' : '🔴 Closed'}
+              </span>
+            </div>
+            <div class="hjc-pay">₹${job.pay}/day</div>
+            <div class="hjc-meta" style="font-size:0.8rem;">
+              ${job.description ? job.description.slice(0, 80) + (job.description.length > 80 ? '…' : '') : ''}
+            </div>
+            <div class="hjc-footer">
+              <div class="applicant-count">
+                👥 ${appCount} Applicant${appCount !== 1 ? 's' : ''}
+              </div>
+              <div style="display:flex;gap:0.5rem;">
+                <button class="btn btn-outline btn-sm"
+                  onclick="openApplicantsModal('${job.jobId}', '${job.title.replace(/'/g, "\\'")}', ${JSON.stringify(job.applicants || [])})">
+                  View Applicants
+                </button>
+              </div>
+            </div>
+            <div style="font-size:0.78rem;color:var(--muted);">Posted: ${formatDate(job.postedAt)}</div>
+          `;
+          grid.appendChild(card);
+        });
+
+        container.innerHTML = '';
+        container.appendChild(grid);
+
+      } catch (err) {
+        console.error('Load jobs error:', err);
+        showToast('Could not load your jobs.', 'error');
+      }
+    }
+
+    // ===== OPEN APPLICANTS MODAL =====
+    // Shows a modal listing all applicants (by name) for a given job.
+    window.openApplicantsModal = async function(jobId, jobTitle, applicantUids) {
+      document.getElementById('modal-job-title').textContent = `Applicants — ${jobTitle}`;
+      document.getElementById('modal-applicant-count').textContent =
+        `${applicantUids.length} applicant${applicantUids.length !== 1 ? 's' : ''}`;
+      document.getElementById('applicants-modal').classList.add('active');
+
+      const listEl = document.getElementById('modal-applicant-list');
+
+      if (applicantUids.length === 0) {
+        listEl.innerHTML = '<p style="color:var(--muted);font-size:0.9rem;">No applicants yet.</p>';
+        return;
+      }
+
+      listEl.innerHTML = '<p style="color:var(--muted);font-size:0.9rem;">Loading…</p>';
+
+      try {
+        // Fetch each applicant's name from Firestore users collection
+        const rows = await Promise.all(
+          applicantUids.map(async (uid) => {
+            const userSnap = await getDoc(doc(db, 'users', uid));
+            if (!userSnap.exists()) return null;
+            const u = userSnap.data();
+            return `
+              <div class="applicant-row">
+                <img class="applicant-avatar"
+                     src="${u.photo || ''}"
+                     onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(u.name)}'"
+                     referrerpolicy="no-referrer"
+                     alt="${u.name}" />
+                <div>
+                  <div class="applicant-name">${u.name}</div>
+                  <div style="font-size:0.78rem;color:var(--muted);">${u.email}</div>
+                  ${u.skills && u.skills.length ? `<div style="font-size:0.75rem;color:var(--jade);margin-top:0.2rem;">Skills: ${u.skills.slice(0,4).join(', ')}</div>` : ''}
+                </div>
+              </div>`;
+          })
+        );
+
+        listEl.innerHTML = rows.filter(Boolean).join('');
+      } catch (err) {
+        console.error('Load applicants error:', err);
+        showToast('Could not load applicant details.', 'error');
+      }
+    };
+
+    // ===== CLOSE MODAL =====
+    window.closeModal = function() {
+      document.getElementById('applicants-modal').classList.remove('active');
+    };
+
+    // Close modal when clicking outside the box
+    document.getElementById('applicants-modal').addEventListener('click', function(e) {
+      if (e.target === this) closeModal();
+    });
+
+    // ===== LOGOUT =====
+    window.handleLogout = logout;
+
+    // ===== START =====
+    init();
+  </script>
+
+</body>
+</html>

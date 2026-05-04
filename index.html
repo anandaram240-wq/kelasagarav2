@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<!--
+  index.html — KelasaGaara Landing Page
+  Shows what the app does and lets users choose their role.
+  Two CTA buttons: "I am a Worker" and "I am a Hirer" → both go to login.html
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KelasaGaara — Karnataka Daily Worker Marketplace</title>
+  <meta name="description" content="KelasaGaara connects daily wage workers and hirers across Karnataka. Find jobs or hire workers — simple, fast, and free." />
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    /* ===== HERO SECTION ===== */
+    .hero {
+      min-height: calc(100vh - 64px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 3rem 1.5rem;
+      background: linear-gradient(160deg, #fff9f4 0%, var(--paper) 60%, #edf5f0 100%);
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.35rem 1rem;
+      background: rgba(232, 89, 12, 0.1);
+      color: var(--saffron);
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      border: 1px solid rgba(232, 89, 12, 0.2);
+    }
+
+    .hero h1 {
+      font-size: clamp(2.2rem, 5vw, 3.5rem);
+      font-weight: 800;
+      max-width: 700px;
+      margin-bottom: 1.25rem;
+      line-height: 1.15;
+    }
+
+    .hero h1 .highlight { color: var(--saffron); }
+    .hero h1 .highlight-green { color: var(--jade); }
+
+    .hero-sub {
+      font-size: 1.1rem;
+      color: var(--muted);
+      max-width: 540px;
+      margin-bottom: 2.5rem;
+      line-height: 1.7;
+    }
+
+    /* ===== ROLE BUTTONS ===== */
+    .cta-row {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 3.5rem;
+    }
+
+    .cta-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 1rem 2rem;
+      border-radius: 14px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 1.05rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all 0.22s ease;
+      text-decoration: none;
+    }
+
+    .cta-worker {
+      background: var(--jade);
+      color: #fff;
+      box-shadow: 0 6px 20px rgba(27, 107, 69, 0.28);
+    }
+    .cta-worker:hover {
+      background: #155538;
+      transform: translateY(-3px);
+      box-shadow: 0 10px 28px rgba(27, 107, 69, 0.38);
+      color: #fff;
+      text-decoration: none;
+    }
+
+    .cta-hirer {
+      background: var(--saffron);
+      color: #fff;
+      box-shadow: 0 6px 20px rgba(232, 89, 12, 0.28);
+    }
+    .cta-hirer:hover {
+      background: #c94a08;
+      transform: translateY(-3px);
+      box-shadow: 0 10px 28px rgba(232, 89, 12, 0.38);
+      color: #fff;
+      text-decoration: none;
+    }
+
+    .cta-btn .cta-icon { font-size: 1.4rem; }
+
+    /* ===== FEATURE CARDS ===== */
+    .features {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.25rem;
+      max-width: 860px;
+      width: 100%;
+    }
+
+    @media (max-width: 640px) {
+      .features { grid-template-columns: 1fr; }
+    }
+
+    .feature-card {
+      background: var(--white);
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      padding: 1.5rem;
+      text-align: left;
+      box-shadow: var(--shadow);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .feature-card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .feature-icon { font-size: 2rem; margin-bottom: 0.75rem; }
+
+    .feature-card h4 {
+      font-size: 1rem;
+      margin-bottom: 0.35rem;
+    }
+
+    .feature-card p {
+      font-size: 0.85rem;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    /* ===== SIMPLE NAVBAR for landing ===== */
+    .landing-nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+    }
+    .brand-icon {
+      width: 36px; height: 36px;
+      background: linear-gradient(135deg, var(--saffron), var(--gold));
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem;
+    }
+    .brand-name {
+      font-family: 'Baloo Tamma 2', cursive;
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: var(--ink);
+    }
+    .brand-name span { color: var(--saffron); }
+    .nav-login-btn {
+      padding: 0.45rem 1.1rem;
+      background: var(--saffron);
+      color: #fff;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+    .nav-login-btn:hover { background: #c94a08; text-decoration: none; color: #fff; }
+
+    /* ===== STATS BAR ===== */
+    .stats-bar {
+      display: flex;
+      gap: 2.5rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 3rem;
+    }
+    .stat { text-align: center; }
+    .stat-number {
+      font-family: 'Baloo Tamma 2', cursive;
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--saffron);
+    }
+    .stat-label { font-size: 0.82rem; color: var(--muted); }
+
+    /* ===== FOOTER ===== */
+    .footer {
+      text-align: center;
+      padding: 2rem 1rem;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 0.85rem;
+      margin-top: 2rem;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===== NAVIGATION ===== -->
+  <nav class="landing-nav">
+    <a class="brand" href="index.html">
+      <div class="brand-icon">🌾</div>
+      <div class="brand-name">Kelasa<span>Gaara</span></div>
+    </a>
+    <a class="nav-login-btn" href="login.html">Login / Sign Up</a>
+  </nav>
+
+  <!-- ===== HERO ===== -->
+  <section class="hero">
+
+    <!-- Tagline badge -->
+    <div class="hero-badge">🌾 Karnataka's Daily Worker Marketplace</div>
+
+    <!-- Main heading -->
+    <h1>
+      Connect <span class="highlight-green">Workers</span> &amp;
+      <span class="highlight">Hirers</span><br />across Karnataka
+    </h1>
+
+    <!-- Sub heading -->
+    <p class="hero-sub">
+      KelasaGaara helps daily wage workers find jobs and hirers find workers —
+      no middleman, no fees, just a simple Google login.
+    </p>
+
+    <!-- Quick stat numbers -->
+    <div class="stats-bar">
+      <div class="stat">
+        <div class="stat-number">31</div>
+        <div class="stat-label">Karnataka Districts</div>
+      </div>
+      <div class="stat">
+        <div class="stat-number">10</div>
+        <div class="stat-label">Job Categories</div>
+      </div>
+      <div class="stat">
+        <div class="stat-number">Free</div>
+        <div class="stat-label">No Charges</div>
+      </div>
+    </div>
+
+    <!-- Role choice buttons — both link to login.html -->
+    <div class="cta-row">
+      <a class="cta-btn cta-worker" href="login.html?role=worker" id="worker-cta">
+        <span class="cta-icon">👷</span>
+        I am a Worker
+      </a>
+      <a class="cta-btn cta-hirer" href="login.html?role=hirer" id="hirer-cta">
+        <span class="cta-icon">🏗️</span>
+        I am a Hirer
+      </a>
+    </div>
+
+    <!-- Feature summary cards -->
+    <div class="features">
+      <div class="feature-card">
+        <div class="feature-icon">🔍</div>
+        <h4>Find Jobs Easily</h4>
+        <p>Browse daily wage jobs by district and category. Filter, read details, and apply with one click.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📋</div>
+        <h4>Post Jobs Instantly</h4>
+        <p>Hirers post a job in under 2 minutes. Set pay, district, and category — workers apply right away.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔐</div>
+        <h4>Google Login Only</h4>
+        <p>No passwords. No OTPs. Just sign in with your existing Google account — safe and simple.</p>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="footer">
+    <p>KelasaGaara (ಕೆಲಸಗಾರ) — Karnataka Daily Worker Marketplace &nbsp;|&nbsp; Built with Firebase &amp; ❤️</p>
+  </footer>
+
+</body>
+</html>

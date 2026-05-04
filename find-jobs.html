@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<!--
+  find-jobs.html — Job Discovery Page for Workers
+  Fetches all open jobs from Firestore, shows them as a card grid.
+  Workers can filter by category/district and apply with one click.
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Find Jobs — KelasaGaara</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    .results-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .results-count {
+      font-family: 'Baloo Tamma 2', cursive;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--ink);
+    }
+
+    /* ===== JOB CARDS GRID ===== */
+    .jobs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.1rem;
+    }
+
+    .job-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      padding: 1.3rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      transition: box-shadow 0.2s, transform 0.2s;
+    }
+    .job-card:hover {
+      box-shadow: var(--shadow-lg);
+      transform: translateY(-2px);
+    }
+
+    .jc-icon   { font-size: 2rem; }
+    .jc-title  {
+      font-family: 'Baloo Tamma 2', cursive;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--ink);
+    }
+    .jc-meta   { font-size: 0.83rem; color: var(--muted); line-height: 1.6; }
+    .jc-pay    {
+      font-family: 'Baloo Tamma 2', cursive;
+      font-size: 1.3rem;
+      color: var(--jade);
+      font-weight: 700;
+    }
+    .jc-desc   {
+      font-size: 0.83rem;
+      color: var(--muted);
+      line-height: 1.5;
+      flex: 1;
+    }
+    .jc-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 0.65rem;
+      border-top: 1px solid var(--border);
+      margin-top: auto;
+    }
+    .jc-hirer {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+    .jc-hirer img {
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    /* Apply button states */
+    .btn-applied {
+      background: rgba(27,107,69,0.1);
+      color: var(--jade);
+      border: 1px solid rgba(27,107,69,0.25);
+      border-radius: var(--radius-sm);
+      padding: 0.4rem 0.9rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: default;
+    }
+
+    .filter-reset {
+      font-size: 0.82rem;
+      color: var(--saffron);
+      cursor: pointer;
+      border: none;
+      background: none;
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 600;
+      padding: 0;
+    }
+    .filter-reset:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+  <!-- ===== NAVBAR ===== -->
+  <nav class="navbar" id="main-navbar">
+    <div style="width:160px;height:36px;background:var(--paper2);border-radius:8px;"></div>
+    <div style="width:120px;height:36px;background:var(--paper2);border-radius:8px;"></div>
+  </nav>
+
+  <!-- ===== MAIN CONTENT ===== -->
+  <main class="page-container" id="main-content" style="display:none;">
+
+    <!-- Page Header -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;flex-wrap:wrap;gap:0.75rem;">
+      <div>
+        <h1 class="page-title" style="margin-bottom:0.2rem;">🔍 Find Jobs</h1>
+        <p style="font-size:0.88rem;color:var(--muted);">All open daily wage jobs across Karnataka</p>
+      </div>
+      <a class="btn btn-ghost btn-sm" href="worker-dashboard.html">← My Dashboard</a>
+    </div>
+
+    <!-- ===== FILTER BAR ===== -->
+    <div class="filter-bar">
+      <div class="form-group">
+        <label class="form-label" for="filter-category">Category</label>
+        <select class="form-select" id="filter-category" onchange="applyFilters()">
+          <option value="">All Categories</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="filter-district">District</label>
+        <select class="form-select" id="filter-district" onchange="applyFilters()">
+          <option value="">All Districts</option>
+        </select>
+      </div>
+      <div style="display:flex;align-items:flex-end;padding-bottom:0.05rem;">
+        <button class="filter-reset" onclick="resetFilters()">✕ Reset</button>
+      </div>
+    </div>
+
+    <!-- Results count + jobs grid -->
+    <div class="results-header">
+      <div class="results-count" id="results-count">Loading…</div>
+    </div>
+
+    <div id="jobs-container">
+      <div class="empty-state"><div class="empty-icon">⏳</div><p>Fetching jobs…</p></div>
+    </div>
+
+  </main>
+
+  <div id="toast-container"></div>
+
+  <!-- ===== JAVASCRIPT ===== -->
+  <script type="module">
+    import { checkAuth, logout }  from './js/auth.js';
+    import { showToast, formatDate, truncate, CATEGORY_EMOJI,
+             buildNavbar, populateDistricts, populateCategories } from './js/app.js';
+    import { db }                 from './js/firebase-config.js';
+    import {
+      collection, query, where, getDocs,
+      doc, updateDoc, arrayUnion
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    let currentUser  = null;
+    let allJobs      = [];   // All fetched jobs (unfiltered)
+    let filteredJobs = [];   // Currently visible jobs after filter
+
+    // ===== PAGE INIT =====
+    async function init() {
+      try {
+        // Protect route — redirect to login.html if not authenticated
+        currentUser = await checkAuth();
+
+        buildNavbar(currentUser);
+        document.getElementById('main-content').style.display = 'block';
+
+        // Populate filter dropdowns
+        populateCategories('filter-category', true);
+        populateDistricts('filter-district',  true);
+
+        // Fetch all open jobs from Firestore
+        await loadJobs();
+
+      } catch (err) {
+        console.error('Init error:', err);
+      }
+    }
+
+    // ===== LOAD ALL OPEN JOBS =====
+    // Queries Firestore for jobs where status === 'open', stores in allJobs.
+    async function loadJobs() {
+      try {
+        // Firestore query: only fetch jobs that are still open
+        const q        = query(collection(db, 'jobs'), where('status', '==', 'open'));
+        const snapshot = await getDocs(q);
+
+        if (snapshot.empty) {
+          allJobs = [];
+          renderJobs([]);
+          return;
+        }
+
+        // Map Firestore documents to plain JS objects
+        allJobs = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+
+        // Sort: newest first (by postedAt timestamp)
+        allJobs.sort((a, b) => {
+          const tA = a.postedAt?.toMillis?.() || 0;
+          const tB = b.postedAt?.toMillis?.() || 0;
+          return tB - tA;
+        });
+
+        filteredJobs = [...allJobs];
+        renderJobs(filteredJobs);
+
+      } catch (err) {
+        console.error('Load jobs error:', err);
+        showToast('Could not load jobs. Check your connection.', 'error');
+        document.getElementById('jobs-container').innerHTML =
+          '<p style="text-align:center;color:var(--muted);">Failed to load jobs.</p>';
+      }
+    }
+
+    // ===== APPLY FILTERS =====
+    // Client-side filter: reads selected category and district, filters allJobs array.
+    window.applyFilters = function() {
+      const cat  = document.getElementById('filter-category').value;
+      const dist = document.getElementById('filter-district').value;
+
+      // Filter the full jobs list based on selected values
+      filteredJobs = allJobs.filter(job => {
+        const matchCat  = !cat  || job.category === cat;
+        const matchDist = !dist || job.district  === dist;
+        return matchCat && matchDist;
+      });
+
+      renderJobs(filteredJobs);
+    };
+
+    // ===== RESET FILTERS =====
+    window.resetFilters = function() {
+      document.getElementById('filter-category').value = '';
+      document.getElementById('filter-district').value  = '';
+      filteredJobs = [...allJobs];
+      renderJobs(filteredJobs);
+    };
+
+    // ===== RENDER JOB CARDS =====
+    // Builds the DOM cards from a jobs array and injects into the container.
+    function renderJobs(jobs) {
+      const container  = document.getElementById('jobs-container');
+      const countEl    = document.getElementById('results-count');
+      countEl.textContent = `Showing ${jobs.length} job${jobs.length !== 1 ? 's' : ''}`;
+
+      if (jobs.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">🔭</div>
+            <h4>No jobs found</h4>
+            <p>Try removing your filters, or check back later.</p>
+          </div>`;
+        return;
+      }
+
+      const grid = document.createElement('div');
+      grid.className = 'jobs-grid';
+
+      jobs.forEach(job => {
+        const emoji      = CATEGORY_EMOJI[job.category] || '💼';
+        // Check if current worker has already applied to this job
+        const hasApplied = job.applicants && job.applicants.includes(currentUser.uid);
+
+        const card       = document.createElement('div');
+        card.className   = 'job-card';
+        card.id          = `job-${job.jobId}`;
+
+        card.innerHTML = `
+          <div class="jc-icon">${emoji}</div>
+          <div class="jc-title">${job.title}</div>
+          <div class="jc-meta">
+            📍 ${job.district} &nbsp;|&nbsp; 🏷️ ${job.category}
+          </div>
+          <div class="jc-pay">₹${job.pay}<span style="font-size:0.85rem;font-weight:500;color:var(--muted);"> /day</span></div>
+          <div class="jc-desc">${truncate(job.description, 90)}</div>
+          <div class="jc-footer">
+            <div class="jc-hirer">
+              <img src="${job.hirerPhoto || ''}"
+                   onerror="this.style.display='none'"
+                   referrerpolicy="no-referrer"
+                   alt="${job.hirerName}" />
+              ${job.hirerName}
+            </div>
+            ${hasApplied
+              ? `<span class="btn-applied">✓ Applied</span>`
+              : `<button class="btn btn-secondary btn-sm"
+                   id="apply-btn-${job.jobId}"
+                   onclick="applyToJob('${job.jobId}')">Apply Now</button>`
+            }
+          </div>
+          <div style="font-size:0.75rem;color:var(--muted);">Posted: ${formatDate(job.postedAt)}</div>
+        `;
+
+        grid.appendChild(card);
+      });
+
+      container.innerHTML = '';
+      container.appendChild(grid);
+    }
+
+    // ===== APPLY TO JOB =====
+    // Adds the worker's UID to the job's applicants array using Firestore arrayUnion.
+    // arrayUnion ensures no duplicate entries even if called twice.
+    window.applyToJob = async function(jobId) {
+      const btn = document.getElementById(`apply-btn-${jobId}`);
+      if (btn) {
+        btn.disabled     = true;
+        btn.textContent  = 'Applying…';
+      }
+
+      try {
+        // Use arrayUnion so the UID is only added once, even if Apply is clicked again
+        const jobRef = doc(db, 'jobs', jobId);
+        await updateDoc(jobRef, {
+          applicants: arrayUnion(currentUser.uid)
+        });
+
+        showToast('Applied successfully! 🎉', 'success');
+
+        // Update the in-memory job so re-renders show "Applied"
+        const job = allJobs.find(j => j.jobId === jobId);
+        if (job) {
+          if (!job.applicants) job.applicants = [];
+          if (!job.applicants.includes(currentUser.uid)) {
+            job.applicants.push(currentUser.uid);
+          }
+        }
+
+        // Re-render the current filtered view
+        renderJobs(filteredJobs);
+
+      } catch (err) {
+        console.error('Apply error:', err);
+        showToast('Could not apply. Please try again.', 'error');
+        if (btn) {
+          btn.disabled    = false;
+          btn.textContent = 'Apply Now';
+        }
+      }
+    };
+
+    // ===== LOGOUT =====
+    window.handleLogout = logout;
+
+    // ===== START =====
+    init();
+  </script>
+
+</body>
+</html>

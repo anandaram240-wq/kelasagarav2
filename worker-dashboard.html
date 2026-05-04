@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<!--
+  worker-dashboard.html — Worker's Personal Dashboard
+  Shows Google profile, skills manager, and jobs this worker applied to.
+  Calls checkAuth() on load; redirects to login.html if not authenticated.
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Worker Dashboard — KelasaGaara</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    .skills-input-row {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+    }
+    .skills-input-row input {
+      flex: 1;
+      padding: 0.55rem 0.9rem;
+      border: 2px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      outline: none;
+      background: var(--white);
+      color: var(--ink);
+    }
+    .skills-input-row input:focus { border-color: var(--saffron); }
+
+    .applied-jobs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1rem;
+      margin-top: 0.5rem;
+    }
+
+    .applied-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      padding: 1.25rem;
+      box-shadow: var(--shadow);
+    }
+
+    .applied-card-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 0.75rem;
+    }
+
+    .applied-icon { font-size: 1.8rem; }
+
+    .applied-title {
+      font-family: 'Baloo Tamma 2', cursive;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--ink);
+      margin-bottom: 0.2rem;
+    }
+
+    .applied-meta { font-size: 0.82rem; color: var(--muted); }
+
+    .applied-pay {
+      font-family: 'Baloo Tamma 2', cursive;
+      font-size: 1.1rem;
+      color: var(--jade);
+      font-weight: 700;
+      margin-top: 0.4rem;
+    }
+
+    /* Loading skeleton */
+    .skeleton {
+      background: linear-gradient(90deg, var(--paper2) 25%, var(--paper) 50%, var(--paper2) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.4s infinite;
+      border-radius: 8px;
+      height: 1rem;
+    }
+    @keyframes shimmer { to { background-position: -200% 0; } }
+
+    .top-action-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===== NAVBAR ===== -->
+  <nav class="navbar" id="main-navbar">
+    <!-- Filled dynamically by buildNavbar() in app.js -->
+    <div class="skeleton" style="width:160px; height:36px;"></div>
+    <div class="skeleton" style="width:120px; height:36px;"></div>
+  </nav>
+
+  <!-- ===== MAIN CONTENT ===== -->
+  <main class="page-container" id="main-content" style="display:none;">
+
+    <!-- Profile block -->
+    <div class="profile-block" id="profile-block">
+      <img class="profile-avatar" id="user-photo" src="" alt="Profile" referrerpolicy="no-referrer" />
+      <div class="profile-info">
+        <h3 id="user-name">Loading…</h3>
+        <p id="user-email">—</p>
+        <span class="badge badge-green" style="margin-top:0.4rem;">👷 Worker</span>
+      </div>
+    </div>
+
+    <!-- Skills Section -->
+    <div class="card" style="margin-bottom:1.5rem;">
+      <div class="section-title">🛠️ My Skills</div>
+      <p style="font-size:0.88rem; margin-bottom:0.9rem;">
+        Add skills that hirers will see when you apply. Press <kbd>Enter</kbd> or click Add.
+      </p>
+      <div class="skills-input-row">
+        <input type="text" id="skill-input" placeholder="e.g. Mason, Plumber, Driver…" maxlength="30"
+               onkeydown="handleSkillKeydown(event)" />
+        <button class="btn btn-secondary btn-sm" onclick="addSkill()">+ Add</button>
+      </div>
+      <!-- Skill tags appear here -->
+      <div class="skill-tags" id="skill-tags-container">
+        <span style="font-size:0.82rem; color:var(--muted);">Loading skills…</span>
+      </div>
+    </div>
+
+    <!-- Applied Jobs Section -->
+    <div class="top-action-bar">
+      <div class="section-title" style="margin-bottom:0;">📋 Jobs I Applied To</div>
+      <a class="btn btn-primary" href="find-jobs.html" id="find-jobs-btn">🔍 Find New Jobs</a>
+    </div>
+
+    <div id="applied-jobs-container">
+      <div class="empty-state">
+        <div class="skeleton" style="width:60px;height:60px;border-radius:50%;margin:0 auto 1rem;"></div>
+        <div class="skeleton" style="width:200px;height:1rem;margin:0 auto 0.5rem;"></div>
+        <div class="skeleton" style="width:140px;height:0.8rem;margin:0 auto;"></div>
+      </div>
+    </div>
+
+  </main>
+
+  <div id="toast-container"></div>
+
+  <!-- ===== JAVASCRIPT ===== -->
+  <script type="module">
+    import { checkAuth, logout }  from './js/auth.js';
+    import { showToast, formatDate, CATEGORY_EMOJI, buildNavbar } from './js/app.js';
+    import { db }                 from './js/firebase-config.js';
+    import {
+      doc, getDoc, updateDoc,
+      collection, query, where, getDocs
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    // ===== GLOBAL STATE =====
+    let currentUser = null;   // Firestore user document data
+    let skills      = [];     // Current worker's skills array
+
+    // ===== PAGE INIT — checkAuth first =====
+    // checkAuth() redirects to login.html if user is not signed in.
+    async function init() {
+      try {
+        currentUser = await checkAuth();
+
+        // Populate navbar with user info
+        buildNavbar(currentUser);
+
+        // Fill profile section
+        document.getElementById('user-photo').src   = currentUser.photo || '';
+        document.getElementById('user-name').textContent  = currentUser.name;
+        document.getElementById('user-email').textContent = currentUser.email;
+
+        // Show page content (was hidden during load)
+        document.getElementById('main-content').style.display = 'block';
+
+        // Load skills from Firestore
+        skills = currentUser.skills || [];
+        renderSkillTags();
+
+        // Load applied jobs
+        await loadAppliedJobs();
+
+      } catch (err) {
+        // checkAuth already redirects, but log just in case
+        console.error('Init failed:', err);
+      }
+    }
+
+    // ===== RENDER SKILL TAGS =====
+    // Draws the colored skill tags inside the skills container.
+    function renderSkillTags() {
+      const container = document.getElementById('skill-tags-container');
+      if (skills.length === 0) {
+        container.innerHTML = '<span style="font-size:0.82rem;color:var(--muted);">No skills added yet. Add some above!</span>';
+        return;
+      }
+      container.innerHTML = skills.map((s, i) => `
+        <span class="skill-tag">
+          ${s}
+          <span class="remove-skill" onclick="removeSkill(${i})" title="Remove">✕</span>
+        </span>
+      `).join('');
+    }
+
+    // ===== ADD SKILL =====
+    // Reads the skill input, validates, adds to array, saves to Firestore.
+    window.addSkill = async function() {
+      const input = document.getElementById('skill-input');
+      const value = input.value.trim();
+
+      if (!value) return;
+      if (skills.includes(value)) {
+        showToast('Skill already added.', 'error');
+        return;
+      }
+      if (skills.length >= 15) {
+        showToast('Maximum 15 skills allowed.', 'error');
+        return;
+      }
+
+      skills.push(value);
+      input.value = '';
+      renderSkillTags();
+      await saveSkills();
+    };
+
+    // Handle Enter key in skill input
+    window.handleSkillKeydown = function(e) {
+      if (e.key === 'Enter') { e.preventDefault(); addSkill(); }
+    };
+
+    // ===== REMOVE SKILL =====
+    // Removes a skill by its index, saves updated list to Firestore.
+    window.removeSkill = async function(index) {
+      skills.splice(index, 1);
+      renderSkillTags();
+      await saveSkills();
+    };
+
+    // ===== SAVE SKILLS TO FIRESTORE =====
+    // Writes the current skills array to the user's Firestore document.
+    async function saveSkills() {
+      try {
+        const userRef = doc(db, 'users', currentUser.uid);
+        await updateDoc(userRef, { skills: skills });
+        showToast('Skills saved! ✓', 'success');
+      } catch (err) {
+        console.error('Save skills error:', err);
+        showToast('Could not save skills. Try again.', 'error');
+      }
+    }
+
+    // ===== LOAD APPLIED JOBS =====
+    // Queries Firestore for all jobs where applicants array contains this worker's UID.
+    async function loadAppliedJobs() {
+      const container = document.getElementById('applied-jobs-container');
+
+      try {
+        // Firestore query: find jobs where applicants array-contains this worker's UID
+        const jobsQuery = query(
+          collection(db, 'jobs'),
+          where('applicants', 'array-contains', currentUser.uid)
+        );
+        const snapshot = await getDocs(jobsQuery);
+
+        if (snapshot.empty) {
+          container.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-icon">📭</div>
+              <h4>No applications yet</h4>
+              <p>Find jobs and apply — they'll appear here.</p>
+              <a class="btn btn-primary" href="find-jobs.html" style="margin-top:1rem;">🔍 Browse Jobs</a>
+            </div>`;
+          return;
+        }
+
+        // Build the applied jobs grid
+        const jobs  = snapshot.docs.map(d => d.data());
+        const grid  = document.createElement('div');
+        grid.className = 'applied-jobs-grid';
+
+        jobs.forEach(job => {
+          const emoji = CATEGORY_EMOJI[job.category] || '💼';
+          const card  = document.createElement('div');
+          card.className = 'applied-card';
+          card.innerHTML = `
+            <div class="applied-card-top">
+              <div>
+                <div class="applied-title">${emoji} ${job.title}</div>
+                <div class="applied-meta">📍 ${job.district} &nbsp;|&nbsp; 🏷️ ${job.category}</div>
+                <div class="applied-meta">👤 ${job.hirerName}</div>
+                <div class="applied-pay">₹${job.pay}/day</div>
+              </div>
+              <span class="badge badge-applied">✓ Applied</span>
+            </div>
+            <div class="applied-meta" style="font-size:0.78rem;color:var(--muted);">
+              Posted: ${formatDate(job.postedAt)}
+            </div>
+          `;
+          grid.appendChild(card);
+        });
+
+        container.innerHTML = '';
+        container.appendChild(grid);
+
+      } catch (err) {
+        console.error('Load applied jobs error:', err);
+        showToast('Could not load applied jobs.', 'error');
+        container.innerHTML = '<p style="color:var(--muted);text-align:center;">Failed to load jobs.</p>';
+      }
+    }
+
+    // ===== LOGOUT — exposed globally for navbar button =====
+    window.handleLogout = logout;
+
+    // ===== START =====
+    init();
+  </script>
+
+</body>
+</html>

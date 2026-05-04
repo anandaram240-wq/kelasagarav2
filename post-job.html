@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<!--
+  post-job.html — Job Posting Form for Hirers
+  Hirer fills title, district, pay, category, description.
+  On submit: validates fields, saves job to Firestore, redirects to hirer-dashboard.html.
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Post a Job — KelasaGaara</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    .form-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-lg);
+      padding: 2rem;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .form-card h2 {
+      font-size: 1.4rem;
+      margin-bottom: 0.35rem;
+    }
+
+    .form-card .form-subtitle {
+      font-size: 0.88rem;
+      color: var(--muted);
+      margin-bottom: 1.75rem;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    @media (max-width: 560px) {
+      .form-row { grid-template-columns: 1fr; }
+    }
+
+    .pay-prefix {
+      position: relative;
+    }
+    .pay-prefix input {
+      padding-left: 2.2rem;
+    }
+    .pay-prefix::before {
+      content: '₹';
+      position: absolute;
+      left: 0.9rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+      font-weight: 600;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .submit-row {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: flex-end;
+      margin-top: 0.5rem;
+    }
+
+    /* Live char counter color */
+    .char-count.warn   { color: var(--gold); }
+    .char-count.danger { color: #c0392b; }
+
+    .page-header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===== NAVBAR ===== -->
+  <nav class="navbar" id="main-navbar">
+    <div style="width:160px;height:36px;background:var(--paper2);border-radius:8px;"></div>
+    <div style="width:120px;height:36px;background:var(--paper2);border-radius:8px;"></div>
+  </nav>
+
+  <!-- ===== MAIN CONTENT ===== -->
+  <main class="page-container" id="main-content" style="display:none;">
+
+    <div class="page-header-row">
+      <div class="page-header" style="margin-bottom:0;">
+        <h1 class="page-title">📋 Post a New Job</h1>
+        <p class="page-subtitle">Fill in the details below — workers will see this job immediately.</p>
+      </div>
+      <a class="btn btn-ghost btn-sm" href="hirer-dashboard.html">← My Dashboard</a>
+    </div>
+
+    <div class="form-card">
+      <h2>Job Details</h2>
+      <p class="form-subtitle">All fields are required. Be clear so the right workers apply.</p>
+
+      <!-- Job Title -->
+      <div class="form-group">
+        <label class="form-label" for="job-title">Job Title *</label>
+        <input
+          class="form-input"
+          type="text"
+          id="job-title"
+          placeholder="e.g. Need a mason for 3 days in Mysuru"
+          maxlength="80"
+        />
+      </div>
+
+      <!-- District + Category in a row -->
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="job-district">District *</label>
+          <select class="form-select" id="job-district">
+            <option value="" disabled selected>Select District</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="job-category">Category *</label>
+          <select class="form-select" id="job-category">
+            <option value="" disabled selected>Select Category</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Daily Pay -->
+      <div class="form-group">
+        <label class="form-label" for="job-pay">Daily Pay (₹) *</label>
+        <div class="pay-prefix">
+          <input
+            class="form-input"
+            type="number"
+            id="job-pay"
+            placeholder="e.g. 600"
+            min="200"
+            max="5000"
+          />
+        </div>
+        <span style="font-size:0.78rem;color:var(--muted);">Minimum ₹200 &nbsp;|&nbsp; Maximum ₹5,000</span>
+      </div>
+
+      <!-- Description with char counter -->
+      <div class="form-group">
+        <label class="form-label" for="job-desc">Description *</label>
+        <textarea
+          class="form-textarea"
+          id="job-desc"
+          placeholder="Describe the work — timings, tools, location details, etc."
+          maxlength="300"
+          rows="4"
+          oninput="updateCharCount(this)"
+        ></textarea>
+        <span class="char-count" id="char-count">0 / 300 characters</span>
+      </div>
+
+      <!-- Submit row -->
+      <div class="submit-row">
+        <a class="btn btn-ghost" href="hirer-dashboard.html">Cancel</a>
+        <button class="btn btn-primary btn-lg" id="submit-btn" onclick="submitJob()">
+          🚀 Post Job
+        </button>
+      </div>
+
+    </div>
+  </main>
+
+  <div id="toast-container"></div>
+
+  <!-- ===== JAVASCRIPT ===== -->
+  <script type="module">
+    import { checkAuth, logout }   from './js/auth.js';
+    import { showToast, buildNavbar, populateDistricts, populateCategories } from './js/app.js';
+    import { db }                  from './js/firebase-config.js';
+    import {
+      collection, addDoc, serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    let currentUser = null;
+
+    // ===== PAGE INIT =====
+    async function init() {
+      try {
+        // Ensure hirer is logged in; redirect to login.html if not
+        currentUser = await checkAuth();
+
+        buildNavbar(currentUser);
+        document.getElementById('main-content').style.display = 'block';
+
+        // Populate both dropdowns using shared helpers from app.js
+        populateDistricts('job-district');
+        populateCategories('job-category');
+
+      } catch (err) {
+        console.error('Init error:', err);
+      }
+    }
+
+    // ===== UPDATE CHAR COUNT =====
+    // Called on every keystroke in the description textarea.
+    window.updateCharCount = function(el) {
+      const count   = el.value.length;
+      const display = document.getElementById('char-count');
+      display.textContent = `${count} / 300 characters`;
+      display.className   = 'char-count';
+      if (count > 250) display.classList.add('warn');
+      if (count > 280) display.classList.add('danger');
+    };
+
+    // ===== VALIDATE FORM =====
+    // Returns an error message string if invalid, or null if all fields are good.
+    function validateForm(title, district, category, pay, desc) {
+      if (!title.trim())              return 'Please enter a job title.';
+      if (title.trim().length < 5)   return 'Job title must be at least 5 characters.';
+      if (!district)                  return 'Please select a district.';
+      if (!category)                  return 'Please select a job category.';
+      if (!pay || isNaN(pay))         return 'Please enter a valid daily pay amount.';
+      if (pay < 200 || pay > 5000)   return 'Daily pay must be between ₹200 and ₹5,000.';
+      if (!desc.trim())              return 'Please write a description.';
+      if (desc.trim().length < 10)   return 'Description must be at least 10 characters.';
+      return null; // all valid
+    }
+
+    // ===== SUBMIT JOB =====
+    // Reads form values, validates them, then saves a new job document to Firestore.
+    window.submitJob = async function() {
+      // Read form values
+      const title    = document.getElementById('job-title').value;
+      const district = document.getElementById('job-district').value;
+      const category = document.getElementById('job-category').value;
+      const pay      = parseInt(document.getElementById('job-pay').value);
+      const desc     = document.getElementById('job-desc').value;
+
+      // Validate all fields before saving
+      const error = validateForm(title, district, category, pay, desc);
+      if (error) {
+        showToast(error, 'error');
+        return;
+      }
+
+      // Disable button and show loading state
+      const btn         = document.getElementById('submit-btn');
+      btn.disabled      = true;
+      btn.innerHTML     = `<span class="spinner"></span> Posting…`;
+
+      try {
+        // Save new job document to Firestore jobs collection
+        // addDoc generates a unique auto-ID for each job document
+        const jobsRef = collection(db, 'jobs');
+        const docRef  = await addDoc(jobsRef, {
+          jobId:      '',                   // Will update after we have the doc ID
+          title:      title.trim(),
+          district:   district,
+          pay:        pay,
+          category:   category,
+          description: desc.trim(),
+          hirerUid:   currentUser.uid,
+          hirerName:  currentUser.name,
+          hirerPhoto: currentUser.photo,
+          postedAt:   serverTimestamp(),    // Firebase server time for accuracy
+          applicants: [],                   // Empty at first; workers fill this
+          status:     'open'                // Job is open for applications
+        });
+
+        // Update the document with its own auto-generated ID for easy reference
+        const { doc, updateDoc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+        await updateDoc(doc(db, 'jobs', docRef.id), { jobId: docRef.id });
+
+        showToast('Job posted successfully! 🎉', 'success');
+
+        // Redirect to hirer dashboard after a short delay so the toast is visible
+        setTimeout(() => {
+          window.location.href = 'hirer-dashboard.html';
+        }, 1500);
+
+      } catch (err) {
+        console.error('Post job error:', err);
+        showToast('Failed to post job. Please try again.', 'error');
+        btn.disabled  = false;
+        btn.innerHTML = '🚀 Post Job';
+      }
+    };
+
+    // ===== LOGOUT =====
+    window.handleLogout = logout;
+
+    // ===== START =====
+    init();
+  </script>
+
+</body>
+</html>

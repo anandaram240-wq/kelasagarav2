@@ -1,0 +1,23 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Editor directories
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Node (if ever used)
+node_modules/
+npm-debug.log
+
+# Local env files
+.env
+.env.local
+
+# Report & viva files (keep out of main repo, submit separately)
+report-part1.md
+report-part2.md
+viva-prep.md
