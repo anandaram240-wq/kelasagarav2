@@ -36,7 +36,7 @@
   <div id="access-denied" class="access-denied" style="display:none">
     <div class="icon">🔒</div>
     <h3 style="font-family:'Baloo Tamma 2',cursive;margin-bottom:8px">Chat Locked</h3>
-    <p>Chat is only available after a booking is <strong>CONFIRMED</strong>.</p>
+    <p>You are not part of this booking, or the booking does not exist.</p>
     <a href="hirer-dashboard.html" style="color:var(--saffron);display:block;margin-top:16px">← Back to Dashboard</a>
   </div>
 
@@ -100,11 +100,6 @@
     const bSnap = await getDoc(doc(db,'bookings',bookingId));
     if(!bSnap.exists()){document.getElementById('access-denied').style.display='block';return;}
     booking = bSnap.data();
-
-    // Only allow confirmed bookings
-    if(booking.status !== 'CONFIRMED'){
-      document.getElementById('access-denied').style.display='block'; return;
-    }
 
     // Determine role
     if(booking.hirerId === user.uid)      { myRole='hirer';  otherUid=booking.workerId; }

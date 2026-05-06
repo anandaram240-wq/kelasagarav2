@@ -244,7 +244,7 @@
           ${b.instructions?`<div style="font-size:0.78rem;color:var(--muted);margin-top:4px">📝 ${esc(b.instructions)}</div>`:''}
           <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
             ${b.status==='PENDING'?`<button class="btn-sm btn-primary" onclick="acceptBooking('${b.id}')">✅ Accept</button><button class="btn-sm btn-outline" style="border-color:#EF4444;color:#EF4444" onclick="declineBooking('${b.id}')">❌ Decline</button>`:''}
-            ${b.status==='CONFIRMED'?`<button class="btn-sm btn-primary" onclick="window.location.href='chat.html?booking=${b.id}'">💬 Chat</button>`:''}
+            ${b.status!=='EXPIRED'?`<button class="btn-sm btn-primary" onclick="window.location.href='chat.html?booking=${b.id}'">💬 Chat</button>`:''}
           </div>`;
         el.appendChild(card);
       }

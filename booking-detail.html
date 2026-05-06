@@ -139,7 +139,8 @@
         <button class="btn-act btn-green" onclick="doRespond('accept')">✅ Accept</button>
         <button class="btn-act btn-red"   onclick="doRespond('decline')">❌ Decline</button>`;
     }
-    if(b.status==='CONFIRMED'){
+    // Chat enabled for all statuses so hirer & worker can converse
+    if(b.status!=='EXPIRED'){
       actEl.innerHTML+=`<a href="chat.html?booking=${bookingId}" class="btn-act btn-saffron">💬 Open Chat</a>`;
     }
     if(isHirer&&b.status==='CONFIRMED'){

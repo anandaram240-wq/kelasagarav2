@@ -152,7 +152,7 @@
           </div>
           ${b.instructions?`<div style="font-size:0.8rem;color:var(--muted);margin-top:4px">📝 ${esc(b.instructions)}</div>`:''}
           <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
-            ${b.status==='CONFIRMED'?`<button class="btn-sm btn-primary" onclick="window.location.href='chat.html?booking=${b.id}'">💬 Open Chat</button>`:''}
+            ${b.status!=='EXPIRED'?`<button class="btn-sm btn-primary" onclick="window.location.href='chat.html?booking=${b.id}'">💬 Open Chat</button>`:''}
             <a href="booking-detail.html?id=${b.id}" class="btn-sm btn-outline">View Details</a>
           </div>`;
         el.appendChild(card);
