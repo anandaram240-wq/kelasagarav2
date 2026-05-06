@@ -1,0 +1,41 @@
+{
+  "hosting": {
+    "public": ".",
+    "ignore": [
+      "firebase.json",
+      ".firebaserc",
+      ".git/**",
+      "*.md",
+      "node_modules/**"
+    ],
+    "rewrites": [
+      { "source": "/booking-detail", "destination": "/booking-detail.html" },
+      { "source": "/chat",           "destination": "/chat.html" },
+      { "source": "/hirer",          "destination": "/hirer-dashboard.html" },
+      { "source": "/worker",         "destination": "/worker-dashboard.html" },
+      { "source": "/admin",          "destination": "/admin-login.html" }
+    ],
+    "headers": [
+      {
+        "source": "**",
+        "headers": [
+          { "key": "X-Content-Type-Options", "value": "nosniff" },
+          { "key": "Cache-Control", "value": "no-cache" }
+        ]
+      },
+      {
+        "source": "**/*.@(js|css)",
+        "headers": [
+          { "key": "Cache-Control", "value": "public, max-age=3600" }
+        ]
+      }
+    ]
+  },
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "database": {
+    "rules": "database.rules.json"
+  }
+}

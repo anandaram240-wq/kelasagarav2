@@ -1,0 +1,24 @@
+{
+  "rules": {
+    "notifications": {
+      "$uid": {
+        ".read":  "$uid === auth.uid",
+        ".write": "auth != null"
+      }
+    },
+    "chats": {
+      "$bookingId": {
+        "messages": {
+          ".read":  "auth != null",
+          ".write": "auth != null"
+        }
+      }
+    },
+    "presence": {
+      "$uid": {
+        ".read":  "auth != null",
+        ".write": "$uid === auth.uid"
+      }
+    }
+  }
+}
