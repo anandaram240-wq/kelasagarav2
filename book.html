@@ -108,6 +108,19 @@
         </select>
       </div>
       <div class="fg">
+        <label>💰 Proposed Rate (Negotiable)</label>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span style="padding:10px 12px;background:rgba(27,107,69,0.08);border:1.5px solid var(--border);border-radius:10px;font-size:1rem;color:var(--jade);font-weight:700">₹</span>
+          <input type="number" id="proposed-rate" placeholder="e.g. 500" min="0" style="flex:1"/>
+          <select id="rate-type" style="min-width:110px">
+            <option value="per_day">per day</option>
+            <option value="per_hour">per hour</option>
+            <option value="fixed">fixed total</option>
+          </select>
+        </div>
+        <div id="worker-rate-hint" style="font-size:0.78rem;color:var(--muted);margin-top:6px"></div>
+      </div>
+      <div class="fg">
         <label>📍 Work Location / Address *</label>
         <div style="display:flex;gap:8px;align-items:stretch">
           <input type="text" id="location" placeholder="e.g. 12 MG Road, Davangere, Karnataka" style="flex:1"/>
@@ -215,6 +228,17 @@
         span.textContent = s;
         skillsEl.appendChild(span);
       });
+      // Pre-fill proposed rate with worker's listed rate
+      if (workerData.dailyRate) {
+        document.getElementById('proposed-rate').value = workerData.dailyRate;
+        document.getElementById('worker-rate-hint').innerHTML =
+          `💡 Worker's listed rate: <strong style="color:var(--jade)">₹${workerData.dailyRate}/day</strong> — you can negotiate below or above`;
+      } else if (workerData.hourlyRate) {
+        document.getElementById('proposed-rate').value = workerData.hourlyRate;
+        document.getElementById('rate-type').value = 'per_hour';
+        document.getElementById('worker-rate-hint').innerHTML =
+          `💡 Worker's listed rate: <strong style="color:var(--jade)">₹${workerData.hourlyRate}/hr</strong> — you can negotiate`;
+      }
     } catch(e) {
       console.error(e);
       showToast('Failed to load worker', 'error');
@@ -331,7 +355,7 @@
     btn.innerHTML = '<span class="spin"></span> Sending request…';
 
     try {
-      await createBooking(hirerId, workerId, { jobTitle, date: workDate, time: startTime, duration, location, locationUrl: _locationUrl, instructions });
+      await createBooking(hirerId, workerId, { jobTitle, date: workDate, time: startTime, duration, location, locationUrl: _locationUrl, instructions, proposedRate: parseInt(document.getElementById('proposed-rate').value)||null, rateType: document.getElementById('rate-type').value });
       // Show success
       document.getElementById('form-area').style.display = 'none';
       document.getElementById('success-box').style.display = 'block';
