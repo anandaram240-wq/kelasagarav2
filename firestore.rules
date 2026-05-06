@@ -39,11 +39,12 @@ service cloud.firestore {
       allow read:   if true;
       allow create: if request.auth != null;
     }
-    // Direct message threads — participants can read/write
+    // Direct message threads — any auth user can read (query filters by UID); only participants can write
     match /direct_threads/{threadId} {
-      allow read, write: if request.auth != null &&
-                          request.auth.uid in resource.data.participants;
+      allow read:   if request.auth != null;
       allow create: if request.auth != null;
+      allow update, delete: if request.auth != null &&
+                              request.auth.uid in resource.data.participants;
     }
   }
 }

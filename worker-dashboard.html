@@ -292,8 +292,8 @@
       }
       if (hasUnread) document.getElementById('msg-unread-badge').style.display='inline';
     } catch(e) {
-      console.error(e);
-      el.innerHTML = '<div class="empty">Could not load messages.</div>';
+      console.error('[loadMessages] error:', e);
+      el.innerHTML = `<div class="empty">Error: ${e.message||e}</div>`;
     }
   }
 
