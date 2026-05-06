@@ -180,7 +180,7 @@
     const snap=await getDoc(doc(db,'users',user.uid));
     if(!snap.exists()||snap.data().role!=='worker'){window.location.href='login.html';return;}
     userData=snap.data();
-    renderProfile();renderSkills();loadAppliedJobs();loadBookings();
+    renderProfile();renderSkills();loadAppliedJobs();loadBookings();loadMessages(currentUser.uid);
     initNotificationBell(user.uid,'notif-bell-container');
     listenIncoming(user.uid);
   });

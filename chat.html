@@ -397,22 +397,14 @@
     container.scrollTop = container.scrollHeight;
   }
 
-  window.sendMsg = async function() {
+  window.sendMsg = function() {
     const input = document.getElementById('msg-input');
     const text = input.value.trim();
-    console.log('[sendMsg] text:', text, 'user:', currentUser?.uid, 'other:', otherUid, 'thread:', activeBookingId, 'role:', myRole);
-    if (!text) return;
-    if (!currentUser) { showToast('Not logged in', 'error'); return; }
-    if (!otherUid)    { showToast('No recipient', 'error'); return; }
-    if (!activeBookingId) { showToast('No thread ID', 'error'); return; }
+    if (!text || !currentUser || !otherUid || !activeBookingId) return;
     input.value = '';
-    try {
-      await sendMessage(activeBookingId, currentUser.uid, myRole || 'hirer', otherUid, text);
-    } catch(e) {
-      console.error('[sendMsg] error:', e);
-      showToast('Failed to send: ' + e.message, 'error');
-      input.value = text; // restore on error
-    }
+    input.focus();
+    sendMessage(activeBookingId, currentUser.uid, myRole || 'hirer', otherUid, text)
+      .catch(e => { showToast('Send failed: ' + e.message, 'error'); input.value = text; });
   };
 
   window.toggleEmoji = function() {

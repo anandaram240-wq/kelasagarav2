@@ -1,14 +1,12 @@
 /*
  * chat.js — Real-time messenger using Firebase RTDB
- * Messages linked to bookingId. Only available after CONFIRMED booking.
  */
 import { rtdb } from './firebase-config.js';
-import { ref, push, onValue, update, serverTimestamp }
+import { ref, push, onValue, update }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
 export function sendMessage(bookingId, senderId, senderRole, receiverId, text) {
-  const msgsRef = ref(rtdb, `chats/${bookingId}/messages`);
-  return push(msgsRef, {
+  return push(ref(rtdb, `chats/${bookingId}/messages`), {
     senderId, senderRole, receiverId,
     messageText: text,
     timestamp:   Date.now(),
@@ -17,20 +15,24 @@ export function sendMessage(bookingId, senderId, senderRole, receiverId, text) {
 }
 
 export function listenMessages(bookingId, callback) {
-  const msgsRef = ref(rtdb, `chats/${bookingId}/messages`);
-  return onValue(msgsRef, snap => {
+  return onValue(ref(rtdb, `chats/${bookingId}/messages`), snap => {
     const msgs = [];
-    snap.forEach(child => msgs.push({ id: child.key, ...child.val() }));
+    snap.forEach(c => msgs.push({ id: c.key, ...c.val() }));
     callback(msgs);
   });
 }
 
-export function markMessagesRead(bookingId, messageIds, receiverId) {
-  const updates = {};
-  messageIds.forEach(id => {
-    updates[`chats/${bookingId}/messages/${id}/isRead`] = true;
-  });
-  return update(ref(rtdb), updates);
+// Debounced — avoids triggering onValue loop by batching read receipts
+let _readTimer = null;
+export function markMessagesRead(bookingId, messageIds) {
+  clearTimeout(_readTimer);
+  _readTimer = setTimeout(() => {
+    const updates = {};
+    messageIds.forEach(id => {
+      updates[`chats/${bookingId}/messages/${id}/isRead`] = true;
+    });
+    update(ref(rtdb), updates).catch(() => {});
+  }, 1500);
 }
 
 export function setOnlineStatus(userId, isOnline) {
