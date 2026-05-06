@@ -5,74 +5,61 @@
   <title>Worker Dashboard — KelasaGaara</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link href="https://fonts.googleapis.com/css2?family=Baloo+Tamma+2:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="css/style.css"/>
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    :root{--saffron:#E8600A;--saffron-light:#FEF0E6;--jade:#2D6A4F;--jade-light:#E8F5EE;--paper:#FAF8F5;--ink:#1A1A2E;--muted:#6B7280;--border:#E5E2DC;}
     body{font-family:'DM Sans',sans-serif;background:var(--paper);min-height:100vh}
     .navbar{background:#fff;border-bottom:1px solid var(--border);padding:0 28px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 1px 4px rgba(0,0,0,0.06)}
     .brand{font-family:'Baloo Tamma 2',sans-serif;font-weight:800;font-size:1.1rem;color:var(--ink);text-decoration:none}
     .brand span{color:var(--saffron)}
-    .nav-right{display:flex;align-items:center;gap:12px}
-    .nav-avatar{width:34px;height:34px;border-radius:50%;object-fit:cover;border:2px solid var(--saffron)}
+    .nav-right{display:flex;align-items:center;gap:10px}
+    .nav-avatar{width:34px;height:34px;border-radius:50%;object-fit:cover;border:2px solid var(--jade)}
     .nav-name{font-size:0.85rem;font-weight:600;color:var(--ink)}
-    .btn-sm{padding:6px 14px;border-radius:8px;font-size:0.8rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;border:none;transition:all 0.2s}
+    .btn-sm{padding:6px 14px;border-radius:8px;font-size:0.8rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;border:none;transition:all 0.2s;text-decoration:none;display:inline-flex;align-items:center;gap:4px}
     .btn-outline{background:transparent;border:1.5px solid var(--border);color:var(--muted)}
-    .btn-outline:hover{border-color:var(--saffron);color:var(--saffron)}
-    .btn-primary{background:var(--saffron);color:#fff}
-    .btn-primary:hover{background:#C04E06}
-    /* Layout */
+    .btn-outline:hover{border-color:var(--jade);color:var(--jade)}
+    .btn-primary{background:var(--jade,#1B6B45);color:#fff}
+    .btn-primary:hover{background:#155538}
     .layout{max-width:1050px;margin:28px auto;padding:0 24px;display:grid;grid-template-columns:280px 1fr;gap:20px;align-items:start}
-    /* Profile card */
-    .profile-card{background:#fff;border:1px solid var(--border);border-radius:16px;overflow:hidden}
-    .profile-banner{height:70px;background:linear-gradient(135deg,var(--jade),#1a4a35)}
+    .profile-card{background:#fff;border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:16px}
+    .profile-banner{height:70px;background:linear-gradient(135deg,var(--jade,#1B6B45),#1a4a35)}
     .profile-body{padding:0 20px 24px;position:relative}
-    .profile-avatar{width:72px;height:72px;border-radius:50%;border:3px solid #fff;object-fit:cover;margin-top:-36px;background:var(--saffron-light);display:flex;align-items:center;justify-content:center;font-size:1.4rem;font-weight:700;color:var(--saffron)}
-    .profile-name{font-weight:700;font-size:1.05rem;margin:10px 0 2px}
-    .profile-email{font-size:0.78rem;color:var(--muted);margin-bottom:14px}
-    .role-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:20px;font-size:0.75rem;font-weight:600;background:var(--jade-light);color:var(--jade);border:1px solid rgba(45,106,79,0.3);margin-bottom:16px}
+    .p-avatar{width:72px;height:72px;border-radius:50%;border:3px solid #fff;object-fit:cover;margin-top:-36px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;font-weight:700;color:var(--saffron);background:var(--saffron-light,#FEF0E6)}
+    .p-name{font-weight:700;font-size:1.05rem;margin:10px 0 2px}
+    .p-email{font-size:0.78rem;color:var(--muted);margin-bottom:14px}
+    .role-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:20px;font-size:0.75rem;font-weight:600;background:rgba(27,107,69,0.1);color:var(--jade,#1B6B45);border:1px solid rgba(45,106,79,0.3);margin-bottom:16px}
     .info-row{display:flex;align-items:center;gap:8px;font-size:0.82rem;color:var(--ink);margin-bottom:8px}
-    .info-row .icon{font-size:1rem;width:20px;flex-shrink:0}
     .info-label{color:var(--muted);font-size:0.75rem;margin-right:4px}
-    .profile-divider{border:none;border-top:1px solid var(--border);margin:14px 0}
-    /* Not complete banner */
-    .setup-banner{background:var(--saffron-light);border:1px solid rgba(232,96,10,0.3);border-radius:10px;padding:12px;margin-bottom:16px;font-size:0.82rem;color:var(--saffron);display:flex;align-items:center;gap:8px}
-    /* Edit profile form */
-    .edit-section{display:none}
-    .form-group{margin-bottom:12px}
-    .form-group label{display:block;font-size:0.78rem;font-weight:600;color:var(--ink);margin-bottom:4px}
-    .form-group input,.form-group select{width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:0.85rem;font-family:'DM Sans',sans-serif;outline:none}
-    .form-group input:focus,.form-group select:focus{border-color:var(--saffron)}
-    /* Main content */
-    .main-col{}
-    .section-title{font-weight:700;font-size:1rem;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between}
+    hr.div{border:none;border-top:1px solid var(--border);margin:14px 0}
+    .edit-section{display:none;margin-top:14px}
+    .fg{margin-bottom:12px}.fg label{display:block;font-size:0.78rem;font-weight:600;color:var(--ink);margin-bottom:4px}
+    .fg input,.fg select{width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:0.85rem;font-family:'DM Sans',sans-serif;outline:none}
+    .fg input:focus,.fg select:focus{border-color:var(--jade,#1B6B45)}
     .card{background:#fff;border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:18px}
-    /* Skills */
+    .section-title{font-weight:700;font-size:1rem;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between}
     .skills-wrap{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:12px}
-    .skill-tag{padding:5px 12px;background:var(--jade-light);border:1px solid rgba(45,106,79,0.3);color:var(--jade);border-radius:20px;font-size:0.78rem;font-weight:600;display:flex;align-items:center;gap:5px}
-    .skill-tag button{background:none;border:none;cursor:pointer;color:var(--jade);font-size:0.85rem;padding:0;line-height:1}
+    .skill-tag{padding:5px 12px;background:rgba(27,107,69,0.1);border:1px solid rgba(45,106,79,0.3);color:var(--jade,#1B6B45);border-radius:20px;font-size:0.78rem;font-weight:600;display:flex;align-items:center;gap:5px}
+    .skill-tag button{background:none;border:none;cursor:pointer;color:var(--jade,#1B6B45);font-size:0.85rem;padding:0;line-height:1}
     .skill-input-row{display:flex;gap:8px}
     .skill-input{flex:1;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:0.85rem;font-family:'DM Sans',sans-serif;outline:none}
-    .skill-input:focus{border-color:var(--jade)}
-    /* Job cards */
-    .job-card{border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px;display:flex;align-items:flex-start;gap:14px}
-    .job-emoji{font-size:1.8rem;flex-shrink:0}
-    .job-title{font-weight:600;font-size:0.92rem;margin-bottom:4px}
-    .job-meta{font-size:0.78rem;color:var(--muted)}
-    .job-pay{font-size:1.1rem;font-weight:700;color:var(--jade);margin-top:4px}
-    .badge-applied{background:var(--jade-light);color:var(--jade);border:1px solid rgba(45,106,79,0.3);padding:3px 10px;border-radius:20px;font-size:0.72rem;font-weight:600;margin-left:auto;flex-shrink:0}
+    .skill-input:focus{border-color:var(--jade,#1B6B45)}
+    .booking-card{border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px}
+    .booking-title{font-weight:600;font-size:0.92rem;margin-bottom:4px}
+    .booking-meta{font-size:0.78rem;color:var(--muted)}
     .empty{text-align:center;padding:32px;color:var(--muted);font-size:0.88rem}
-    /* Toast */
     #toast{position:fixed;bottom:20px;right:20px;padding:12px 20px;border-radius:10px;font-size:0.88rem;transform:translateY(60px);opacity:0;transition:all 0.3s;z-index:999}
     #toast.show{transform:translateY(0);opacity:1}
-    #toast.success{background:var(--jade);color:#fff}
+    #toast.success{background:var(--jade,#1B6B45);color:#fff}
     #toast.error{background:#DC2626;color:#fff}
-    #toast.info{background:var(--ink);color:#fff}
+    #toast.info{background:var(--ink,#0F1923);color:#fff}
+    @media(max-width:768px){.layout{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
 <nav class="navbar">
   <a href="index.html" class="brand">Kelasa<span>Gaara</span></a>
   <div class="nav-right">
+    <div id="notif-bell-container"></div>
     <img id="nav-avatar" class="nav-avatar" src="" alt="" onerror="this.style.display='none'"/>
     <span class="nav-name" id="nav-name"></span>
     <a href="find-jobs.html" class="btn-sm btn-primary">Find Jobs</a>
@@ -81,76 +68,41 @@
 </nav>
 
 <div class="layout">
-  <!-- LEFT: Profile card -->
   <div>
     <div class="profile-card">
       <div class="profile-banner"></div>
       <div class="profile-body">
-        <div id="p-avatar" class="profile-avatar">👤</div>
-        <div class="profile-name" id="p-name">Loading…</div>
-        <div class="profile-email" id="p-email"></div>
+        <div id="p-avatar" class="p-avatar">👤</div>
+        <div class="p-name" id="p-name">Loading…</div>
+        <div class="p-email" id="p-email"></div>
         <div class="role-badge">👷 Worker</div>
-
-        <!-- Setup warning if profile incomplete -->
-        <div id="setup-warning" class="setup-banner" style="display:none">
+        <div id="setup-warning" style="display:none;background:rgba(232,89,12,0.1);border:1px solid rgba(232,89,12,0.3);border-radius:10px;padding:10px;margin-bottom:12px;font-size:0.82rem;color:var(--saffron)">
           ⚠️ Complete your profile so hirers can find you!
         </div>
-
-        <!-- Profile details -->
         <div id="profile-details">
-          <div class="info-row"><span class="icon">📍</span><span><span class="info-label">District:</span><span id="p-district">—</span></span></div>
-          <div class="info-row"><span class="icon">🏘️</span><span><span class="info-label">Taluk:</span><span id="p-taluk">—</span></span></div>
-          <div class="info-row"><span class="icon">🛠️</span><span><span class="info-label">Trade:</span><span id="p-trade">—</span></span></div>
-          <div class="info-row"><span class="icon">⏳</span><span><span class="info-label">Experience:</span><span id="p-exp">—</span></span></div>
-          <div class="info-row"><span class="icon">💰</span><span><span class="info-label">Daily Rate:</span><span id="p-rate">—</span></span></div>
-          <div class="info-row"><span class="icon">📱</span><span><span class="info-label">Phone:</span><span id="p-phone">—</span></span></div>
+          <div class="info-row">📍 <span><span class="info-label">District:</span><span id="p-district">—</span></span></div>
+          <div class="info-row">🏘️ <span><span class="info-label">Taluk:</span><span id="p-taluk">—</span></span></div>
+          <div class="info-row">🛠️ <span><span class="info-label">Trade:</span><span id="p-trade">—</span></span></div>
+          <div class="info-row">⏳ <span><span class="info-label">Experience:</span><span id="p-exp">—</span></span></div>
+          <div class="info-row">💰 <span><span class="info-label">Daily Rate:</span><span id="p-rate">—</span></span></div>
+          <div class="info-row">📱 <span><span class="info-label">Phone:</span><span id="p-phone">—</span></span></div>
         </div>
-
-        <hr class="profile-divider"/>
+        <hr class="div"/>
         <button class="btn-sm btn-outline" style="width:100%" onclick="toggleEdit()">✏️ Edit Profile</button>
-
-        <!-- Edit form (hidden by default) -->
-        <div class="edit-section" id="edit-section" style="margin-top:14px">
-          <div class="form-group">
-            <label>District</label>
-            <select id="e-district"><option value="">Select</option></select>
-          </div>
-          <div class="form-group">
-            <label>Taluk</label>
-            <input id="e-taluk" type="text" placeholder="e.g. Mysuru"/>
-          </div>
-          <div class="form-group">
-            <label>Trade / Skill</label>
-            <input id="e-trade" type="text" placeholder="e.g. Mason, Plumber"/>
-          </div>
-          <div class="form-group">
-            <label>Experience</label>
-            <select id="e-exp">
-              <option value="">Select</option>
-              <option>Less than 1 Year</option>
-              <option>1–2 Years</option>
-              <option>3–5 Years</option>
-              <option>5–10 Years</option>
-              <option>10+ Years</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Daily Rate (₹)</label>
-            <input id="e-rate" type="number" placeholder="e.g. 600"/>
-          </div>
-          <div class="form-group">
-            <label>Phone</label>
-            <input id="e-phone" type="tel" placeholder="10-digit number"/>
-          </div>
+        <div class="edit-section" id="edit-section">
+          <div class="fg"><label>District</label><select id="e-district"><option value="">Select</option></select></div>
+          <div class="fg"><label>Taluk</label><input id="e-taluk" type="text" placeholder="e.g. Mysuru"/></div>
+          <div class="fg"><label>Trade / Skill</label><input id="e-trade" type="text" placeholder="e.g. Mason, Plumber"/></div>
+          <div class="fg"><label>Experience</label><select id="e-exp"><option value="">Select</option><option>Less than 1 Year</option><option>1–2 Years</option><option>3–5 Years</option><option>5–10 Years</option><option>10+ Years</option></select></div>
+          <div class="fg"><label>Daily Rate (₹)</label><input id="e-rate" type="number" placeholder="e.g. 600"/></div>
+          <div class="fg"><label>Phone</label><input id="e-phone" type="tel" placeholder="10-digit number"/></div>
           <button class="btn-sm btn-primary" style="width:100%" onclick="saveProfile()">💾 Save Profile</button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- RIGHT: Main content -->
-  <div class="main-col">
-    <!-- Skills -->
+  <div>
     <div class="card">
       <div class="section-title">My Skills / ಕೌಶಲ್ಯಗಳು</div>
       <div class="skills-wrap" id="skills-wrap"></div>
@@ -161,171 +113,211 @@
       <button class="btn-sm btn-outline" style="margin-top:10px" onclick="saveSkills()">💾 Save Skills</button>
     </div>
 
-    <!-- Applied Jobs -->
+    <div class="card">
+      <div class="section-title">
+        📋 Incoming Booking Requests
+        <span id="booking-count" style="font-size:0.78rem;font-weight:400;color:var(--muted)"></span>
+      </div>
+      <div id="bookings-list"><div class="empty">⏳ Loading…</div></div>
+    </div>
+
     <div class="card">
       <div class="section-title">
         Jobs I Applied To
-        <a href="find-jobs.html" class="btn-sm btn-primary">+ Find More Jobs</a>
+        <a href="find-jobs.html" class="btn-sm btn-primary">+ Find More</a>
       </div>
-      <div id="applied-jobs"><div class="empty">Loading your applications…</div></div>
+      <div id="applied-jobs"><div class="empty">Loading…</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- Incoming booking popup (Rapido-style) -->
+<div id="incoming-overlay" class="incoming-overlay" style="display:none">
+  <div class="incoming-card">
+    <div class="incoming-icon">📋</div>
+    <div class="incoming-title">New Booking Request!</div>
+    <div class="incoming-hirer" id="inc-hirer"></div>
+    <div class="incoming-details" id="inc-details"></div>
+    <div class="incoming-timer" id="inc-timer">⏱ Expires in 60s</div>
+    <div class="incoming-actions">
+      <button class="btn-accept" onclick="respondBooking('accept')">✅ ACCEPT</button>
+      <button class="btn-decline" onclick="respondBooking('decline')">❌ DECLINE</button>
     </div>
   </div>
 </div>
 
 <div id="toast"></div>
+<div id="toast-container"></div>
 
 <script type="module">
-  import { auth, db } from './js/firebase-config.js';
+  import { auth, db, rtdb } from './js/firebase-config.js';
   import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
   import { doc, getDoc, updateDoc, query, collection, where, getDocs, serverTimestamp }
     from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+  import { respondBooking as respondBookingFn } from './js/bookings.js';
+  import { initNotificationBell } from './js/notifications-ui.js';
 
   const DISTRICTS = ["Bagalkot","Ballari","Belagavi","Bengaluru Rural","Bengaluru Urban","Bidar","Chamarajanagar","Chikkaballapura","Chikkamagaluru","Chitradurga","Dakshina Kannada","Davanagere","Dharwad","Gadag","Hassan","Haveri","Kalaburagi","Kodagu","Kolar","Koppal","Mandya","Mysuru","Raichur","Ramanagara","Shivamogga","Tumakuru","Udupi","Uttara Kannada","Vijayapura","Yadgir","Vijayanagara"];
   const CAT_EMOJI = {Mason:"🧱",Plumber:"🔧",Electrician:"⚡",Carpenter:"🪵",Painter:"🎨",Driver:"🚗",Cook:"🍳",Gardener:"🌿","Security Guard":"🔒",Helper:"🤝",Labour:"🏗️"};
 
-  let currentUser = null, userData = null, skills = [];
+  let currentUser=null, userData=null, skills=[], pendingBookingId=null, incTimer=null;
 
-  // Populate district select
-  const dsel = document.getElementById('e-district');
-  DISTRICTS.forEach(d => { const o=document.createElement('option');o.value=d;o.textContent=d;dsel.appendChild(o); });
+  const dsel=document.getElementById('e-district');
+  DISTRICTS.forEach(d=>{const o=document.createElement('option');o.value=d;o.textContent=d;dsel.appendChild(o);});
 
-  onAuthStateChanged(auth, async (user) => {
-    if (!user) { window.location.href='login.html'; return; }
-    currentUser = user;
-    const snap = await getDoc(doc(db,'users',user.uid));
-    if (!snap.exists() || snap.data().role !== 'worker') { window.location.href='login.html'; return; }
-    userData = snap.data();
-    renderProfile();
-    renderSkills();
-    loadAppliedJobs();
+  onAuthStateChanged(auth, async user=>{
+    if(!user){window.location.href='login.html';return;}
+    currentUser=user;
+    const snap=await getDoc(doc(db,'users',user.uid));
+    if(!snap.exists()||snap.data().role!=='worker'){window.location.href='login.html';return;}
+    userData=snap.data();
+    renderProfile();renderSkills();loadAppliedJobs();loadBookings();
+    initNotificationBell(user.uid,'notif-bell-container');
+    listenIncoming(user.uid);
   });
 
-  function renderProfile() {
-    const u = userData, cu = currentUser;
-    // Navbar
-    document.getElementById('nav-name').textContent = (u.name||cu.displayName||'').split(' ')[0];
-    const navAv = document.getElementById('nav-avatar');
-    navAv.src = u.photo || cu.photoURL || '';
-
-    // Profile card
-    if (u.photo || cu.photoURL) {
-      document.getElementById('p-avatar').outerHTML = `<img class="profile-avatar" id="p-avatar" src="${u.photo||cu.photoURL}" alt="" onerror="this.style.display='none'" style="width:72px;height:72px;border-radius:50%;border:3px solid #fff;object-fit:cover;margin-top:-36px"/>`;
-    } else {
-      document.getElementById('p-avatar').textContent = (u.name||'?')[0].toUpperCase();
-    }
-    document.getElementById('p-name').textContent = u.name || cu.displayName || 'Worker';
-    document.getElementById('p-email').textContent = u.email || cu.email || '';
-
-    // Details
-    document.getElementById('p-district').textContent = u.district || '—';
-    document.getElementById('p-taluk').textContent    = u.taluk    || '—';
-    document.getElementById('p-trade').textContent    = (u.skills&&u.skills[0]) || u.trade || '—';
-    document.getElementById('p-exp').textContent      = u.experience || '—';
-    document.getElementById('p-rate').textContent     = u.dailyRate ? `₹${u.dailyRate}/day` : '—';
-    document.getElementById('p-phone').textContent    = u.phone || '—';
-
-    // Show warning if profile incomplete
-    if (!u.district || !u.experience) {
-      document.getElementById('setup-warning').style.display = 'flex';
-      // Auto-open edit form
-      document.getElementById('edit-section').style.display = 'block';
-    }
-
-    // Pre-fill edit form
-    document.getElementById('e-district').value = u.district || '';
-    document.getElementById('e-taluk').value    = u.taluk    || '';
-    document.getElementById('e-trade').value    = (u.skills&&u.skills[0]) || u.trade || '';
-    document.getElementById('e-exp').value      = u.experience || '';
-    document.getElementById('e-rate').value     = u.dailyRate  || '';
-    document.getElementById('e-phone').value    = u.phone      || '';
-
-    skills = [...(u.skills || [])];
+  function renderProfile(){
+    const u=userData,cu=currentUser;
+    document.getElementById('nav-name').textContent=(u.name||cu.displayName||'').split(' ')[0];
+    document.getElementById('nav-avatar').src=u.photo||cu.photoURL||'';
+    if(u.photo||cu.photoURL){document.getElementById('p-avatar').outerHTML=`<img class="p-avatar" id="p-avatar" src="${u.photo||cu.photoURL}" alt="" style="width:72px;height:72px;border-radius:50%;border:3px solid #fff;object-fit:cover;margin-top:-36px"/>`;}
+    else{document.getElementById('p-avatar').textContent=(u.name||'?')[0].toUpperCase();}
+    document.getElementById('p-name').textContent=u.name||cu.displayName||'Worker';
+    document.getElementById('p-email').textContent=u.email||cu.email||'';
+    document.getElementById('p-district').textContent=u.district||'—';
+    document.getElementById('p-taluk').textContent=u.taluk||'—';
+    document.getElementById('p-trade').textContent=(u.skills&&u.skills[0])||u.trade||'—';
+    document.getElementById('p-exp').textContent=u.experience||'—';
+    document.getElementById('p-rate').textContent=u.dailyRate?`₹${u.dailyRate}/day`:'—';
+    document.getElementById('p-phone').textContent=u.phone||'—';
+    if(!u.district||!u.experience){document.getElementById('setup-warning').style.display='block';document.getElementById('edit-section').style.display='block';}
+    document.getElementById('e-district').value=u.district||'';
+    document.getElementById('e-taluk').value=u.taluk||'';
+    document.getElementById('e-trade').value=(u.skills&&u.skills[0])||u.trade||'';
+    document.getElementById('e-exp').value=u.experience||'';
+    document.getElementById('e-rate').value=u.dailyRate||'';
+    document.getElementById('e-phone').value=u.phone||'';
+    skills=[...(u.skills||[])];
   }
-
-  function renderSkills() {
-    const wrap = document.getElementById('skills-wrap');
-    wrap.innerHTML = skills.length ? skills.map((s,i) =>
-      `<span class="skill-tag">${CAT_EMOJI[s]||'🔨'} ${s} <button onclick="removeSkill(${i})">×</button></span>`
-    ).join('') : '<span style="color:var(--muted);font-size:0.82rem">No skills added yet.</span>';
+  function renderSkills(){
+    const w=document.getElementById('skills-wrap');
+    w.innerHTML=skills.length?skills.map((s,i)=>`<span class="skill-tag">${CAT_EMOJI[s]||'🔨'} ${s} <button onclick="removeSkill(${i})">×</button></span>`).join(''):'<span style="color:var(--muted);font-size:0.82rem">No skills added yet.</span>';
   }
-
-  window.addSkill = function() {
-    const input = document.getElementById('skill-input');
-    const val = input.value.trim();
-    if (!val || skills.includes(val)) { input.value=''; return; }
-    skills.push(val); input.value='';
-    renderSkills();
-  };
-
-  window.removeSkill = function(i) {
-    skills.splice(i,1); renderSkills();
-  };
-
-  window.saveSkills = async function() {
-    try {
-      await updateDoc(doc(db,'users',currentUser.uid), { skills, updatedAt: serverTimestamp() });
-      userData.skills = [...skills];
-      showToast('Skills saved!','success');
-    } catch(e){ showToast('Failed to save','error'); }
-  };
-
-  window.toggleEdit = function() {
-    const s = document.getElementById('edit-section');
-    s.style.display = s.style.display === 'none' ? 'block' : 'none';
-  };
-
-  window.saveProfile = async function() {
-    const district  = document.getElementById('e-district').value;
-    const taluk     = document.getElementById('e-taluk').value.trim();
-    const trade     = document.getElementById('e-trade').value.trim();
-    const exp       = document.getElementById('e-exp').value;
-    const rate      = document.getElementById('e-rate').value;
-    const phone     = document.getElementById('e-phone').value.trim();
-
-    if (!district) return showToast('Select your district','error');
-    if (!taluk)    return showToast('Enter your taluk','error');
-
-    try {
-      const updates = { district, taluk, experience:exp, dailyRate:parseInt(rate)||0, phone:phone||null, profileComplete:true, updatedAt:serverTimestamp() };
-      if (trade) { updates.skills = [trade]; skills = [trade]; }
-      await updateDoc(doc(db,'users',currentUser.uid), updates);
-      Object.assign(userData, updates);
-      renderProfile(); renderSkills();
-      document.getElementById('setup-warning').style.display = 'none';
-      document.getElementById('edit-section').style.display = 'none';
+  window.addSkill=function(){const input=document.getElementById('skill-input'),val=input.value.trim();if(!val||skills.includes(val)){input.value='';return;}skills.push(val);input.value='';renderSkills();};
+  window.removeSkill=function(i){skills.splice(i,1);renderSkills();};
+  window.saveSkills=async function(){try{await updateDoc(doc(db,'users',currentUser.uid),{skills,updatedAt:serverTimestamp()});userData.skills=[...skills];showToast('Skills saved!','success');}catch(e){showToast('Failed to save','error');}};
+  window.toggleEdit=function(){const s=document.getElementById('edit-section');s.style.display=s.style.display==='none'?'block':'none';};
+  window.saveProfile=async function(){
+    const district=document.getElementById('e-district').value,taluk=document.getElementById('e-taluk').value.trim(),trade=document.getElementById('e-trade').value.trim(),exp=document.getElementById('e-exp').value,rate=document.getElementById('e-rate').value,phone=document.getElementById('e-phone').value.trim();
+    if(!district)return showToast('Select your district','error');
+    if(!taluk)return showToast('Enter your taluk','error');
+    try{
+      const updates={district,taluk,experience:exp,dailyRate:parseInt(rate)||0,phone:phone||null,profileComplete:true,updatedAt:serverTimestamp()};
+      if(trade){updates.skills=[trade];skills=[trade];}
+      await updateDoc(doc(db,'users',currentUser.uid),updates);
+      Object.assign(userData,updates);renderProfile();renderSkills();
+      document.getElementById('setup-warning').style.display='none';
+      document.getElementById('edit-section').style.display='none';
       showToast('Profile updated! ✅','success');
-    } catch(e){ showToast('Failed to save','error'); }
+    }catch(e){showToast('Failed to save','error');}
   };
 
-  async function loadAppliedJobs() {
-    try {
-      const q = query(collection(db,'jobs'), where('applicants','array-contains',currentUser.uid));
-      const snap = await getDocs(q);
-      const el = document.getElementById('applied-jobs');
-      if (snap.empty) { el.innerHTML='<div class="empty">You haven\'t applied to any jobs yet.<br><a href="find-jobs.html" style="color:var(--saffron)">Browse jobs →</a></div>'; return; }
-      el.innerHTML = snap.docs.map(d => {
-        const j = d.data();
-        const emoji = CAT_EMOJI[j.category] || '💼';
-        return `<div class="job-card">
-          <div class="job-emoji">${emoji}</div>
-          <div style="flex:1">
-            <div class="job-title">${j.title||'Job'}</div>
-            <div class="job-meta">📍 ${j.district||'—'} · ${j.category||'—'} · by ${j.hirerName||'Hirer'}</div>
-            <div class="job-pay">₹${j.pay||'—'}/day</div>
-          </div>
-          <span class="badge-applied">✓ Applied</span>
-        </div>`;
-      }).join('');
-    } catch(e){ document.getElementById('applied-jobs').innerHTML='<div class="empty">Could not load jobs.</div>'; }
+  async function loadBookings(){
+    const el=document.getElementById('bookings-list');
+    try{
+      const q=query(collection(db,'bookings'),where('workerId','==',currentUser.uid));
+      const snap=await getDocs(q);
+      if(snap.empty){el.innerHTML='<div class="empty">No booking requests yet.</div>';return;}
+      const items=snap.docs.map(d=>({id:d.id,...d.data()}));
+      items.sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
+      document.getElementById('booking-count').textContent=`${items.length} total`;
+      el.innerHTML='';
+      for(const b of items){
+        let empName='Employer';
+        try{const es=await getDoc(doc(db,'users',b.hirerId));if(es.exists())empName=es.data().name||'Employer';}catch(e){}
+        const statusClass=`status-${(b.status||'PENDING').toLowerCase()}`;
+        const card=document.createElement('div');card.className='booking-card';
+        card.innerHTML=`
+          <div class="booking-title">💼 ${esc(b.jobTitle||'Job')} <span class="${statusClass}" style="float:right">${b.status||'PENDING'}</span></div>
+          <div class="booking-meta">👔 Employer: <strong>${esc(empName)}</strong> · 📅 ${b.date||'—'} ${b.time||''} · 📍 ${esc(b.location||'—')}</div>
+          ${b.instructions?`<div style="font-size:0.78rem;color:var(--muted);margin-top:4px">📝 ${esc(b.instructions)}</div>`:''}
+          <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
+            ${b.status==='PENDING'?`<button class="btn-sm btn-primary" onclick="acceptBooking('${b.id}')">✅ Accept</button><button class="btn-sm btn-outline" style="border-color:#EF4444;color:#EF4444" onclick="declineBooking('${b.id}')">❌ Decline</button>`:''}
+            ${b.status==='CONFIRMED'?`<button class="btn-sm btn-primary" onclick="window.location.href='chat.html?booking=${b.id}'">💬 Chat</button>`:''}
+          </div>`;
+        el.appendChild(card);
+      }
+    }catch(e){el.innerHTML='<div class="empty">Could not load bookings.</div>';}
   }
 
-  window.doLogout = async function() { await signOut(auth); window.location.href='login.html'; };
+  window.acceptBooking=async function(id){try{await respondBookingFn(id,currentUser.uid,'accept');showToast('Booking accepted! ✅','success');loadBookings();}catch(e){showToast('Failed','error');}};
+  window.declineBooking=async function(id){try{await respondBookingFn(id,currentUser.uid,'decline');showToast('Booking declined','info');loadBookings();}catch(e){showToast('Failed','error');}};
 
-  function showToast(msg,type) {
-    const el=document.getElementById('toast');
-    el.textContent=msg; el.className=`show ${type}`;
-    setTimeout(()=>el.className='',3000);
+  // Rapido-style incoming notification
+  function listenIncoming(uid){
+    onValue(ref(rtdb,`notifications/${uid}`),snap=>{
+      snap.forEach(child=>{
+        const n=child.val();
+        if(n.type==='BOOKING_REQUEST'&&!n.isRead&&!n.shown){
+          update(ref(rtdb,`notifications/${uid}/${child.key}`),{shown:true});
+          showIncoming(n, child.key, uid);
+        }
+      });
+    });
   }
+
+  async function showIncoming(n, nid, uid){
+    let empName='Employer';
+    try{const es=await getDoc(doc(db,'users',n.hirerId));if(es.exists())empName=es.data().name||'Employer';}catch(e){}
+    pendingBookingId=n.bookingId;
+    document.getElementById('inc-hirer').textContent=`From: ${empName}`;
+    document.getElementById('inc-details').innerHTML=`<strong>Job:</strong> ${esc(n.jobTitle||'—')}<br><strong>Date:</strong> ${n.date||'—'} at ${n.time||'—'}<br><strong>Location:</strong> ${esc(n.location||'—')}`;
+    document.getElementById('incoming-overlay').style.display='flex';
+    let secs=60;
+    clearInterval(incTimer);
+    incTimer=setInterval(()=>{
+      secs--;
+      document.getElementById('inc-timer').textContent=`⏱ Expires in ${secs}s`;
+      if(secs<=0){
+        clearInterval(incTimer);
+        document.getElementById('incoming-overlay').style.display='none';
+        if(pendingBookingId){
+          import('./js/firebase-config.js').then(({db})=>{
+            import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js").then(({doc,updateDoc,serverTimestamp})=>{
+              updateDoc(doc(db,'bookings',pendingBookingId),{status:'EXPIRED',updatedAt:serverTimestamp()});
+            });
+          });
+        }
+      }
+    },1000);
+  }
+
+  window.respondBooking=async function(action){
+    clearInterval(incTimer);
+    document.getElementById('incoming-overlay').style.display='none';
+    if(!pendingBookingId)return;
+    try{
+      await respondBookingFn(pendingBookingId,currentUser.uid,action);
+      showToast(action==='accept'?'Booking Accepted! ✅':'Booking Declined','success');
+      loadBookings();
+    }catch(e){showToast('Failed to respond','error');}
+    pendingBookingId=null;
+  };
+
+  async function loadAppliedJobs(){
+    try{
+      const q=query(collection(db,'jobs'),where('applicants','array-contains',currentUser.uid));
+      const snap=await getDocs(q);
+      const el=document.getElementById('applied-jobs');
+      if(snap.empty){el.innerHTML='<div class="empty">You haven\'t applied to any jobs yet.<br><a href="find-jobs.html" style="color:var(--saffron)">Browse jobs →</a></div>';return;}
+      el.innerHTML=snap.docs.map(d=>{const j=d.data();return`<div class="booking-card"><div class="booking-title">${CAT_EMOJI[j.category]||'💼'} ${esc(j.title||'Job')}</div><div class="booking-meta">📍 ${esc(j.district||'—')} · by ${esc(j.hirerName||'Employer')} · ₹${j.pay||'—'}/day</div><span class="status-confirmed" style="font-size:0.72rem;display:inline-block;margin-top:6px">✓ Applied</span></div>`;}).join('');
+    }catch(e){document.getElementById('applied-jobs').innerHTML='<div class="empty">Could not load jobs.</div>';}
+  }
+
+  window.doLogout=async function(){await signOut(auth);window.location.href='login.html';};
+  function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+  function showToast(msg,type){const el=document.getElementById('toast');el.textContent=msg;el.className=`show ${type}`;setTimeout(()=>el.className='',3000);}
 </script>
 </body>
 </html>

@@ -110,7 +110,8 @@
 
     /* ── FOOTER ── */
     footer{border-top:1px solid var(--border);padding:20px 32px;text-align:center;font-size:0.8rem;color:var(--muted);margin-top:40px}
-  </style>
+  @keyframes toastIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+</style>
 </head>
 <body>
 
@@ -222,8 +223,9 @@
 <footer>KelasaGaara (ಕೆಲಸಗಾರ) — Karnataka Daily Worker Marketplace &nbsp;|&nbsp; Built with Firebase &amp; ❤️</footer>
 
 <script type="module">
-  import { db } from './js/firebase-config.js';
-  import { collection, getDocs, query, where, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { db, auth } from './js/firebase-config.js';
+  import { collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
   const DISTRICTS = ["Bagalkot","Ballari","Belagavi","Bengaluru Rural","Bengaluru Urban","Bidar","Chamarajanagar","Chikkaballapura","Chikkamagaluru","Chitradurga","Dakshina Kannada","Davanagere","Dharwad","Gadag","Hassan","Haveri","Kalaburagi","Kodagu","Kolar","Koppal","Mandya","Mysuru","Raichur","Ramanagara","Shivamogga","Tumakuru","Udupi","Uttara Kannada","Vijayapura","Yadgir","Vijayanagara"];
   const CATEGORIES = [
@@ -240,7 +242,21 @@
     {label:"🤝 ಸಹಾಯಕ",en:"Helper"}
   ];
 
-  let allWorkers = [], activeCategory = 'All';
+  let allWorkers = [], activeCategory = 'All', currentHirer = null;
+
+  // Check if logged-in user is hirer
+  import('./js/firebase-config.js').then(({auth,db})=>{
+    import("https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js").then(({onAuthStateChanged})=>{
+      import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js").then(({doc,getDoc})=>{
+        onAuthStateChanged(auth, async user=>{
+          if(user){
+            const snap = await getDoc(doc(db,'users',user.uid));
+            if(snap.exists() && snap.data().role==='hirer') currentHirer = {...snap.data(),uid:user.uid};
+          }
+        });
+      });
+    });
+  });
 
   // Populate district dropdown
   const distSel = document.getElementById('filter-district');
@@ -288,7 +304,7 @@
     const district = document.getElementById('filter-district').value;
     const search = document.getElementById('search-name').value.toLowerCase().trim();
     let filtered = allWorkers;
-    if (district) filtered = filtered.filter(w => w.district === district || (w.skills||[]).length > 0);
+    if (district) filtered = filtered.filter(w => (w.district||'') === district);
     if (activeCategory !== 'All') filtered = filtered.filter(w => (w.skills||[]).some(s => s.toLowerCase().includes(activeCategory.toLowerCase())));
     if (search) filtered = filtered.filter(w => (w.name||'').toLowerCase().includes(search) || (w.skills||[]).some(s => s.toLowerCase().includes(search)));
     renderWorkers(filtered);
@@ -326,7 +342,22 @@
   }
 
   function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+  // Check if current user is a hirer (for Book Now button)
+  onAuthStateChanged(auth, async user => {
+    if (user) {
+      const { doc: docFn, getDoc: getDocFn } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+      try {
+        const snap = await getDocFn(docFn(db, 'users', user.uid));
+        if (snap.exists() && snap.data().role === 'hirer') {
+          currentHirer = { uid: user.uid, ...snap.data() };
+          // Re-render if workers already loaded
+          if (allWorkers.length) applyFilter();
+        }
+      } catch(e) { console.warn('Auth check error:', e); }
+    }
+  });
   loadWorkers();
 </script>
+<script type="module" src="index-booking-modal.js"></script>
 </body>
 </html>

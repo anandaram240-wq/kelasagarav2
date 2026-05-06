@@ -1,6 +1,10 @@
 {
   "rewrites": [
-    { "source": "/(.*)", "destination": "/index.html" }
+    { "source": "/booking-detail", "destination": "/booking-detail.html" },
+    { "source": "/chat",           "destination": "/chat.html" },
+    { "source": "/hirer",          "destination": "/hirer-dashboard.html" },
+    { "source": "/worker",         "destination": "/worker-dashboard.html" },
+    { "source": "/admin",          "destination": "/admin-login.html" }
   ],
   "headers": [
     {
@@ -8,7 +12,7 @@
       "headers": [
         { "key": "X-Content-Type-Options", "value": "nosniff" },
         { "key": "X-Frame-Options",        "value": "DENY" },
-        { "key": "X-XSS-Protection",       "value": "1; mode=block" }
+        { "key": "Referrer-Policy",        "value": "strict-origin-when-cross-origin" }
       ]
     }
   ]

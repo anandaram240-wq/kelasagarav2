@@ -634,3 +634,94 @@ a:hover { text-decoration: underline; }
   font-weight: 500;
   font-size: 0.9rem;
 }
+
+/* ===== NOTIFICATION BELL ===== */
+.notif-bell-wrap{position:relative;display:inline-block}
+.notif-bell-btn{background:none;border:none;cursor:pointer;font-size:1.25rem;padding:6px 10px;border-radius:8px;position:relative;transition:background 0.2s}
+.notif-bell-btn:hover{background:var(--paper2)}
+.notif-badge{position:absolute;top:0;right:0;min-width:18px;height:18px;background:#E53E3E;color:#fff;border-radius:9px;font-size:0.65rem;font-weight:700;display:inline-flex;align-items:center;justify-content:center;padding:0 4px;border:2px solid #fff}
+.notif-dropdown{position:absolute;right:0;top:calc(100% + 8px);width:320px;background:#fff;border:1px solid var(--border);border-radius:14px;box-shadow:0 12px 40px rgba(0,0,0,0.15);z-index:500;overflow:hidden}
+.notif-dropdown-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border);font-weight:600;font-size:0.9rem}
+.notif-item{display:flex;gap:10px;padding:10px 16px;cursor:pointer;transition:background 0.15s;border-bottom:1px solid var(--border)}
+.notif-item:last-child{border-bottom:none}
+.notif-item:hover{background:var(--paper)}
+.notif-item.unread{background:#FFF8F5}
+.notif-icon{font-size:1.3rem;flex-shrink:0;margin-top:2px}
+.notif-title{font-weight:600;font-size:0.85rem;color:var(--ink)}
+.notif-sub{font-size:0.78rem;color:var(--muted);margin-top:1px}
+.notif-time{font-size:0.72rem;color:var(--muted);margin-top:2px}
+
+/* ===== BOOKING MODAL ===== */
+.booking-modal .modal{max-width:520px}
+.booking-field{margin-bottom:1rem}
+.booking-field label{display:block;font-size:0.82rem;font-weight:600;color:var(--ink);margin-bottom:4px}
+.booking-field input,.booking-field textarea,.booking-field select{width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:0.88rem;font-family:'DM Sans',sans-serif;outline:none;transition:border 0.2s}
+.booking-field input:focus,.booking-field textarea:focus,.booking-field select:focus{border-color:var(--saffron)}
+.booking-field textarea{resize:vertical;min-height:80px}
+
+/* ===== WORKER CARD BOOK NOW ===== */
+.wc-actions{display:flex;gap:7px;margin-top:12px}
+.wc-btn-book{flex:1;padding:9px;background:var(--saffron);color:#fff;border:none;border-radius:8px;font-size:0.82rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s}
+.wc-btn-book:hover{background:#C04E06;transform:translateY(-1px)}
+.wc-btn-view{flex:1;padding:9px;background:transparent;color:var(--saffron);border:1.5px solid var(--saffron);border-radius:8px;font-size:0.82rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s}
+.wc-btn-view:hover{background:var(--saffron);color:#fff}
+.wc-rate{font-size:0.8rem;font-weight:700;color:var(--jade);margin-top:6px}
+.wc-stars{color:#F59E0B;font-size:0.78rem}
+
+/* ===== INCOMING REQUEST POPUP (Rapido-style) ===== */
+.incoming-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:900;display:flex;align-items:center;justify-content:center;animation:fadeIn 0.3s ease}
+.incoming-card{background:#fff;border-radius:20px;padding:2rem;width:90%;max-width:400px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.3);animation:slideUp 0.3s ease}
+@keyframes slideUp{from{transform:translateY(40px);opacity:0}to{transform:translateY(0);opacity:1}}
+.incoming-icon{font-size:3rem;margin-bottom:0.5rem}
+.incoming-title{font-family:'Baloo Tamma 2',cursive;font-size:1.3rem;font-weight:800;color:var(--ink);margin-bottom:0.5rem}
+.incoming-employer{font-size:0.95rem;color:var(--muted);margin-bottom:1rem}
+.incoming-details{background:var(--paper);border-radius:12px;padding:1rem;text-align:left;margin-bottom:1rem;font-size:0.85rem;line-height:1.8}
+.incoming-details strong{color:var(--ink)}
+.incoming-timer{font-size:0.85rem;color:var(--saffron);font-weight:600;margin-bottom:1rem}
+.incoming-actions{display:flex;gap:10px}
+.btn-accept{flex:1;padding:12px;background:#22C55E;color:#fff;border:none;border-radius:12px;font-size:0.95rem;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s}
+.btn-accept:hover{background:#16A34A;transform:translateY(-1px)}
+.btn-decline{flex:1;padding:12px;background:#EF4444;color:#fff;border:none;border-radius:12px;font-size:0.95rem;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s}
+.btn-decline:hover{background:#DC2626;transform:translateY(-1px)}
+
+/* ===== CHAT UI ===== */
+.chat-page{max-width:700px;margin:0 auto;padding:0 1rem 2rem}
+.chat-header{background:#fff;border:1px solid var(--border);border-radius:14px 14px 0 0;padding:12px 16px;display:flex;align-items:center;gap:12px}
+.chat-other-avatar{width:40px;height:40px;border-radius:50%;background:var(--saffron-light,#FEF0E6);border:2px solid var(--saffron);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1rem;color:var(--saffron);flex-shrink:0}
+.chat-other-name{font-weight:600;font-size:0.95rem}
+.chat-status{font-size:0.75rem;color:#22C55E}
+.chat-status.offline{color:var(--muted)}
+.chat-messages{background:#F0EBE0;padding:16px;min-height:400px;max-height:500px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;border-left:1px solid var(--border);border-right:1px solid var(--border)}
+.msg-bubble{max-width:72%;display:flex;flex-direction:column;gap:3px}
+.msg-bubble.sent{align-self:flex-end;align-items:flex-end}
+.msg-bubble.recv{align-self:flex-start;align-items:flex-start}
+.msg-text{padding:10px 14px;border-radius:16px;font-size:0.88rem;line-height:1.5}
+.msg-bubble.sent .msg-text{background:var(--saffron);color:#fff;border-bottom-right-radius:4px}
+.msg-bubble.recv .msg-text{background:#fff;color:var(--ink);border-bottom-left-radius:4px;box-shadow:0 1px 3px rgba(0,0,0,0.08)}
+.msg-meta{font-size:0.7rem;color:var(--muted);display:flex;align-items:center;gap:4px}
+.msg-seen{color:#3B82F6;font-size:0.72rem}
+.chat-input-bar{background:#fff;border:1px solid var(--border);border-radius:0 0 14px 14px;padding:10px 12px;display:flex;align-items:center;gap:8px}
+.chat-emoji-btn{background:none;border:none;font-size:1.3rem;cursor:pointer;padding:4px;border-radius:8px;transition:background 0.15s}
+.chat-emoji-btn:hover{background:var(--paper)}
+.chat-text-input{flex:1;padding:9px 14px;border:1.5px solid var(--border);border-radius:20px;font-size:0.88rem;font-family:'DM Sans',sans-serif;outline:none;transition:border 0.2s}
+.chat-text-input:focus{border-color:var(--saffron)}
+.chat-send-btn{padding:9px 18px;background:var(--saffron);color:#fff;border:none;border-radius:20px;font-size:0.88rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s}
+.chat-send-btn:hover{background:#C04E06}
+.emoji-picker{display:flex;flex-wrap:wrap;gap:6px;padding:10px;background:#fff;border:1px solid var(--border);border-radius:10px;margin-bottom:6px;max-width:300px}
+.emoji-picker span{font-size:1.4rem;cursor:pointer;padding:4px;border-radius:6px;transition:background 0.15s}
+.emoji-picker span:hover{background:var(--paper)}
+
+/* ===== STATUS BADGES ===== */
+.status-pending{background:#FEF3C7;color:#92400E;padding:3px 10px;border-radius:20px;font-size:0.75rem;font-weight:600}
+.status-confirmed{background:#D1FAE5;color:#065F46;padding:3px 10px;border-radius:20px;font-size:0.75rem;font-weight:600}
+.status-declined{background:#FEE2E2;color:#991B1B;padding:3px 10px;border-radius:20px;font-size:0.75rem;font-weight:600}
+.status-expired{background:#F3F4F6;color:#6B7280;padding:3px 10px;border-radius:20px;font-size:0.75rem;font-weight:600}
+.status-completed{background:#DBEAFE;color:#1E40AF;padding:3px 10px;border-radius:20px;font-size:0.75rem;font-weight:600}
+
+/* ===== BOOKING CARDS ===== */
+.booking-card{background:#fff;border:1px solid var(--border);border-radius:14px;padding:16px 18px;margin-bottom:12px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;transition:all 0.2s}
+.booking-card:hover{box-shadow:0 6px 20px rgba(0,0,0,0.08);transform:translateY(-1px)}
+.booking-info{flex:1}
+.booking-title{font-weight:700;font-size:0.95rem;margin-bottom:4px}
+.booking-meta{font-size:0.8rem;color:var(--muted);line-height:1.7}
+.booking-actions{display:flex;flex-direction:column;gap:6px;align-items:flex-end;flex-shrink:0}

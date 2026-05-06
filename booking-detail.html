@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Booking Detail — KelasaGaara</title>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+Tamma+2:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="css/style.css"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'DM Sans',sans-serif;background:var(--paper);min-height:100vh}
+    .navbar{background:#fff;border-bottom:1px solid var(--border);padding:0 24px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 1px 4px rgba(0,0,0,0.06)}
+    .brand{font-family:'Baloo Tamma 2',sans-serif;font-weight:800;font-size:1.1rem;color:var(--ink);text-decoration:none}
+    .brand span{color:var(--saffron)}
+    .wrap{max-width:640px;margin:28px auto;padding:0 16px}
+    .detail-card{background:#fff;border:1px solid var(--border);border-radius:16px;padding:24px;margin-bottom:16px;box-shadow:0 2px 12px rgba(0,0,0,0.06)}
+    .card-section-title{font-family:'Baloo Tamma 2',cursive;font-size:1rem;font-weight:700;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+    .detail-row{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);font-size:0.88rem}
+    .detail-row:last-child{border-bottom:none}
+    .dl{font-weight:600;color:var(--muted);min-width:110px;flex-shrink:0}
+    .dv{color:var(--ink)}
+    .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:4px}
+    .btn-act{padding:10px 20px;border-radius:10px;font-size:0.9rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;border:none;transition:all 0.2s;text-decoration:none;display:inline-flex;align-items:center;gap:5px}
+    .btn-green{background:#22C55E;color:#fff}.btn-green:hover{background:#16A34A}
+    .btn-red{background:#EF4444;color:#fff}.btn-red:hover{background:#DC2626}
+    .btn-saffron{background:var(--saffron);color:#fff}.btn-saffron:hover{background:#C04E06}
+    .btn-grey{background:#6B7280;color:#fff}.btn-grey:hover{background:#4B5563}
+    .btn-outline-s{background:transparent;color:var(--saffron);border:1.5px solid var(--saffron)}.btn-outline-s:hover{background:var(--saffron);color:#fff}
+    .phone-locked{font-size:0.82rem;color:var(--muted);font-style:italic}
+  </style>
+</head>
+<body>
+<nav class="navbar">
+  <a href="javascript:history.back()" style="font-size:0.88rem;color:var(--muted);text-decoration:none;display:flex;align-items:center;gap:4px">← Back</a>
+  <a href="index.html" class="brand">Kelasa<span>Gaara</span></a>
+  <div style="width:60px"></div>
+</nav>
+
+<div class="wrap">
+  <div id="loading" style="text-align:center;padding:60px;color:var(--muted)">⏳ Loading booking…</div>
+  <div id="detail-content" style="display:none">
+
+    <div class="detail-card">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px">
+        <div>
+          <div style="font-family:'Baloo Tamma 2',cursive;font-size:1.5rem;font-weight:800;color:var(--ink)" id="d-job">—</div>
+          <div style="font-size:0.78rem;color:var(--muted);margin-top:2px" id="d-created"></div>
+        </div>
+        <div id="d-status-badge"></div>
+      </div>
+      <div class="detail-row"><span class="dl">📅 Date</span><span class="dv" id="d-date">—</span></div>
+      <div class="detail-row"><span class="dl">🕐 Time</span><span class="dv" id="d-time">—</span></div>
+      <div class="detail-row"><span class="dl">📍 Location</span><span class="dv" id="d-location">—</span></div>
+      <div class="detail-row"><span class="dl">📝 Instructions</span><span class="dv" id="d-notes">—</span></div>
+    </div>
+
+    <div class="detail-card" id="worker-section">
+      <div class="card-section-title">👷 Worker Details</div>
+      <div class="detail-row"><span class="dl">Name</span><span class="dv" id="w-name">—</span></div>
+      <div class="detail-row"><span class="dl">Skills</span><span class="dv" id="w-skills">—</span></div>
+      <div class="detail-row"><span class="dl">District</span><span class="dv" id="w-district">—</span></div>
+      <div class="detail-row"><span class="dl">📱 Phone</span><span class="dv" id="w-phone"><span class="phone-locked">🔒 Revealed after booking confirmed</span></span></div>
+    </div>
+
+    <div class="detail-card" id="hirer-section" style="display:none">
+      <div class="card-section-title">🏗️ Hirer Details</div>
+      <div class="detail-row"><span class="dl">Name</span><span class="dv" id="h-name">—</span></div>
+    </div>
+
+    <div class="detail-card">
+      <div class="actions" id="action-btns"></div>
+    </div>
+
+  </div>
+</div>
+<div id="toast-container"></div>
+<script type="module">
+  import { auth, db } from './js/firebase-config.js';
+  import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { doc, getDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { respondBooking } from './js/bookings.js';
+
+  const bookingId = new URLSearchParams(window.location.search).get('id');
+  if (!bookingId) { window.location.href='index.html'; }
+
+  function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+  function statusBadge(s){
+    const map={PENDING:'status-pending',CONFIRMED:'status-confirmed',DECLINED:'status-declined',EXPIRED:'status-expired',COMPLETED:'status-completed'};
+    return `<span class="${map[s]||'status-pending'}">${s}</span>`;
+  }
+  function showToast(msg,type='info'){
+    const c=document.getElementById('toast-container');
+    const col={success:'#1B6B45',error:'#C0392B',info:'#E8590C'};
+    const t=document.createElement('div');
+    t.style.cssText=`min-width:240px;padding:11px 16px;background:${col[type]||col.info};color:#fff;border-radius:10px;font-size:0.88rem;font-weight:500;display:flex;align-items:center;gap:8px;box-shadow:0 6px 20px rgba(0,0,0,0.15);animation:toastIn 0.3s ease`;
+    t.innerHTML=`<span>${msg}</span>`;c.appendChild(t);setTimeout(()=>t.remove(),3200);
+  }
+
+  onAuthStateChanged(auth, async user=>{
+    if(!user){window.location.href='login.html';return;}
+    const bSnap=await getDoc(doc(db,'bookings',bookingId));
+    if(!bSnap.exists()){document.getElementById('loading').textContent='Booking not found.';return;}
+    const b=bSnap.data();
+    if(b.hirerId!==user.uid&&b.workerId!==user.uid){window.location.href='index.html';return;}
+    const isHirer=b.hirerId===user.uid, isWorker=b.workerId===user.uid;
+
+    document.getElementById('loading').style.display='none';
+    document.getElementById('detail-content').style.display='block';
+    document.getElementById('d-job').textContent=b.jobTitle||'—';
+    document.getElementById('d-status-badge').innerHTML=statusBadge(b.status||'PENDING');
+    document.getElementById('d-date').textContent=b.date||'—';
+    document.getElementById('d-time').textContent=b.time||'—';
+    document.getElementById('d-location').textContent=b.location||'—';
+    document.getElementById('d-notes').textContent=b.instructions||'None';
+    if(b.createdAt?.toDate) document.getElementById('d-created').textContent='Created '+b.createdAt.toDate().toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
+
+    // Worker info
+    try{
+      const ws=await getDoc(doc(db,'users',b.workerId));
+      if(ws.exists()){
+        const w=ws.data();
+        document.getElementById('w-name').textContent=(w.name||'—');
+        document.getElementById('w-skills').textContent=((w.skills||[]).join(', '))||'—';
+        document.getElementById('w-district').textContent=(w.district||'—');
+        if(b.status==='CONFIRMED'||b.status==='COMPLETED')
+          document.getElementById('w-phone').textContent=(w.phone||'Not provided');
+      }
+    }catch(e){}
+
+    // Hirer info (visible to worker)
+    if(isWorker){
+      document.getElementById('hirer-section').style.display='block';
+      try{const hs=await getDoc(doc(db,'users',b.hirerId));if(hs.exists())document.getElementById('h-name').textContent=hs.data().name||'—';}catch(e){}
+    }
+
+    // Action buttons
+    const actEl=document.getElementById('action-btns');
+    if(isWorker&&b.status==='PENDING'){
+      actEl.innerHTML=`
+        <button class="btn-act btn-green" onclick="doRespond('accept')">✅ Accept</button>
+        <button class="btn-act btn-red"   onclick="doRespond('decline')">❌ Decline</button>`;
+    }
+    if(b.status==='CONFIRMED'){
+      actEl.innerHTML+=`<a href="chat.html?booking=${bookingId}" class="btn-act btn-saffron">💬 Open Chat</a>`;
+    }
+    if(isHirer&&b.status==='CONFIRMED'){
+      actEl.innerHTML+=`<button class="btn-act btn-grey" onclick="doComplete()">✅ Mark Completed</button>`;
+    }
+    if(!actEl.innerHTML) actEl.innerHTML=`<a href="${isHirer?'hirer-dashboard':'worker-dashboard'}.html" class="btn-act btn-outline-s">← Back to Dashboard</a>`;
+
+    window.doRespond=async function(action){
+      try{await respondBooking(bookingId,user.uid,action);showToast(action==='accept'?'Accepted ✅':'Declined','success');setTimeout(()=>location.reload(),1400);}catch(e){showToast('Failed','error');}
+    };
+    window.doComplete=async function(){
+      try{await updateDoc(doc(db,'bookings',bookingId),{status:'COMPLETED',updatedAt:serverTimestamp()});showToast('Marked completed ✅','success');setTimeout(()=>location.reload(),1400);}catch(e){showToast('Failed','error');}
+    };
+  });
+</script>
+<style>@keyframes toastIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}</style>
+</body>
+</html>

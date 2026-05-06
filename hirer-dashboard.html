@@ -1,323 +1,198 @@
 <!DOCTYPE html>
 <!--
-  hirer-dashboard.html — Hirer's Personal Dashboard
-  Shows profile, all jobs posted by this hirer, applicant counts,
-  and a "View Applicants" modal. Calls checkAuth() on load.
+  hirer-dashboard.html — Hirer's Dashboard
+  Shows bookings made, posted jobs, and notifications
 -->
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <title>Hirer Dashboard — KelasaGaara</title>
-  <link rel="stylesheet" href="css/style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+Tamma+2:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="css/style.css"/>
   <style>
-    .hirer-jobs-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 1.1rem;
-    }
-
-    .hirer-job-card {
-      background: var(--white);
-      border-radius: var(--radius);
-      border: 1px solid var(--border);
-      padding: 1.25rem 1.4rem;
-      box-shadow: var(--shadow);
-      display: flex;
-      flex-direction: column;
-      gap: 0.65rem;
-      transition: box-shadow 0.2s, transform 0.2s;
-    }
-    .hirer-job-card:hover {
-      box-shadow: var(--shadow-lg);
-      transform: translateY(-2px);
-    }
-
-    .hjc-header {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 0.5rem;
-    }
-
-    .hjc-title {
-      font-family: 'Baloo Tamma 2', cursive;
-      font-size: 1.05rem;
-      font-weight: 700;
-      color: var(--ink);
-    }
-
-    .hjc-meta { font-size: 0.83rem; color: var(--muted); line-height: 1.6; }
-
-    .hjc-pay {
-      font-family: 'Baloo Tamma 2', cursive;
-      font-size: 1.25rem;
-      color: var(--jade);
-      font-weight: 700;
-    }
-
-    .hjc-footer {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding-top: 0.65rem;
-      border-top: 1px solid var(--border);
-      margin-top: auto;
-    }
-
-    .applicant-count {
-      display: flex;
-      align-items: center;
-      gap: 0.35rem;
-      font-size: 0.85rem;
-      font-weight: 600;
-      color: var(--saffron);
-    }
-
-    .top-action-bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 1.5rem;
-      flex-wrap: wrap;
-      gap: 0.75rem;
-    }
-
-    /* ===== APPLICANTS MODAL ===== */
-    .modal-overlay { display: none; }
-    .modal-overlay.active { display: flex; }
-
-    .applicant-list { margin-top: 0.5rem; }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'DM Sans',sans-serif;background:var(--paper);min-height:100vh}
+    .navbar{background:#fff;border-bottom:1px solid var(--border);padding:0 28px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 1px 4px rgba(0,0,0,0.06)}
+    .brand{font-family:'Baloo Tamma 2',sans-serif;font-weight:800;font-size:1.1rem;color:var(--ink);text-decoration:none}
+    .brand span{color:var(--saffron)}
+    .nav-right{display:flex;align-items:center;gap:10px}
+    .nav-avatar{width:34px;height:34px;border-radius:50%;object-fit:cover;border:2px solid var(--saffron)}
+    .nav-name{font-size:0.85rem;font-weight:600;color:var(--ink)}
+    .btn-sm{padding:6px 14px;border-radius:8px;font-size:0.8rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;border:none;transition:all 0.2s;text-decoration:none;display:inline-flex;align-items:center;gap:4px}
+    .btn-outline{background:transparent;border:1.5px solid var(--border);color:var(--muted)}
+    .btn-outline:hover{border-color:var(--saffron);color:var(--saffron)}
+    .btn-primary{background:var(--saffron);color:#fff}
+    .btn-primary:hover{background:#C04E06}
+    .layout{max-width:1050px;margin:28px auto;padding:0 24px}
+    .tabs{display:flex;gap:4px;margin-bottom:24px;background:#fff;border:1px solid var(--border);border-radius:12px;padding:4px;flex-wrap:wrap}
+    .tab{padding:8px 18px;border-radius:8px;font-size:0.85rem;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--muted);font-family:'DM Sans',sans-serif;transition:all 0.2s}
+    .tab.active{background:var(--saffron);color:#fff}
+    .tab-pane{display:none}.tab-pane.active{display:block}
+    .profile-block{display:flex;align-items:center;gap:1rem;padding:1.5rem;background:#fff;border-radius:16px;border:1px solid var(--border);box-shadow:0 2px 12px rgba(0,0,0,0.06);margin-bottom:1.5rem}
+    .profile-avatar{width:64px;height:64px;border-radius:50%;border:3px solid var(--saffron);object-fit:cover;flex-shrink:0}
+    .booking-card{background:#fff;border:1px solid var(--border);border-radius:14px;padding:16px 18px;margin-bottom:12px;transition:box-shadow 0.2s}
+    .booking-card:hover{box-shadow:0 6px 20px rgba(0,0,0,0.08)}
+    .booking-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:8px}
+    .booking-title{font-weight:700;font-size:0.95rem;color:var(--ink);margin-bottom:3px}
+    .booking-meta{font-size:0.8rem;color:var(--muted);line-height:1.7}
+    .empty{text-align:center;padding:40px 20px;color:var(--muted);font-size:0.88rem}
+    .hirer-jobs-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+    .hirer-job-card{background:#fff;border:1px solid var(--border);border-radius:14px;padding:16px;transition:all 0.2s}
+    .hirer-job-card:hover{box-shadow:0 6px 20px rgba(0,0,0,0.08);transform:translateY(-2px)}
+    .hjc-title{font-family:'Baloo Tamma 2',cursive;font-size:1.02rem;font-weight:700;color:var(--ink);margin-bottom:4px}
+    .hjc-meta{font-size:0.82rem;color:var(--muted);line-height:1.6}
+    .hjc-pay{font-family:'Baloo Tamma 2',cursive;font-size:1.2rem;color:var(--jade,#1B6B45);font-weight:700;margin:6px 0}
+    .hjc-footer{display:flex;align-items:center;justify-content:space-between;padding-top:10px;border-top:1px solid var(--border);margin-top:8px}
   </style>
 </head>
 <body>
+<nav class="navbar">
+  <a href="index.html" class="brand">Kelasa<span>Gaara</span></a>
+  <div class="nav-right">
+    <div id="notif-bell-container"></div>
+    <img id="nav-avatar" class="nav-avatar" src="" alt="" onerror="this.style.display='none'"/>
+    <span class="nav-name" id="nav-name"></span>
+    <a href="index.html" class="btn-sm btn-primary">Browse Workers</a>
+    <button class="btn-sm btn-outline" onclick="doLogout()">Logout</button>
+  </div>
+</nav>
 
-  <!-- ===== NAVBAR ===== -->
-  <nav class="navbar" id="main-navbar">
-    <div style="width:160px;height:36px;background:var(--paper2);border-radius:8px;"></div>
-    <div style="width:120px;height:36px;background:var(--paper2);border-radius:8px;"></div>
-  </nav>
-
-  <!-- ===== MAIN CONTENT ===== -->
-  <main class="page-container" id="main-content" style="display:none;">
-
-    <!-- Profile block -->
-    <div class="profile-block">
-      <img class="profile-avatar" id="user-photo" src="" alt="Profile" referrerpolicy="no-referrer" />
-      <div class="profile-info">
-        <h3 id="user-name">Loading…</h3>
-        <p id="user-email">—</p>
-        <span class="badge badge-orange" style="margin-top:0.4rem;">🏗️ Hirer</span>
-      </div>
-    </div>
-
-    <!-- Posted Jobs Header + CTA -->
-    <div class="top-action-bar">
-      <div>
-        <div class="section-title" style="margin-bottom:0.1rem;">📋 My Posted Jobs</div>
-        <p id="jobs-count-text" style="font-size:0.85rem;color:var(--muted);"></p>
-      </div>
-      <a class="btn btn-primary" href="post-job.html">+ Post New Job</a>
-    </div>
-
-    <!-- Jobs grid — filled by JS -->
-    <div id="hirer-jobs-container">
-      <div class="empty-state">
-        <div class="empty-icon">⏳</div>
-        <p>Loading your jobs…</p>
-      </div>
-    </div>
-
-  </main>
-
-  <!-- ===== APPLICANTS MODAL ===== -->
-  <div class="modal-overlay" id="applicants-modal">
-    <div class="modal">
-      <div class="modal-header">
-        <h3 id="modal-job-title">Applicants</h3>
-        <button class="modal-close" onclick="closeModal()">✕</button>
-      </div>
-      <p id="modal-applicant-count" style="font-size:0.85rem;color:var(--muted);margin-bottom:1rem;"></p>
-      <div class="applicant-list" id="modal-applicant-list">
-        <p style="color:var(--muted);font-size:0.9rem;">Loading applicants…</p>
-      </div>
+<div class="layout">
+  <div class="profile-block">
+    <img class="profile-avatar" id="user-photo" src="" alt=""/>
+    <div>
+      <h3 id="user-name" style="font-family:'Baloo Tamma 2',cursive;font-size:1.15rem;margin-bottom:2px">Loading…</h3>
+      <p id="user-email" style="font-size:0.82rem;color:var(--muted)"></p>
+      <span style="display:inline-flex;align-items:center;gap:5px;padding:3px 12px;border-radius:20px;font-size:0.75rem;font-weight:600;background:rgba(232,89,12,0.1);color:var(--saffron);margin-top:6px">🏗️ Hirer</span>
     </div>
   </div>
 
-  <div id="toast-container"></div>
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('bookings',this)">📋 My Bookings</button>
+    <button class="tab" onclick="switchTab('jobs',this)">💼 Posted Jobs</button>
+    <button class="tab" onclick="switchTab('profile',this)">👤 Profile</button>
+  </div>
 
-  <!-- ===== JAVASCRIPT ===== -->
-  <script type="module">
-    import { checkAuth, logout }          from './js/auth.js';
-    import { showToast, formatDate, CATEGORY_EMOJI, buildNavbar } from './js/app.js';
-    import { db }                         from './js/firebase-config.js';
-    import {
-      collection, query, where, getDocs, doc, getDoc
-    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  <div id="tab-bookings" class="tab-pane active">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <strong style="font-family:'Baloo Tamma 2',cursive;font-size:1rem">My Worker Bookings</strong>
+      <a href="index.html" class="btn-sm btn-primary">+ Book a Worker</a>
+    </div>
+    <div id="bookings-list"><div class="empty">⏳ Loading bookings…</div></div>
+  </div>
 
-    let currentUser = null;
+  <div id="tab-jobs" class="tab-pane">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <strong style="font-family:'Baloo Tamma 2',cursive;font-size:1rem">My Posted Jobs</strong>
+      <a href="post-job.html" class="btn-sm btn-primary">+ Post New Job</a>
+    </div>
+    <div id="jobs-list"><div class="empty">⏳ Loading…</div></div>
+  </div>
 
-    // ===== PAGE INIT =====
-    async function init() {
-      try {
-        // checkAuth redirects to login.html if not signed in
-        currentUser = await checkAuth();
+  <div id="tab-profile" class="tab-pane">
+    <div style="background:#fff;border:1px solid var(--border);border-radius:14px;padding:20px">
+      <p style="color:var(--muted);font-size:0.88rem">Your profile is managed via Google Sign-In. Name and photo update through your Google account.</p>
+    </div>
+  </div>
+</div>
 
-        buildNavbar(currentUser);
+<div id="toast-container"></div>
 
-        document.getElementById('user-photo').src         = currentUser.photo || '';
-        document.getElementById('user-name').textContent  = currentUser.name;
-        document.getElementById('user-email').textContent = currentUser.email;
+<script type="module">
+  import { auth, db } from './js/firebase-config.js';
+  import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { doc, getDoc, collection, query, where, getDocs }
+    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { initNotificationBell } from './js/notifications-ui.js';
 
-        document.getElementById('main-content').style.display = 'block';
+  function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
 
-        await loadHirerJobs();
+  onAuthStateChanged(auth, async user => {
+    if (!user) { window.location.href='login.html'; return; }
+    const snap = await getDoc(doc(db,'users',user.uid));
+    if (!snap.exists() || snap.data().role !== 'hirer') { window.location.href='login.html'; return; }
+    const u = { uid: user.uid, ...snap.data() };
 
-      } catch (err) {
-        console.error('Init error:', err);
-      }
-    }
+    document.getElementById('nav-avatar').src        = u.photo || '';
+    document.getElementById('nav-name').textContent  = (u.name||'').split(' ')[0];
+    document.getElementById('user-photo').src        = u.photo || '';
+    document.getElementById('user-name').textContent = u.name || 'Hirer';
+    document.getElementById('user-email').textContent= u.email || '';
 
-    // ===== LOAD HIRER JOBS =====
-    // Fetches all jobs from Firestore where hirerUid matches the logged-in user.
-    async function loadHirerJobs() {
-      const container = document.getElementById('hirer-jobs-container');
+    initNotificationBell(user.uid, 'notif-bell-container');
+    loadBookings(user.uid);
+    loadJobs(user.uid);
+  });
 
-      try {
-        // Firestore query: jobs where hirerUid === current user's UID
-        const q = query(
-          collection(db, 'jobs'),
-          where('hirerUid', '==', currentUser.uid)
-        );
-        const snapshot = await getDocs(q);
-
-        if (snapshot.empty) {
-          document.getElementById('jobs-count-text').textContent = '0 jobs posted';
-          container.innerHTML = `
-            <div class="empty-state">
-              <div class="empty-icon">📭</div>
-              <h4>No jobs posted yet</h4>
-              <p>Post your first job to start receiving applications.</p>
-              <a class="btn btn-primary" href="post-job.html" style="margin-top:1rem;">+ Post a Job</a>
-            </div>`;
-          return;
-        }
-
-        const jobs = snapshot.docs.map(d => d.data());
-        document.getElementById('jobs-count-text').textContent =
-          `${jobs.length} job${jobs.length > 1 ? 's' : ''} posted`;
-
-        // Build the jobs grid
-        const grid = document.createElement('div');
-        grid.className = 'hirer-jobs-grid';
-
-        jobs.forEach(job => {
-          const emoji       = CATEGORY_EMOJI[job.category] || '💼';
-          const appCount    = job.applicants ? job.applicants.length : 0;
-          const card        = document.createElement('div');
-          card.className    = 'hirer-job-card';
-          card.innerHTML    = `
-            <div class="hjc-header">
-              <div>
-                <div class="hjc-title">${emoji} ${job.title}</div>
-                <div class="hjc-meta">📍 ${job.district} &nbsp;|&nbsp; 🏷️ ${job.category}</div>
-              </div>
-              <span class="badge ${job.status === 'open' ? 'badge-green' : 'badge-gold'}">
-                ${job.status === 'open' ? '🟢 Open' : '🔴 Closed'}
-              </span>
-            </div>
-            <div class="hjc-pay">₹${job.pay}/day</div>
-            <div class="hjc-meta" style="font-size:0.8rem;">
-              ${job.description ? job.description.slice(0, 80) + (job.description.length > 80 ? '…' : '') : ''}
-            </div>
-            <div class="hjc-footer">
-              <div class="applicant-count">
-                👥 ${appCount} Applicant${appCount !== 1 ? 's' : ''}
-              </div>
-              <div style="display:flex;gap:0.5rem;">
-                <button class="btn btn-outline btn-sm"
-                  onclick="openApplicantsModal('${job.jobId}', '${job.title.replace(/'/g, "\\'")}', ${JSON.stringify(job.applicants || [])})">
-                  View Applicants
-                </button>
-              </div>
-            </div>
-            <div style="font-size:0.78rem;color:var(--muted);">Posted: ${formatDate(job.postedAt)}</div>
-          `;
-          grid.appendChild(card);
-        });
-
-        container.innerHTML = '';
-        container.appendChild(grid);
-
-      } catch (err) {
-        console.error('Load jobs error:', err);
-        showToast('Could not load your jobs.', 'error');
-      }
-    }
-
-    // ===== OPEN APPLICANTS MODAL =====
-    // Shows a modal listing all applicants (by name) for a given job.
-    window.openApplicantsModal = async function(jobId, jobTitle, applicantUids) {
-      document.getElementById('modal-job-title').textContent = `Applicants — ${jobTitle}`;
-      document.getElementById('modal-applicant-count').textContent =
-        `${applicantUids.length} applicant${applicantUids.length !== 1 ? 's' : ''}`;
-      document.getElementById('applicants-modal').classList.add('active');
-
-      const listEl = document.getElementById('modal-applicant-list');
-
-      if (applicantUids.length === 0) {
-        listEl.innerHTML = '<p style="color:var(--muted);font-size:0.9rem;">No applicants yet.</p>';
+  async function loadBookings(uid) {
+    const el = document.getElementById('bookings-list');
+    try {
+      const q    = query(collection(db,'bookings'), where('hirerId','==', uid));
+      const snap = await getDocs(q);
+      if (snap.empty) {
+        el.innerHTML = '<div class="empty">📭 No bookings yet. <a href="index.html" style="color:var(--saffron)">Browse workers →</a></div>';
         return;
       }
-
-      listEl.innerHTML = '<p style="color:var(--muted);font-size:0.9rem;">Loading…</p>';
-
-      try {
-        // Fetch each applicant's name from Firestore users collection
-        const rows = await Promise.all(
-          applicantUids.map(async (uid) => {
-            const userSnap = await getDoc(doc(db, 'users', uid));
-            if (!userSnap.exists()) return null;
-            const u = userSnap.data();
-            return `
-              <div class="applicant-row">
-                <img class="applicant-avatar"
-                     src="${u.photo || ''}"
-                     onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(u.name)}'"
-                     referrerpolicy="no-referrer"
-                     alt="${u.name}" />
-                <div>
-                  <div class="applicant-name">${u.name}</div>
-                  <div style="font-size:0.78rem;color:var(--muted);">${u.email}</div>
-                  ${u.skills && u.skills.length ? `<div style="font-size:0.75rem;color:var(--jade);margin-top:0.2rem;">Skills: ${u.skills.slice(0,4).join(', ')}</div>` : ''}
-                </div>
-              </div>`;
-          })
-        );
-
-        listEl.innerHTML = rows.filter(Boolean).join('');
-      } catch (err) {
-        console.error('Load applicants error:', err);
-        showToast('Could not load applicant details.', 'error');
+      const items = snap.docs.map(d=>({id:d.id,...d.data()}));
+      items.sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
+      el.innerHTML = '';
+      for (const b of items) {
+        let workerName='Worker';
+        try{const ws=await getDoc(doc(db,'users',b.workerId));if(ws.exists())workerName=ws.data().name||'Worker';}catch(e){}
+        const stClass = `status-${(b.status||'PENDING').toLowerCase()}`;
+        const card = document.createElement('div'); card.className='booking-card';
+        card.innerHTML = `
+          <div class="booking-top">
+            <div>
+              <div class="booking-title">💼 ${esc(b.jobTitle)}</div>
+              <div class="booking-meta">👷 Worker: <strong>${esc(workerName)}</strong><br>📅 ${b.date||'—'} at ${b.time||'—'}<br>📍 ${esc(b.location)}</div>
+            </div>
+            <span class="${stClass}">${b.status||'PENDING'}</span>
+          </div>
+          ${b.instructions?`<div style="font-size:0.8rem;color:var(--muted);margin-top:4px">📝 ${esc(b.instructions)}</div>`:''}
+          <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+            ${b.status==='CONFIRMED'?`<button class="btn-sm btn-primary" onclick="window.location.href='chat.html?booking=${b.id}'">💬 Open Chat</button>`:''}
+            <a href="booking-detail.html?id=${b.id}" class="btn-sm btn-outline">View Details</a>
+          </div>`;
+        el.appendChild(card);
       }
-    };
+    } catch(e) { console.error(e); el.innerHTML='<div class="empty">Could not load bookings.</div>'; }
+  }
 
-    // ===== CLOSE MODAL =====
-    window.closeModal = function() {
-      document.getElementById('applicants-modal').classList.remove('active');
-    };
+  async function loadJobs(uid) {
+    const el = document.getElementById('jobs-list');
+    try {
+      const q    = query(collection(db,'jobs'), where('hirerUid','==', uid));
+      const snap = await getDocs(q);
+      if (snap.empty) {
+        el.innerHTML='<div class="empty">📭 No jobs posted. <a href="post-job.html" style="color:var(--saffron)">Post one →</a></div>'; return;
+      }
+      const grid = document.createElement('div'); grid.className='hirer-jobs-grid';
+      snap.docs.forEach(d=>{
+        const j=d.data();
+        const card=document.createElement('div'); card.className='hirer-job-card';
+        card.innerHTML=`
+          <div class="hjc-title">💼 ${esc(j.title)}</div>
+          <div class="hjc-meta">📍 ${esc(j.district)} &nbsp;|&nbsp; 🏷️ ${esc(j.category)}</div>
+          <div class="hjc-pay">₹${j.pay}/day</div>
+          <div class="hjc-footer">
+            <span class="${j.status==='open'?'status-confirmed':'status-declined'}">${j.status==='open'?'🟢 Open':'🔴 Closed'}</span>
+            <span style="font-size:0.78rem;color:var(--muted)">👥 ${(j.applicants||[]).length} applicants</span>
+          </div>`;
+        grid.appendChild(card);
+      });
+      el.innerHTML=''; el.appendChild(grid);
+    } catch(e) { el.innerHTML='<div class="empty">Could not load jobs.</div>'; }
+  }
 
-    // Close modal when clicking outside the box
-    document.getElementById('applicants-modal').addEventListener('click', function(e) {
-      if (e.target === this) closeModal();
-    });
-
-    // ===== LOGOUT =====
-    window.handleLogout = logout;
-
-    // ===== START =====
-    init();
-  </script>
-
+  window.switchTab = function(tab, btn) {
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-'+tab).classList.add('active');
+  };
+  window.doLogout = async () => { await signOut(auth); window.location.href='login.html'; };
+</script>
 </body>
 </html>
