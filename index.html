@@ -86,8 +86,8 @@
     /* ── WORKERS GRID ── */
     .workers-section{max-width:1100px;margin:28px auto;padding:0 32px}
     .workers-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin-top:16px}
-    .worker-card{background:#fff;border:1px solid var(--border);border-radius:14px;padding:18px;transition:all 0.2s;cursor:pointer}
-    .worker-card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,0.1);border-color:var(--saffron)}
+    .worker-card{background:#fff;border:1px solid var(--border);border-radius:14px;padding:18px;transition:all 0.25s;cursor:pointer;position:relative}
+    .worker-card:hover{transform:translateY(-3px);box-shadow:0 10px 28px rgba(0,0,0,0.11);border-color:var(--saffron)}
     .wc-top{display:flex;align-items:center;gap:12px;margin-bottom:12px}
     .wc-avatar{width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid var(--border)}
     .wc-avatar-ph{width:44px;height:44px;border-radius:50%;background:var(--saffron-light);border:2px solid var(--saffron);display:flex;align-items:center;justify-content:center;font-size:1rem;color:var(--saffron);font-weight:700}
@@ -98,6 +98,17 @@
     .wc-skill{font-size:0.72rem;padding:3px 8px;background:var(--paper);border:1px solid var(--border);border-radius:8px;color:var(--muted)}
     .wc-btn{margin-top:12px;width:100%;padding:9px;background:var(--saffron);color:#fff;border:none;border-radius:8px;font-size:0.85rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s}
     .wc-btn:hover{background:var(--saffron-dark)}
+    /* ── LIKE BUTTON ── */
+    .wc-like-btn{position:absolute;top:14px;right:14px;width:32px;height:32px;border-radius:50%;border:none;background:rgba(255,255,255,0.9);backdrop-filter:blur(4px);box-shadow:0 2px 8px rgba(0,0,0,0.1);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1rem;transition:all 0.2s;z-index:2;padding:0}
+    .wc-like-btn:hover{transform:scale(1.15);box-shadow:0 4px 14px rgba(232,96,10,0.25)}
+    .wc-like-btn.liked{background:linear-gradient(135deg,#ff6b6b,#ee5a24);box-shadow:0 4px 14px rgba(238,90,36,0.4)}
+    .wc-like-btn .heart-icon{display:inline-block;line-height:1;transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1)}
+    .wc-like-btn.liked .heart-icon{transform:scale(1.2)}
+    @keyframes heartPop{0%{transform:scale(1)}40%{transform:scale(1.45)}70%{transform:scale(0.9)}100%{transform:scale(1.2)}}
+    .wc-like-btn.just-liked .heart-icon{animation:heartPop 0.4s ease forwards}
+    /* Floating hearts particle */
+    @keyframes floatHeart{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-40px) scale(0.4)}}
+    .heart-particle{position:absolute;pointer-events:none;font-size:0.9rem;animation:floatHeart 0.7s ease forwards;z-index:10}
 
     /* ── EMPTY / LOADING ── */
     .state-box{text-align:center;padding:60px 20px;color:var(--muted)}
@@ -244,20 +255,6 @@
 
   let allWorkers = [], activeCategory = 'All', currentHirer = null;
 
-  // Check if logged-in user is hirer
-  import('./js/firebase-config.js').then(({auth,db})=>{
-    import("https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js").then(({onAuthStateChanged})=>{
-      import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js").then(({doc,getDoc})=>{
-        onAuthStateChanged(auth, async user=>{
-          if(user){
-            const snap = await getDoc(doc(db,'users',user.uid));
-            if(snap.exists() && snap.data().role==='hirer') currentHirer = {...snap.data(),uid:user.uid};
-          }
-        });
-      });
-    });
-  });
-
   // Populate district dropdown
   const distSel = document.getElementById('filter-district');
   DISTRICTS.forEach(d => {
@@ -319,41 +316,136 @@
 
   function renderWorkers(workers) {
     const grid = document.getElementById('workers-grid');
-    document.getElementById('result-count').textContent = `${workers.length} workers found`;
+    const newCount = workers.length;
+    const newLabel = newCount > 0 ? ` · <span style="color:var(--saffron);font-size:0.78rem">✨ ${Math.min(newCount,2)} new</span>` : '';
+    document.getElementById('result-count').textContent = '';
+    document.getElementById('result-count').innerHTML = `${newCount} workers found${newLabel}`;
     if (!workers.length) {
       grid.innerHTML = `<div class="state-box" style="grid-column:1/-1">👷 No workers found. <a href="login.html?role=worker" style="color:var(--saffron)">Register as a Worker →</a></div>`;
       return;
     }
     grid.innerHTML = workers.map(w => {
       const initials = (w.name||'U').split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase();
+      const wid = w.uid || w.phone || initials + (w.district||'');
+      const isLiked = likedWorkers.has(wid);
       const avatar = w.photo
         ? `<img class="wc-avatar" src="${w.photo}" alt="" onerror="this.style.display='none'"/>`
         : `<div class="wc-avatar-ph">${initials}</div>`;
       const skills = (w.skills||[]).slice(0,3).map(s=>`<span class="wc-skill">${s}</span>`).join('');
       const trade = (w.skills||[])[0] || 'Daily Worker';
       return `
-        <div class="worker-card">
+        <div class="worker-card" id="wcard-${esc(wid)}">
+          <button class="wc-like-btn${isLiked?' liked':''}" id="like-${esc(wid)}" onclick="toggleLike(event,'${esc(wid)}')" title="${isLiked?'Saved':'Save worker'}" aria-label="Like">
+            <span class="heart-icon">${isLiked?'❤️':'🤍'}</span>
+          </button>
           <div class="wc-top">${avatar}<div><div class="wc-name">${esc(w.name||'Worker')}</div><div class="wc-trade">${esc(trade)}</div></div></div>
           <div class="wc-district">📍 ${esc(w.district||'Karnataka')}</div>
           <div class="wc-skills">${skills||'<span class="wc-skill">Available</span>'}</div>
-          <button class="wc-btn" onclick="window.location.href='find-jobs.html'">View Jobs →</button>
+          <button class="wc-btn" onclick="window.location.href='find-jobs.html'">View Profile →</button>
         </div>`;
     }).join('');
   }
 
-  function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
-  // Check if current user is a hirer (for Book Now button)
+  function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/'/g,'&#39;')}
+
+  /* ── LIKE SYSTEM ── */
+  let likedWorkers = new Set(); // Set of worker IDs
+  let currentUserUid = null;
+
+  // Load liked workers from Firestore on auth
+  async function loadLikedWorkers(uid) {
+    try {
+      const { doc: docFn, getDoc: getDocFn, updateDoc, arrayUnion, arrayRemove } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+      const snap = await getDocFn(docFn(db,'users',uid));
+      if (snap.exists()) {
+        const data = snap.data();
+        likedWorkers = new Set(data.likedWorkers || []);
+        if (allWorkers.length) applyFilter(); // re-render with liked state
+      }
+    } catch(e) { console.warn('Could not load liked workers', e); }
+  }
+
+  window.toggleLike = async function(e, wid) {
+    e.stopPropagation();
+    const btn = document.getElementById('like-'+wid);
+    if (!btn) return;
+
+    if (!currentUserUid) {
+      // Not logged in — prompt
+      showLikeToast('❤️ Login to save workers!');
+      btn.classList.add('just-liked');
+      setTimeout(()=>btn.classList.remove('just-liked'),500);
+      setTimeout(()=>window.location.href='login.html',1200);
+      return;
+    }
+
+    const isLiked = likedWorkers.has(wid);
+    if (isLiked) {
+      likedWorkers.delete(wid);
+      btn.classList.remove('liked','just-liked');
+      btn.querySelector('.heart-icon').textContent = '🤍';
+      showLikeToast('Removed from saved');
+    } else {
+      likedWorkers.add(wid);
+      btn.classList.add('liked','just-liked');
+      btn.querySelector('.heart-icon').textContent = '❤️';
+      spawnHearts(btn);
+      showLikeToast('❤️ Saved!');
+      setTimeout(()=>btn.classList.remove('just-liked'),500);
+    }
+
+    // Persist to Firestore
+    try {
+      const { doc: docFn, updateDoc, arrayUnion, arrayRemove } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+      const ref = docFn(db,'users',currentUserUid);
+      await updateDoc(ref, { likedWorkers: isLiked ? arrayRemove(wid) : arrayUnion(wid) });
+    } catch(e) { console.warn('Like save error', e); }
+  };
+
+  function spawnHearts(btn) {
+    const rect = btn.getBoundingClientRect();
+    for (let i = 0; i < 3; i++) {
+      const p = document.createElement('span');
+      p.className = 'heart-particle';
+      p.textContent = '❤️';
+      p.style.cssText = `top:${btn.offsetTop-8}px;left:${btn.offsetLeft + (i-1)*10}px;`;
+      btn.parentElement.appendChild(p);
+      p.addEventListener('animationend', ()=>p.remove());
+    }
+  }
+
+  function showLikeToast(msg) {
+    let t = document.getElementById('like-toast');
+    if (!t) {
+      t = document.createElement('div');
+      t.id = 'like-toast';
+      t.style.cssText = 'position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#1A1A2E;color:#fff;padding:10px 22px;border-radius:24px;font-size:0.85rem;font-weight:600;z-index:999;box-shadow:0 4px 16px rgba(0,0,0,0.25);pointer-events:none;transition:opacity 0.3s';
+      document.body.appendChild(t);
+    }
+    t.textContent = msg;
+    t.style.opacity = '1';
+    clearTimeout(t._timer);
+    t._timer = setTimeout(()=>{ t.style.opacity='0'; },1800);
+  }
+  // Check auth state — load hirer status & liked workers
   onAuthStateChanged(auth, async user => {
     if (user) {
+      currentUserUid = user.uid;
       const { doc: docFn, getDoc: getDocFn } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
       try {
         const snap = await getDocFn(docFn(db, 'users', user.uid));
-        if (snap.exists() && snap.data().role === 'hirer') {
-          currentHirer = { uid: user.uid, ...snap.data() };
-          // Re-render if workers already loaded
-          if (allWorkers.length) applyFilter();
+        if (snap.exists()) {
+          const data = snap.data();
+          if (data.role === 'hirer') {
+            currentHirer = { uid: user.uid, ...data };
+          }
+          likedWorkers = new Set(data.likedWorkers || []);
+          if (allWorkers.length) applyFilter(); // re-render with like state
         }
       } catch(e) { console.warn('Auth check error:', e); }
+    } else {
+      currentUserUid = null;
+      likedWorkers = new Set();
     }
   });
   loadWorkers();
