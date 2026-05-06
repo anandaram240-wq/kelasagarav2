@@ -400,11 +400,19 @@
   window.sendMsg = async function() {
     const input = document.getElementById('msg-input');
     const text = input.value.trim();
-    if (!text || !currentUser || !otherUid || !activeBookingId) return;
+    console.log('[sendMsg] text:', text, 'user:', currentUser?.uid, 'other:', otherUid, 'thread:', activeBookingId, 'role:', myRole);
+    if (!text) return;
+    if (!currentUser) { showToast('Not logged in', 'error'); return; }
+    if (!otherUid)    { showToast('No recipient', 'error'); return; }
+    if (!activeBookingId) { showToast('No thread ID', 'error'); return; }
     input.value = '';
     try {
-      await sendMessage(activeBookingId, currentUser.uid, myRole, otherUid, text);
-    } catch(e) { console.error(e); showToast('Failed to send', 'error'); }
+      await sendMessage(activeBookingId, currentUser.uid, myRole || 'hirer', otherUid, text);
+    } catch(e) {
+      console.error('[sendMsg] error:', e);
+      showToast('Failed to send: ' + e.message, 'error');
+      input.value = text; // restore on error
+    }
   };
 
   window.toggleEmoji = function() {

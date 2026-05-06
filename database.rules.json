@@ -7,12 +7,8 @@
       }
     },
     "chats": {
-      "$bookingId": {
-        "messages": {
-          ".read":  "auth != null",
-          ".write": "auth != null"
-        }
-      }
+      ".read":  "auth != null",
+      ".write": "auth != null"
     },
     "presence": {
       "$uid": {
