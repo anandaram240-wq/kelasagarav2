@@ -1,6 +1,7 @@
 /*
  * firebase-config.js — Firebase Initialization
- * Project: kelasagara-f127a (NEW production project)
+ * Project: kelasagara-90b5c (Production)
+ * Hosting: https://kelasagara-90b5c.web.app
  * Exports: app, auth, db (Firestore), rtdb (Realtime Database)
  */
 import { initializeApp }   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
