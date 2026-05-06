@@ -152,6 +152,9 @@
 
   const params    = new URLSearchParams(window.location.search);
   const bookingId = params.get('booking');
+  const directId  = params.get('direct');   // direct thread (no booking needed)
+  const pWorker   = params.get('worker');
+  const pHirer    = params.get('hirer');
 
   let currentUser = null, myRole = null, otherUid = null, booking = null, activeBookingId = null;
   let msgUnsubscribe = null;
@@ -185,17 +188,66 @@
     setOnlineStatus(user.uid, true);
     onDisconnect(ref(rtdb, `presence/${user.uid}`)).update({ online: false, lastSeen: Date.now() });
 
-    // Load all bookings for sidebar
+    // Load sidebar
     await loadSidebar(user.uid);
 
-    // If bookingId in URL, open that chat directly
-    if (bookingId) {
+    if (directId) {
+      // Direct message mode — no booking needed
+      openDirectChat(directId, pWorker, pHirer, user);
+    } else if (bookingId) {
       openChat(bookingId);
     } else {
       document.getElementById('no-chat-selected').style.display = 'flex';
       document.getElementById('no-chat-selected').style.flexDirection = 'column';
     }
   });
+
+  async function openDirectChat(threadId, workerId, hirerId, user) {
+    document.getElementById('no-chat-selected').style.display = 'none';
+    if (msgUnsubscribe) { msgUnsubscribe(); msgUnsubscribe = null; }
+
+    // Determine who we're talking to
+    otherUid = user.uid === hirerId ? workerId : hirerId;
+    myRole   = user.uid === hirerId ? 'hirer' : 'worker';
+    activeBookingId = threadId; // use threadId as conversation key
+
+    // Load other user info
+    const otherSnap = await getDoc(doc(db,'users',otherUid));
+    const other = otherSnap.exists() ? otherSnap.data() : {};
+
+    document.getElementById('chat-other-name').textContent = other.name || 'User';
+    document.getElementById('chat-job-title').textContent = 'Direct Message';
+    document.getElementById('chat-date').textContent = '';
+    document.getElementById('chat-status-badge').innerHTML = '<span style="color:#22C55E;font-weight:600">Direct Chat</span>';
+    document.getElementById('phone-reveal').style.display = 'none';
+
+    const initials = (other.name||'U').split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase();
+    const avatarEl = document.getElementById('chat-avatar');
+    if (other.photo) {
+      avatarEl.outerHTML = `<img id="chat-avatar" class="chat-other-avatar" src="${esc(other.photo)}" style="object-fit:cover" alt=""/>`;
+    } else {
+      avatarEl.textContent = initials;
+    }
+
+    const chatArea = document.getElementById('chat-area');
+    chatArea.style.display = 'flex';
+    chatArea.style.flexDirection = 'column';
+
+    listenOnlineStatus(otherUid, status => {
+      const el = document.getElementById('chat-status');
+      if (el) {
+        if (status.online) { el.textContent='● Online'; el.className='chat-status'; }
+        else { el.textContent='○ Offline'; el.className='chat-status offline'; }
+      }
+    });
+
+    // Listen to direct messages using threadId
+    msgUnsubscribe = listenMessages(threadId, msgs => {
+      renderMessages(msgs, user.uid);
+      const unread = msgs.filter(m => m.receiverId === user.uid && !m.isRead).map(m => m.id);
+      if (unread.length) markMessagesRead(threadId, unread, user.uid);
+    });
+  }
 
   async function loadSidebar(uid) {
     const listEl = document.getElementById('conv-list');
@@ -354,7 +406,7 @@
     input.value = '';
     try {
       await sendMessage(activeBookingId, currentUser.uid, myRole, otherUid, text);
-    } catch(e) { console.error(e); showToast('Failed to send message', 'error'); }
+    } catch(e) { console.error(e); showToast('Failed to send', 'error'); }
   };
 
   window.toggleEmoji = function() {

@@ -234,37 +234,14 @@
       document.getElementById('no-book-worker-name').textContent = workerData.name;
     }
 
-    // --- MESSAGE MODE: check for existing booking, open chat or show no-booking screen ---
+    // --- MESSAGE MODE: open direct chat immediately, no booking required ---
     if (mode === 'message') {
-      try {
-        const q = query(
-          collection(db,'bookings'),
-          where('hirerId','==', user.uid),
-          where('workerId','==', workerId)
-        );
-        const bSnap = await getDocs(q);
-        if (!bSnap.empty) {
-          // Find the best booking to chat on (prefer CONFIRMED, then PENDING)
-          const bookings = bSnap.docs.map(d=>({id:d.id,...d.data()}));
-          const active = bookings.find(b=>b.status==='CONFIRMED')
-                      || bookings.find(b=>b.status==='PENDING')
-                      || bookings[0];
-          // Redirect directly to chat
-          window.location.href = 'chat.html?booking=' + active.id;
-          return;
-        }
-      } catch(e) { console.error(e); }
-      // No existing booking — show the "book first" screen
-      document.getElementById('form-area').style.display = 'none';
-      document.getElementById('no-booking-box').style.display = 'block';
+      // Use a direct thread ID based on sorted UIDs (consistent both ways)
+      const threadId = [user.uid, workerId].sort().join('_');
+      window.location.href = 'chat.html?direct=' + threadId + '&worker=' + encodeURIComponent(workerId) + '&hirer=' + encodeURIComponent(user.uid);
+      return;
     }
   });
-
-  // Switch from "no booking" screen to the booking form
-  window.switchToBook = function() {
-    document.getElementById('no-booking-box').style.display = 'none';
-    document.getElementById('form-area').style.display = 'block';
-  };
 
   window.confirmBooking = async function() {
     const jobTitle     = document.getElementById('jobTitle').value.trim();
