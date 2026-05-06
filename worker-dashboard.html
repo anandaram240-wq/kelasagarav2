@@ -115,6 +115,14 @@
 
     <div class="card">
       <div class="section-title">
+        💬 Messages
+        <span id="msg-unread-badge" style="background:#EF4444;color:#fff;border-radius:20px;padding:2px 8px;font-size:0.72rem;font-weight:700;display:none">NEW</span>
+      </div>
+      <div id="messages-list"><div class="empty">⏳ Loading…</div></div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">
         📋 Incoming Booking Requests
         <span id="booking-count" style="font-size:0.78rem;font-weight:400;color:var(--muted)"></span>
       </div>
@@ -222,6 +230,72 @@
       showToast('Profile updated! ✅','success');
     }catch(e){showToast('Failed to save','error');}
   };
+
+  // ── MESSAGES: show all conversations (direct + booking chats) ──
+  async function loadMessages(uid) {
+    const el = document.getElementById('messages-list');
+    try {
+      // 1. Booking-based chats (hirers who booked this worker)
+      const bSnap = await getDocs(query(collection(db,'bookings'), where('workerId','==',uid)));
+      const convs = [];
+
+      for (const bd of bSnap.docs) {
+        const b = bd.data();
+        let hirerName='Hirer', hirerPhoto='';
+        try {
+          const hs = await getDoc(doc(db,'users',b.hirerId));
+          if (hs.exists()) { hirerName=hs.data().name||'Hirer'; hirerPhoto=hs.data().photo||''; }
+        } catch(e){}
+        convs.push({ id: bd.id, threadId: bd.id, type:'booking', otherName: hirerName, otherPhoto: hirerPhoto, subtitle: b.jobTitle||'Booking', workerId: uid, hirerId: b.hirerId });
+      }
+
+      // 2. Direct message threads (hirers who messaged without booking)
+      const dmSnap = await getDocs(query(collection(db,'direct_threads'), where('participants','array-contains', uid)));
+      for (const dm of dmSnap.docs) {
+        const d = dm.data();
+        const otherId = d.participants.find(p => p !== uid);
+        let otherName='Hirer', otherPhoto='';
+        try {
+          const os = await getDoc(doc(db,'users',otherId));
+          if (os.exists()) { otherName=os.data().name||'Hirer'; otherPhoto=os.data().photo||''; }
+        } catch(e){}
+        // Avoid duplicate if there's already a booking thread
+        if (!convs.find(c => c.hirerId === otherId && c.type==='booking')) {
+          convs.push({ id: dm.id, threadId: dm.id, type:'direct', otherName, otherPhoto, subtitle: 'Direct Message', workerId: uid, hirerId: otherId });
+        }
+      }
+
+      if (!convs.length) {
+        el.innerHTML = '<div class="empty">💭 No messages yet. Hirers who message you will appear here.</div>';
+        return;
+      }
+
+      el.innerHTML = '';
+      let hasUnread = false;
+      for (const c of convs) {
+        const initials = c.otherName.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase();
+        const avatarHtml = c.otherPhoto
+          ? `<img src="${esc(c.otherPhoto)}" style="width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid var(--saffron);flex-shrink:0" alt=""/>`
+          : `<div style="width:44px;height:44px;border-radius:50%;background:var(--saffron);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.9rem;flex-shrink:0">${initials}</div>`;
+        const card = document.createElement('div');
+        card.style.cssText = 'background:var(--paper);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:all 0.2s';
+        card.onmouseenter = () => card.style.background = '#fff';
+        card.onmouseleave = () => card.style.background = 'var(--paper)';
+
+        const chatUrl = c.type === 'booking'
+          ? `chat.html?booking=${c.id}`
+          : `chat.html?direct=${c.threadId}&worker=${encodeURIComponent(c.workerId)}&hirer=${encodeURIComponent(c.hirerId)}`;
+
+        card.innerHTML = `${avatarHtml}<div style="flex:1;min-width:0"><div style="font-weight:700;font-size:0.88rem">${esc(c.otherName)}</div><div style="font-size:0.75rem;color:var(--muted)">${esc(c.subtitle)}</div></div><a href="${chatUrl}" class="btn-sm btn-primary" onclick="event.stopPropagation()">💬 Open Chat</a>`;
+        card.onclick = () => window.location.href = chatUrl;
+        el.appendChild(card);
+      }
+      if (hasUnread) document.getElementById('msg-unread-badge').style.display='inline';
+    } catch(e) {
+      console.error(e);
+      el.innerHTML = '<div class="empty">Could not load messages.</div>';
+    }
+  }
 
   async function loadBookings(){
     const el=document.getElementById('bookings-list');

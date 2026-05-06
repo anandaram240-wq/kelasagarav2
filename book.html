@@ -150,7 +150,7 @@
 <script type="module">
   import { auth, db, rtdb } from './js/firebase-config.js';
   import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-  import { doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { doc, getDoc, collection, query, where, getDocs, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
   import { createBooking } from './js/bookings.js';
 
   const params   = new URLSearchParams(window.location.search);
@@ -236,8 +236,16 @@
 
     // --- MESSAGE MODE: open direct chat immediately, no booking required ---
     if (mode === 'message') {
-      // Use a direct thread ID based on sorted UIDs (consistent both ways)
       const threadId = [user.uid, workerId].sort().join('_');
+      // Save thread to Firestore so worker can see it in their dashboard
+      try {
+        await setDoc(doc(db,'direct_threads', threadId), {
+          participants: [user.uid, workerId],
+          hirerId: user.uid,
+          workerId: workerId,
+          createdAt: Date.now()
+        }, { merge: true });
+      } catch(e) { console.error(e); }
       window.location.href = 'chat.html?direct=' + threadId + '&worker=' + encodeURIComponent(workerId) + '&hirer=' + encodeURIComponent(user.uid);
       return;
     }
