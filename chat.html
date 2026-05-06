@@ -144,9 +144,9 @@
 <script type="module">
   import { auth, db, rtdb } from './js/firebase-config.js';
   import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-  import { doc, getDoc, collection, query, where, getDocs, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-  import { sendMessage, listenMessages, markMessagesRead, setOnlineStatus, listenOnlineStatus } from './js/chat.js';
-  import { ref, onDisconnect, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+  import { doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { ref, push, onChildAdded, off, onValue, onDisconnect, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+  import { setOnlineStatus, listenOnlineStatus } from './js/chat.js';
 
   const params    = new URLSearchParams(window.location.search);
   const bookingId = params.get('booking');
@@ -200,26 +200,84 @@
     }
   });
 
+  // ── CORE SEND FUNCTION — direct RTDB push, no intermediary ──
+  function doSend(text) {
+    if (!text || !currentUser || !otherUid || !activeBookingId) {
+      if (!currentUser)     showToast('❌ Not logged in', 'error');
+      else if (!otherUid)   showToast('❌ No recipient — reload page', 'error');
+      else if (!activeBookingId) showToast('❌ No chat thread — reload page', 'error');
+      return;
+    }
+    push(ref(rtdb, `chats/${activeBookingId}/messages`), {
+      senderId:    currentUser.uid,
+      senderRole:  myRole || 'hirer',
+      receiverId:  otherUid,
+      messageText: text,
+      timestamp:   Date.now(),
+      isRead:      false
+    }).catch(e => {
+      showToast('Send failed: ' + (e.message || e), 'error');
+      console.error('[doSend]', e);
+    });
+  }
+
+  // ── LISTEN using onChildAdded — fires once per message, appends to UI ──
+  let _msgRef = null;
+  function startListening(threadId, myUid) {
+    // Detach any previous listener
+    if (_msgRef) { off(_msgRef); _msgRef = null; }
+    const container = document.getElementById('chat-messages');
+    container.innerHTML = ''; // clear on new chat open
+    _msgRef = ref(rtdb, `chats/${threadId}/messages`);
+    onChildAdded(_msgRef, snap => {
+      const m = { id: snap.key, ...snap.val() };
+      appendMessage(m, myUid);
+    });
+  }
+
+  function appendMessage(m, myUid) {
+    const container = document.getElementById('chat-messages');
+    const isSent = m.senderId === myUid;
+    const seen = isSent && m.isRead
+      ? '<span class="msg-seen">✓✓ Seen</span>'
+      : isSent ? '<span style="color:var(--muted);font-size:0.68rem">✓ Sent</span>' : '';
+    const msgDate = fmtDate(m.timestamp);
+    // Add date divider if needed
+    const lastDiv = container.querySelector('[data-date]:last-of-type');
+    if (!lastDiv || lastDiv.dataset.date !== msgDate) {
+      const div = document.createElement('div');
+      div.className = 'msg-date-divider';
+      div.dataset.date = msgDate;
+      div.textContent = msgDate;
+      container.appendChild(div);
+    }
+    const bubble = document.createElement('div');
+    bubble.className = `msg-bubble ${isSent ? 'sent' : 'recv'}`;
+    bubble.dataset.msgId = m.id;
+    bubble.innerHTML = `<div class="msg-text">${esc(m.messageText)}</div><div class="msg-meta">${fmtTime(m.timestamp)} ${seen}</div>`;
+    container.appendChild(bubble);
+    container.scrollTop = container.scrollHeight;
+  }
+
   async function openDirectChat(threadId, workerId, hirerId, user) {
     document.getElementById('no-chat-selected').style.display = 'none';
-    if (msgUnsubscribe) { msgUnsubscribe(); msgUnsubscribe = null; }
 
-    // Determine who we're talking to
     otherUid = user.uid === hirerId ? workerId : hirerId;
     myRole   = user.uid === hirerId ? 'hirer' : 'worker';
-    activeBookingId = threadId; // use threadId as conversation key
+    activeBookingId = threadId;
 
-    // Load other user info
-    const otherSnap = await getDoc(doc(db,'users',otherUid));
-    const other = otherSnap.exists() ? otherSnap.data() : {};
+    console.log('[openDirectChat] threadId:', threadId, 'otherUid:', otherUid, 'myRole:', myRole);
+
+    const otherSnap = await getDoc(doc(db, 'users', otherUid)).catch(() => null);
+    const other = otherSnap?.exists() ? otherSnap.data() : {};
 
     document.getElementById('chat-other-name').textContent = other.name || 'User';
-    document.getElementById('chat-job-title').textContent = 'Direct Message';
+    document.getElementById('chat-job-title').textContent = '💬 Direct Message';
     document.getElementById('chat-date').textContent = '';
     document.getElementById('chat-status-badge').innerHTML = '<span style="color:#22C55E;font-weight:600">Direct Chat</span>';
     document.getElementById('phone-reveal').style.display = 'none';
 
-    const initials = (other.name||'U').split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase();
+    const initials = (other.name || 'U').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
     const avatarEl = document.getElementById('chat-avatar');
     if (other.photo) {
       avatarEl.outerHTML = `<img id="chat-avatar" class="chat-other-avatar" src="${esc(other.photo)}" style="object-fit:cover" alt=""/>`;
@@ -234,17 +292,12 @@
     listenOnlineStatus(otherUid, status => {
       const el = document.getElementById('chat-status');
       if (el) {
-        if (status.online) { el.textContent='● Online'; el.className='chat-status'; }
-        else { el.textContent='○ Offline'; el.className='chat-status offline'; }
+        if (status.online) { el.textContent = '● Online'; el.className = 'chat-status'; }
+        else { el.textContent = '○ Offline'; el.className = 'chat-status offline'; }
       }
     });
 
-    // Listen to direct messages using threadId
-    msgUnsubscribe = listenMessages(threadId, msgs => {
-      renderMessages(msgs, user.uid);
-      const unread = msgs.filter(m => m.receiverId === user.uid && !m.isRead).map(m => m.id);
-      if (unread.length) markMessagesRead(threadId, unread, user.uid);
-    });
+    startListening(threadId, user.uid);
   }
 
   async function loadSidebar(uid) {
@@ -351,7 +404,6 @@
     chatArea.style.display = 'flex';
     chatArea.style.flexDirection = 'column';
 
-    // Online status
     listenOnlineStatus(otherUid, status => {
       const el = document.getElementById('chat-status');
       if (el) {
@@ -364,47 +416,16 @@
       }
     });
 
-    // Listen to messages
-    msgUnsubscribe = listenMessages(bId, msgs => {
-      renderMessages(msgs, currentUser.uid);
-      const unread = msgs.filter(m => m.receiverId === currentUser.uid && !m.isRead).map(m => m.id);
-      if (unread.length) markMessagesRead(bId, unread, currentUser.uid);
-    });
-  }
-
-  let lastDateShown = '';
-  function renderMessages(msgs, myUid) {
-    const container = document.getElementById('chat-messages');
-    if (!msgs.length) {
-      container.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:0.82rem;padding:30px">No messages yet. Say hello! 👋</div>';
-      return;
-    }
-    lastDateShown = '';
-    container.innerHTML = msgs.map(m => {
-      const isSent = m.senderId === myUid;
-      const seen = isSent && m.isRead ? '<span class="msg-seen">✓✓ Seen</span>' : isSent ? '<span style="color:var(--muted);font-size:0.68rem">✓ Sent</span>' : '';
-      const msgDate = fmtDate(m.timestamp);
-      let dateDivider = '';
-      if (msgDate !== lastDateShown) {
-        lastDateShown = msgDate;
-        dateDivider = `<div class="msg-date-divider">${msgDate}</div>`;
-      }
-      return `${dateDivider}<div class="msg-bubble ${isSent?'sent':'recv'}">
-        <div class="msg-text">${esc(m.messageText)}</div>
-        <div class="msg-meta">${fmtTime(m.timestamp)} ${seen}</div>
-      </div>`;
-    }).join('');
-    container.scrollTop = container.scrollHeight;
+    startListening(bId, currentUser.uid);
   }
 
   window.sendMsg = function() {
     const input = document.getElementById('msg-input');
     const text = input.value.trim();
-    if (!text || !currentUser || !otherUid || !activeBookingId) return;
+    if (!text) return;
     input.value = '';
     input.focus();
-    sendMessage(activeBookingId, currentUser.uid, myRole || 'hirer', otherUid, text)
-      .catch(e => { showToast('Send failed: ' + e.message, 'error'); input.value = text; });
+    doSend(text);
   };
 
   window.toggleEmoji = function() {
