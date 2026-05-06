@@ -17,6 +17,7 @@ export async function createBooking(hirerId, workerId, form) {
     jobTitle:     form.jobTitle,
     date:         form.date,
     time:         form.time,
+    duration:     form.duration || '',
     location:     form.location,
     instructions: form.instructions || '',
     status:       'PENDING',
@@ -32,11 +33,13 @@ export async function createBooking(hirerId, workerId, form) {
     jobTitle:  form.jobTitle,
     date:      form.date,
     time:      form.time,
+    duration:  form.duration || '',
     location:  form.location,
     isRead:    false,
     shown:     false,
     createdAt: Date.now()
   });
+
 
   // Also persist to Firestore notifications collection
   await addDoc(collection(db, 'notifications'), {

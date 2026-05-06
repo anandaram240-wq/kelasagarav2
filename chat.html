@@ -8,50 +8,113 @@
   <link rel="stylesheet" href="css/style.css"/>
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    body{font-family:'DM Sans',sans-serif;background:var(--paper);min-height:100vh}
-    .navbar{background:#fff;border-bottom:1px solid var(--border);padding:0 28px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 1px 4px rgba(0,0,0,0.06)}
-    .brand{font-family:'Baloo Tamma 2',sans-serif;font-weight:800;font-size:1.1rem;color:var(--ink);text-decoration:none}
+    body{font-family:'DM Sans',sans-serif;background:var(--paper);height:100vh;display:flex;flex-direction:column;overflow:hidden}
+    /* Navbar */
+    .navbar{background:#fff;border-bottom:1px solid var(--border);padding:0 20px;height:56px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;box-shadow:0 1px 4px rgba(0,0,0,0.06)}
+    .brand{font-family:'Baloo Tamma 2',sans-serif;font-weight:800;font-size:1.05rem;color:var(--ink);text-decoration:none}
     .brand span{color:var(--saffron)}
-    .btn-back{padding:7px 14px;background:transparent;border:1.5px solid var(--border);border-radius:8px;font-size:0.82rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;color:var(--muted);text-decoration:none;transition:all 0.2s}
-    .btn-back:hover{border-color:var(--saffron);color:var(--saffron)}
-    .chat-wrap{max-width:680px;margin:24px auto;padding:0 16px}
-    .chat-info-bar{background:#fff;border:1px solid var(--border);border-radius:14px;padding:12px 16px;margin-bottom:12px;font-size:0.82rem;color:var(--muted);display:flex;align-items:center;gap:8px}
-    .chat-container{border-radius:14px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.1)}
-    .emoji-picker-wrap{display:none;background:#fff;border:1px solid var(--border);border-radius:10px;padding:10px;margin-bottom:6px;display:flex;flex-wrap:wrap;gap:6px}
+    /* Chat layout */
+    .chat-layout{display:flex;flex:1;overflow:hidden}
+    /* Sidebar */
+    .chat-sidebar{width:300px;background:#fff;border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0}
+    .sidebar-header{padding:14px 16px;border-bottom:1px solid var(--border);font-family:'Baloo Tamma 2',sans-serif;font-weight:700;font-size:1rem;color:var(--ink)}
+    .conv-list{flex:1;overflow-y:auto}
+    .conv-item{display:flex;align-items:center;gap:10px;padding:12px 16px;cursor:pointer;border-bottom:1px solid var(--border);transition:background 0.15s}
+    .conv-item:hover,.conv-item.active{background:rgba(232,89,12,0.06)}
+    .conv-item.active{border-left:3px solid var(--saffron)}
+    .conv-avatar{width:40px;height:40px;border-radius:50%;background:var(--saffron);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem;flex-shrink:0;object-fit:cover}
+    .conv-name{font-weight:600;font-size:0.88rem;color:var(--ink)}
+    .conv-meta{font-size:0.74rem;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    /* Main chat panel */
+    .chat-main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+    /* Chat header */
+    .chat-header{background:#fff;border-bottom:1px solid var(--border);padding:12px 18px;display:flex;align-items:center;gap:12px;flex-shrink:0}
+    .chat-other-avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--saffron),#D4920A);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1rem;flex-shrink:0}
+    .chat-other-name{font-weight:700;font-size:0.95rem;color:var(--ink)}
+    .chat-status{font-size:0.75rem;color:#22C55E}
+    .chat-status.offline{color:var(--muted)}
+    .phone-reveal{margin-left:auto;font-size:0.78rem;background:rgba(27,107,69,0.1);color:var(--jade);padding:4px 10px;border-radius:20px;font-weight:600}
+    /* Messages area */
+    .chat-messages{flex:1;overflow-y:auto;padding:16px 18px;background:linear-gradient(to bottom,#F5EFE4,#F0E8D5);display:flex;flex-direction:column;gap:10px}
+    .msg-bubble{max-width:68%;display:flex;flex-direction:column;gap:3px}
+    .msg-bubble.sent{align-self:flex-end;align-items:flex-end}
+    .msg-bubble.recv{align-self:flex-start;align-items:flex-start}
+    .msg-text{padding:10px 14px;border-radius:18px;font-size:0.88rem;line-height:1.5;word-break:break-word}
+    .msg-bubble.sent .msg-text{background:linear-gradient(135deg,var(--saffron),#D4920A);color:#fff;border-bottom-right-radius:4px}
+    .msg-bubble.recv .msg-text{background:#fff;color:var(--ink);border-bottom-left-radius:4px;box-shadow:0 1px 4px rgba(0,0,0,0.08)}
+    .msg-meta{font-size:0.68rem;color:var(--muted);display:flex;align-items:center;gap:4px}
+    .msg-seen{color:#3B82F6;font-size:0.7rem}
+    /* Input area */
+    .chat-input-area{background:#fff;border-top:1px solid var(--border);padding:10px 14px;flex-shrink:0}
+    .emoji-picker-wrap{display:none;flex-wrap:wrap;gap:6px;padding:8px;background:#fff;border:1px solid var(--border);border-radius:10px;margin-bottom:8px;max-width:360px}
     .emoji-picker-wrap.show{display:flex}
-    .emoji-picker-wrap span{font-size:1.4rem;cursor:pointer;padding:4px;border-radius:6px;transition:background 0.15s}
+    .emoji-picker-wrap span{font-size:1.3rem;cursor:pointer;padding:3px;border-radius:6px;transition:background 0.15s}
     .emoji-picker-wrap span:hover{background:var(--paper)}
-    .access-denied{text-align:center;padding:60px 20px;color:var(--muted)}
-    .access-denied .icon{font-size:3rem;margin-bottom:12px}
+    .chat-input-row{display:flex;align-items:center;gap:8px}
+    .chat-emoji-btn{background:none;border:none;font-size:1.2rem;cursor:pointer;padding:6px;border-radius:8px;transition:background 0.15s;flex-shrink:0}
+    .chat-emoji-btn:hover{background:var(--paper)}
+    .chat-text-input{flex:1;padding:10px 16px;border:1.5px solid var(--border);border-radius:24px;font-size:0.88rem;font-family:'DM Sans',sans-serif;outline:none;transition:border 0.2s;background:var(--paper)}
+    .chat-text-input:focus{border-color:var(--saffron);background:#fff}
+    .chat-send-btn{padding:10px 20px;background:var(--saffron);color:#fff;border:none;border-radius:24px;font-size:0.88rem;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s;flex-shrink:0}
+    .chat-send-btn:hover{background:#C04E06;transform:scale(1.05)}
+    /* Locked state */
+    .access-denied{text-align:center;padding:60px 20px;color:var(--muted);flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center}
+    /* Date divider */
+    .msg-date-divider{text-align:center;font-size:0.72rem;color:var(--muted);background:rgba(255,255,255,0.7);padding:4px 12px;border-radius:20px;align-self:center;margin:6px 0}
+    /* Empty sidebar */
+    .no-convs{padding:32px 16px;text-align:center;color:var(--muted);font-size:0.85rem}
+    @media(max-width:700px){.chat-sidebar{display:none}.chat-layout{height:calc(100vh - 56px)}}
   </style>
 </head>
 <body>
 <nav class="navbar">
-  <a href="javascript:history.back()" class="brand" style="font-size:0.95rem">← Back</a>
-  <a href="index.html" class="brand" style="font-size:1rem">Kelasa<span>Gaara</span></a>
+  <a href="javascript:history.back()" style="font-size:0.85rem;color:var(--muted);text-decoration:none;display:flex;align-items:center;gap:4px">← Back</a>
+  <a href="index.html" class="brand">Kelasa<span>Gaara</span></a>
   <div style="width:60px"></div>
 </nav>
 
-<div class="chat-wrap">
-  <div id="access-denied" class="access-denied" style="display:none">
-    <div class="icon">🔒</div>
-    <h3 style="font-family:'Baloo Tamma 2',cursive;margin-bottom:8px">Chat Locked</h3>
-    <p>You are not part of this booking, or the booking does not exist.</p>
-    <a href="hirer-dashboard.html" style="color:var(--saffron);display:block;margin-top:16px">← Back to Dashboard</a>
+<div class="chat-layout">
+  <!-- Sidebar: conversation list -->
+  <div class="chat-sidebar">
+    <div class="sidebar-header">💬 Conversations</div>
+    <div class="conv-list" id="conv-list">
+      <div class="no-convs">⏳ Loading…</div>
+    </div>
   </div>
 
-  <div id="chat-area" style="display:none">
-    <div class="chat-info-bar">
-      📋 Booking: <strong id="chat-job-title">—</strong> &nbsp;|&nbsp; 📅 <span id="chat-date">—</span>
+  <!-- Main area -->
+  <div class="chat-main" id="chat-main">
+    <!-- Access denied state -->
+    <div id="access-denied" class="access-denied" style="display:none">
+      <div style="font-size:3rem;margin-bottom:12px">🔒</div>
+      <h3 style="font-family:'Baloo Tamma 2',cursive;margin-bottom:8px">Chat Locked</h3>
+      <p>You are not part of this booking, or the booking does not exist.</p>
+      <a href="hirer-dashboard.html" style="color:var(--saffron);display:block;margin-top:16px">← Back to Dashboard</a>
     </div>
-    <div class="chat-container">
-      <!-- Header -->
+
+    <!-- No chat selected placeholder -->
+    <div id="no-chat-selected" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--muted)">
+      <div style="font-size:4rem;margin-bottom:16px">💬</div>
+      <div style="font-family:'Baloo Tamma 2',cursive;font-size:1.2rem;font-weight:700;margin-bottom:8px">Select a Conversation</div>
+      <p style="font-size:0.85rem">Choose a booking from the sidebar to open the chat</p>
+    </div>
+
+    <!-- Active chat area -->
+    <div id="chat-area" style="display:none;flex-direction:column;flex:1;overflow:hidden">
+      <!-- Chat header -->
       <div class="chat-header">
         <div class="chat-other-avatar" id="chat-avatar">?</div>
         <div>
           <div class="chat-other-name" id="chat-other-name">Loading…</div>
           <div class="chat-status" id="chat-status">● Online</div>
         </div>
+        <div class="phone-reveal" id="phone-reveal" style="display:none"></div>
+      </div>
+      <!-- Booking info bar -->
+      <div style="background:rgba(232,89,12,0.06);border-bottom:1px solid var(--border);padding:8px 18px;font-size:0.78rem;color:var(--muted);display:flex;gap:12px;flex-wrap:wrap">
+        <span>📋 <strong id="chat-job-title">—</strong></span>
+        <span>📅 <span id="chat-date">—</span></span>
+        <span id="chat-status-badge"></span>
       </div>
       <!-- Messages -->
       <div class="chat-messages" id="chat-messages">
@@ -59,16 +122,20 @@
       </div>
       <!-- Emoji picker -->
       <div class="emoji-picker-wrap" id="emoji-picker">
-        <span onclick="addEmoji('😊')">😊</span><span onclick="addEmoji('👍')">👍</span><span onclick="addEmoji('🙏')">🙏</span><span onclick="addEmoji('✅')">✅</span><span onclick="addEmoji('❌')">❌</span>
-        <span onclick="addEmoji('📅')">📅</span><span onclick="addEmoji('📍')">📍</span><span onclick="addEmoji('💰')">💰</span><span onclick="addEmoji('🔧')">🔧</span><span onclick="addEmoji('🏗️')">🏗️</span>
-        <span onclick="addEmoji('👷')">👷</span><span onclick="addEmoji('🎨')">🎨</span><span onclick="addEmoji('⚡')">⚡</span><span onclick="addEmoji('🚗')">🚗</span><span onclick="addEmoji('🍳')">🍳</span>
-        <span onclick="addEmoji('🔒')">🔒</span><span onclick="addEmoji('🌿')">🌿</span><span onclick="addEmoji('🤝')">🤝</span><span onclick="addEmoji('⭐')">⭐</span><span onclick="addEmoji('❤️')">❤️</span>
+        <span onclick="addEmoji('😊')">😊</span><span onclick="addEmoji('👍')">👍</span><span onclick="addEmoji('🙏')">🙏</span>
+        <span onclick="addEmoji('✅')">✅</span><span onclick="addEmoji('❌')">❌</span><span onclick="addEmoji('📅')">📅</span>
+        <span onclick="addEmoji('📍')">📍</span><span onclick="addEmoji('💰')">💰</span><span onclick="addEmoji('🔧')">🔧</span>
+        <span onclick="addEmoji('👷')">👷</span><span onclick="addEmoji('🎨')">🎨</span><span onclick="addEmoji('⚡')">⚡</span>
+        <span onclick="addEmoji('🤝')">🤝</span><span onclick="addEmoji('⭐')">⭐</span><span onclick="addEmoji('❤️')">❤️</span>
+        <span onclick="addEmoji('👋')">👋</span><span onclick="addEmoji('🏗️')">🏗️</span><span onclick="addEmoji('🔨')">🔨</span>
       </div>
       <!-- Input bar -->
-      <div class="chat-input-bar">
-        <button class="chat-emoji-btn" onclick="toggleEmoji()" title="Emoji">😊</button>
-        <input class="chat-text-input" id="msg-input" type="text" placeholder="Type a message…" onkeydown="if(event.key==='Enter')sendMsg()"/>
-        <button class="chat-send-btn" onclick="sendMsg()">Send ➤</button>
+      <div class="chat-input-area">
+        <div class="chat-input-row">
+          <button class="chat-emoji-btn" onclick="toggleEmoji()" title="Emoji">😊</button>
+          <input class="chat-text-input" id="msg-input" type="text" placeholder="Type a message… (Enter to send)" onkeydown="if(event.key==='Enter')sendMsg()"/>
+          <button class="chat-send-btn" onclick="sendMsg()">Send ➤</button>
+        </div>
       </div>
     </div>
   </div>
@@ -79,73 +146,200 @@
 <script type="module">
   import { auth, db, rtdb } from './js/firebase-config.js';
   import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-  import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { doc, getDoc, collection, query, where, getDocs, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
   import { sendMessage, listenMessages, markMessagesRead, setOnlineStatus, listenOnlineStatus } from './js/chat.js';
   import { ref, onDisconnect, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
   const params    = new URLSearchParams(window.location.search);
   const bookingId = params.get('booking');
-  if (!bookingId) { window.location.href='index.html'; }
 
-  let currentUser=null, myRole=null, otherUid=null, booking=null;
+  let currentUser = null, myRole = null, otherUid = null, booking = null, activeBookingId = null;
+  let msgUnsubscribe = null;
 
-  function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
-  function fmtTime(ts){if(!ts)return'';const d=new Date(ts);return d.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});}
+  function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function fmtTime(ts) {
+    if (!ts) return '';
+    const d = new Date(ts);
+    return d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+  }
+  function fmtDate(ts) {
+    if (!ts) return '';
+    return new Date(ts).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+  }
+
+  function showToast(msg, type='info') {
+    const c = document.getElementById('toast-container');
+    const cols = { success:'#1B6B45', error:'#C0392B', info:'#E8590C' };
+    const t = document.createElement('div');
+    t.style.cssText = `min-width:240px;padding:11px 16px;background:${cols[type]||cols.info};color:#fff;border-radius:10px;font-size:0.88rem;font-weight:500;display:flex;align-items:center;gap:8px;animation:toastIn 0.3s ease;box-shadow:0 8px 24px rgba(0,0,0,0.15)`;
+    t.innerHTML = `<span>${msg}</span>`;
+    c.appendChild(t);
+    setTimeout(() => t.remove(), 3200);
+  }
 
   onAuthStateChanged(auth, async user => {
-    if(!user){window.location.href='login.html';return;}
-    currentUser=user;
+    if (!user) { window.location.href = 'login.html'; return; }
+    currentUser = user;
 
-    // Load booking
-    const bSnap = await getDoc(doc(db,'bookings',bookingId));
-    if(!bSnap.exists()){document.getElementById('access-denied').style.display='block';return;}
+    // Set online presence
+    setOnlineStatus(user.uid, true);
+    onDisconnect(ref(rtdb, `presence/${user.uid}`)).update({ online: false, lastSeen: Date.now() });
+
+    // Load all bookings for sidebar
+    await loadSidebar(user.uid);
+
+    // If bookingId in URL, open that chat directly
+    if (bookingId) {
+      openChat(bookingId);
+    } else {
+      document.getElementById('no-chat-selected').style.display = 'flex';
+      document.getElementById('no-chat-selected').style.flexDirection = 'column';
+    }
+  });
+
+  async function loadSidebar(uid) {
+    const listEl = document.getElementById('conv-list');
+    try {
+      // Load all bookings where user is hirer or worker
+      const [hirerSnap, workerSnap] = await Promise.all([
+        getDocs(query(collection(db,'bookings'), where('hirerId','==',uid))),
+        getDocs(query(collection(db,'bookings'), where('workerId','==',uid)))
+      ]);
+      const allBookings = [
+        ...hirerSnap.docs.map(d=>({id:d.id,...d.data(),_myRole:'hirer'})),
+        ...workerSnap.docs.map(d=>({id:d.id,...d.data(),_myRole:'worker'}))
+      ].filter(b => b.status !== 'EXPIRED');
+      allBookings.sort((a,b) => (b.createdAt?.seconds||0) - (a.createdAt?.seconds||0));
+
+      if (!allBookings.length) {
+        listEl.innerHTML = '<div class="no-convs">No conversations yet.<br><a href="index.html" style="color:var(--saffron)">Browse workers →</a></div>';
+        return;
+      }
+
+      listEl.innerHTML = '';
+      for (const b of allBookings) {
+        const otherId = b._myRole === 'hirer' ? b.workerId : b.hirerId;
+        let otherName = 'User', otherPhoto = '';
+        try {
+          const os = await getDoc(doc(db,'users',otherId));
+          if (os.exists()) { otherName = os.data().name||'User'; otherPhoto = os.data().photo||''; }
+        } catch(e) {}
+        const initials = otherName.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase();
+        const avatarEl = otherPhoto
+          ? `<img src="${esc(otherPhoto)}" class="conv-avatar" style="border-radius:50%;object-fit:cover;" alt=""/>`
+          : `<div class="conv-avatar">${initials}</div>`;
+        const statusColors = { PENDING:'#F59E0B', CONFIRMED:'#22C55E', DECLINED:'#EF4444', COMPLETED:'#3B82F6', EXPIRED:'#9CA3AF' };
+        const item = document.createElement('div');
+        item.className = `conv-item${b.id === bookingId ? ' active' : ''}`;
+        item.id = `conv-${b.id}`;
+        item.innerHTML = `${avatarEl}<div style="flex:1;min-width:0"><div class="conv-name">${esc(otherName)}</div><div class="conv-meta">${esc(b.jobTitle||'—')} · <span style="color:${statusColors[b.status]||'#9CA3AF'}">${b.status}</span></div></div>`;
+        item.onclick = () => openChat(b.id);
+        listEl.appendChild(item);
+      }
+    } catch(e) {
+      listEl.innerHTML = '<div class="no-convs">Could not load conversations.</div>';
+      console.error(e);
+    }
+  }
+
+  async function openChat(bId) {
+    // Update sidebar active state
+    document.querySelectorAll('.conv-item').forEach(el => el.classList.remove('active'));
+    const sideEl = document.getElementById(`conv-${bId}`);
+    if (sideEl) sideEl.classList.add('active');
+
+    // Hide placeholder
+    document.getElementById('no-chat-selected').style.display = 'none';
+
+    // Unsubscribe previous listener
+    if (msgUnsubscribe) { msgUnsubscribe(); msgUnsubscribe = null; }
+
+    const bSnap = await getDoc(doc(db,'bookings',bId));
+    if (!bSnap.exists()) {
+      document.getElementById('access-denied').style.display = 'flex';
+      return;
+    }
     booking = bSnap.data();
+    activeBookingId = bId;
 
     // Determine role
-    if(booking.hirerId === user.uid)      { myRole='hirer';  otherUid=booking.workerId; }
-    else if(booking.workerId === user.uid){ myRole='worker'; otherUid=booking.hirerId; }
-    else { document.getElementById('access-denied').style.display='block'; return; }
+    if (booking.hirerId === currentUser.uid)       { myRole='hirer';  otherUid = booking.workerId; }
+    else if (booking.workerId === currentUser.uid) { myRole='worker'; otherUid = booking.hirerId; }
+    else { document.getElementById('access-denied').style.display = 'flex'; return; }
 
     // Load other user info
     const otherSnap = await getDoc(doc(db,'users',otherUid));
-    const other     = otherSnap.exists() ? otherSnap.data() : {};
+    const other = otherSnap.exists() ? otherSnap.data() : {};
 
+    // Update header
     document.getElementById('chat-job-title').textContent = booking.jobTitle || '—';
-    document.getElementById('chat-date').textContent      = booking.date || '—';
-    document.getElementById('chat-other-name').textContent= other.name || 'User';
+    document.getElementById('chat-date').textContent = booking.date || '—';
+
+    const statusColors = { PENDING:'#F59E0B',CONFIRMED:'#22C55E',DECLINED:'#EF4444',COMPLETED:'#3B82F6',EXPIRED:'#9CA3AF' };
+    document.getElementById('chat-status-badge').innerHTML = `<span style="color:${statusColors[booking.status]||'#9CA3AF'};font-weight:600">${booking.status}</span>`;
+    document.getElementById('chat-other-name').textContent = other.name || 'User';
+
     const initials = (other.name||'U').split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase();
-    document.getElementById('chat-avatar').textContent    = initials;
+    const avatarEl = document.getElementById('chat-avatar');
+    if (other.photo) {
+      avatarEl.outerHTML = `<img id="chat-avatar" class="chat-other-avatar" src="${esc(other.photo)}" style="object-fit:cover" alt=""/>`;
+    } else {
+      avatarEl.textContent = initials;
+    }
 
-    document.getElementById('chat-area').style.display = 'block';
+    // Show phone ONLY after booking confirmed
+    const phoneReveal = document.getElementById('phone-reveal');
+    if ((booking.status === 'CONFIRMED' || booking.status === 'COMPLETED') && other.phone) {
+      phoneReveal.textContent = `📞 ${other.phone}`;
+      phoneReveal.style.display = 'block';
+    } else {
+      phoneReveal.style.display = 'none';
+    }
 
-    // Online presence
-    setOnlineStatus(user.uid, true);
-    onDisconnect(ref(rtdb, `presence/${user.uid}`)).update({online:false, lastSeen: Date.now()});
+    // Show chat area
+    const chatArea = document.getElementById('chat-area');
+    chatArea.style.display = 'flex';
+    chatArea.style.flexDirection = 'column';
+
+    // Online status
     listenOnlineStatus(otherUid, status => {
       const el = document.getElementById('chat-status');
-      if(status.online){ el.textContent='● Online'; el.className='chat-status'; }
-      else { el.textContent='○ Offline'; el.className='chat-status offline'; }
+      if (el) {
+        if (status.online) { el.textContent='● Online'; el.className='chat-status'; }
+        else {
+          const ago = status.lastSeen ? Math.floor((Date.now()-status.lastSeen)/60000) : null;
+          el.textContent = ago && ago < 60 ? `○ ${ago}m ago` : '○ Offline';
+          el.className = 'chat-status offline';
+        }
+      }
     });
 
-    // Listen messages
-    listenMessages(bookingId, msgs => {
-      renderMessages(msgs, user.uid);
-      // Mark received messages as read
-      const unread = msgs.filter(m=>m.receiverId===user.uid&&!m.isRead).map(m=>m.id);
-      if(unread.length) markMessagesRead(bookingId, unread, user.uid);
+    // Listen to messages
+    msgUnsubscribe = listenMessages(bId, msgs => {
+      renderMessages(msgs, currentUser.uid);
+      const unread = msgs.filter(m => m.receiverId === currentUser.uid && !m.isRead).map(m => m.id);
+      if (unread.length) markMessagesRead(bId, unread, currentUser.uid);
     });
-  });
+  }
 
-  function renderMessages(msgs, myUid){
+  let lastDateShown = '';
+  function renderMessages(msgs, myUid) {
     const container = document.getElementById('chat-messages');
-    if(!msgs.length){
-      container.innerHTML='<div style="text-align:center;color:var(--muted);font-size:0.82rem;padding:30px">No messages yet. Say hello! 👋</div>';
+    if (!msgs.length) {
+      container.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:0.82rem;padding:30px">No messages yet. Say hello! 👋</div>';
       return;
     }
-    container.innerHTML = msgs.map(m=>{
+    lastDateShown = '';
+    container.innerHTML = msgs.map(m => {
       const isSent = m.senderId === myUid;
-      const seen = isSent && m.isRead ? '<span class="msg-seen">✓✓ Seen</span>' : isSent ? '<span style="color:var(--muted);font-size:0.7rem">✓ Sent</span>' : '';
-      return `<div class="msg-bubble ${isSent?'sent':'recv'}">
+      const seen = isSent && m.isRead ? '<span class="msg-seen">✓✓ Seen</span>' : isSent ? '<span style="color:var(--muted);font-size:0.68rem">✓ Sent</span>' : '';
+      const msgDate = fmtDate(m.timestamp);
+      let dateDivider = '';
+      if (msgDate !== lastDateShown) {
+        lastDateShown = msgDate;
+        dateDivider = `<div class="msg-date-divider">${msgDate}</div>`;
+      }
+      return `${dateDivider}<div class="msg-bubble ${isSent?'sent':'recv'}">
         <div class="msg-text">${esc(m.messageText)}</div>
         <div class="msg-meta">${fmtTime(m.timestamp)} ${seen}</div>
       </div>`;
@@ -153,35 +347,30 @@
     container.scrollTop = container.scrollHeight;
   }
 
-  window.sendMsg = async function(){
+  window.sendMsg = async function() {
     const input = document.getElementById('msg-input');
-    const text  = input.value.trim();
-    if(!text || !currentUser || !otherUid) return;
+    const text = input.value.trim();
+    if (!text || !currentUser || !otherUid || !activeBookingId) return;
     input.value = '';
     try {
-      await sendMessage(bookingId, currentUser.uid, myRole, otherUid, text);
-    } catch(e){ console.error(e); showToast('Failed to send message','error'); }
+      await sendMessage(activeBookingId, currentUser.uid, myRole, otherUid, text);
+    } catch(e) { console.error(e); showToast('Failed to send message', 'error'); }
   };
 
-  window.toggleEmoji = function(){
+  window.toggleEmoji = function() {
     const ep = document.getElementById('emoji-picker');
     ep.classList.toggle('show');
   };
-  window.addEmoji = function(e){
+  window.addEmoji = function(e) {
     const input = document.getElementById('msg-input');
-    input.value += e; input.focus();
+    input.value += e;
+    input.focus();
+    document.getElementById('emoji-picker').classList.remove('show');
   };
-
-  function showToast(msg,type='info'){
-    let c=document.getElementById('toast-container');
-    const colors={success:'#1B6B45',error:'#C0392B',info:'#E8590C'};
-    const t=document.createElement('div');
-    t.style.cssText=`min-width:240px;padding:11px 16px;background:${colors[type]};color:#fff;border-radius:10px;font-size:0.88rem;font-weight:500;display:flex;align-items:center;gap:8px;animation:toastIn 0.3s ease;box-shadow:0 8px 24px rgba(0,0,0,0.15)`;
-    t.innerHTML=`<span>${msg}</span>`;
-    c.appendChild(t);
-    setTimeout(()=>t.remove(),3000);
-  }
 </script>
-<style>@keyframes toastIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}</style>
+<style>
+  @keyframes toastIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+  #chat-area{display:flex;flex-direction:column}
+</style>
 </body>
 </html>

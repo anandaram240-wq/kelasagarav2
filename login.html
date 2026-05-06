@@ -66,6 +66,12 @@
     <div class="logo-text">Kelasa<span>Gaara</span></div>
   </a>
 
+  <!-- Intent banner (shown when redirected from worker card) -->
+  <div id="intent-banner" style="display:none;background:linear-gradient(135deg,rgba(232,89,12,0.1),rgba(212,146,10,0.08));border:1px solid rgba(232,89,12,0.25);border-radius:14px;padding:14px 16px;margin-bottom:1.25rem;font-size:0.85rem;line-height:1.5;color:var(--ink)">
+    <div style="font-weight:700;margin-bottom:4px">🎯 Almost there!</div>
+    <div id="intent-text">Create a free Hirer account — takes 30 seconds!</div>
+  </div>
+
   <!-- Tab bar -->
   <div class="tab-bar">
     <button class="tab-btn active" id="tab-login-btn"  onclick="switchTab('login')">🔑 Login</button>
@@ -134,6 +140,41 @@
 
   let loginRole = null, signupRole = null;
 
+  // Show intent banner if redirected from worker card
+  function showIntentBanner() {
+    try {
+      const intent = JSON.parse(sessionStorage.getItem('kelasa_intent') || 'null');
+      if (!intent) return;
+      const banner = document.getElementById('intent-banner');
+      const text = document.getElementById('intent-text');
+      const action = intent.action === 'book' ? 'Book' : 'Message';
+      const name = intent.workerName || 'a worker';
+      text.innerHTML = `You clicked to <strong>${action} ${name}</strong>.<br>Create a free <strong>Hirer</strong> account — takes 30 seconds!`;
+      banner.style.display = 'block';
+      // Pre-select Hirer role
+      selRole('login','hirer');
+      selRole('signup','hirer');
+      switchTab('signup');
+    } catch(e) {}
+  }
+  showIntentBanner();
+
+  // Handle post-login intent redirect
+  function handleIntentRedirect(role) {
+    if (role !== 'hirer') return false;
+    try {
+      const intent = JSON.parse(sessionStorage.getItem('kelasa_intent') || 'null');
+      if (!intent || !intent.workerId) return false;
+      sessionStorage.removeItem('kelasa_intent');
+      if (intent.action === 'book') {
+        window.location.href = `book.html?worker=${encodeURIComponent(intent.workerId)}`;
+      } else if (intent.action === 'message') {
+        window.location.href = `book.html?worker=${encodeURIComponent(intent.workerId)}&mode=message`;
+      }
+      return true;
+    } catch(e) { return false; }
+  }
+
   // Auto-redirect if already logged in
   onAuthStateChanged(auth, async user => {
     if (!user) return;
@@ -141,6 +182,7 @@
     if (!snap.exists()) return;
     const d = snap.data();
     if (!d.profileComplete) { window.location.href='setup-profile.html'; return; }
+    if (handleIntentRedirect(d.role)) return;
     window.location.href = d.role === 'worker' ? 'worker-dashboard.html' : 'hirer-dashboard.html';
   });
 
@@ -198,7 +240,10 @@
         const d = snap.data();
         if(!d.profileComplete){ window.location.href='setup-profile.html'; return; }
         toast(`Welcome back, ${user.displayName.split(' ')[0]}! 👋`,'s');
-        setTimeout(()=>{ window.location.href = d.role==='worker'?'worker-dashboard.html':'hirer-dashboard.html'; },800);
+        setTimeout(() => {
+          if (handleIntentRedirect(d.role)) return;
+          window.location.href = d.role==='worker'?'worker-dashboard.html':'hirer-dashboard.html';
+        }, 800);
       }
     } catch(e) {
       console.error(e);
@@ -224,15 +269,20 @@
           profileComplete:false, createdAt:serverTimestamp(), lastLogin:serverTimestamp()
         });
         toast('Account created! Setting up your profile…','s');
-        setTimeout(()=>window.location.href='setup-profile.html',800);
+        setTimeout(() => {
+          if (signupRole === 'hirer' && handleIntentRedirect('hirer')) return;
+          window.location.href='setup-profile.html';
+        }, 800);
       } else {
         // Already exists — just log in
         const d = snap.data();
         await updateDoc(doc(db,'users',user.uid),{lastLogin:serverTimestamp()});
         toast('Account exists — logging you in!','i');
-        setTimeout(()=>{
-          window.location.href = !d.profileComplete?'setup-profile.html':(d.role==='worker'?'worker-dashboard.html':'hirer-dashboard.html');
-        },800);
+        setTimeout(() => {
+          if (!d.profileComplete) { window.location.href='setup-profile.html'; return; }
+          if (handleIntentRedirect(d.role)) return;
+          window.location.href = d.role==='worker'?'worker-dashboard.html':'hirer-dashboard.html';
+        }, 800);
       }
     } catch(e) {
       console.error(e);

@@ -85,30 +85,48 @@
 
     /* ── WORKERS GRID ── */
     .workers-section{max-width:1100px;margin:28px auto;padding:0 32px}
-    .workers-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin-top:16px}
-    .worker-card{background:#fff;border:1px solid var(--border);border-radius:14px;padding:18px;transition:all 0.25s;cursor:pointer;position:relative}
-    .worker-card:hover{transform:translateY(-3px);box-shadow:0 10px 28px rgba(0,0,0,0.11);border-color:var(--saffron)}
-    .wc-top{display:flex;align-items:center;gap:12px;margin-bottom:12px}
-    .wc-avatar{width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid var(--border)}
-    .wc-avatar-ph{width:44px;height:44px;border-radius:50%;background:var(--saffron-light);border:2px solid var(--saffron);display:flex;align-items:center;justify-content:center;font-size:1rem;color:var(--saffron);font-weight:700}
-    .wc-name{font-weight:600;font-size:0.92rem}
-    .wc-trade{font-size:0.78rem;color:var(--muted)}
-    .wc-district{display:inline-flex;align-items:center;gap:4px;font-size:0.75rem;background:var(--jade-light);color:var(--jade);padding:3px 9px;border-radius:10px;margin-bottom:8px}
-    .wc-skills{display:flex;gap:5px;flex-wrap:wrap}
-    .wc-skill{font-size:0.72rem;padding:3px 8px;background:var(--paper);border:1px solid var(--border);border-radius:8px;color:var(--muted)}
-    .wc-btn{margin-top:12px;width:100%;padding:9px;background:var(--saffron);color:#fff;border:none;border-radius:8px;font-size:0.85rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s}
-    .wc-btn:hover{background:var(--saffron-dark)}
-    /* ── LIKE BUTTON ── */
-    .wc-like-btn{position:absolute;top:14px;right:14px;width:32px;height:32px;border-radius:50%;border:none;background:rgba(255,255,255,0.9);backdrop-filter:blur(4px);box-shadow:0 2px 8px rgba(0,0,0,0.1);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1rem;transition:all 0.2s;z-index:2;padding:0}
+    .workers-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:16px}
+    @media(max-width:1024px){.workers-grid{grid-template-columns:repeat(2,1fr)}}
+    @media(max-width:580px){.workers-grid{grid-template-columns:1fr}}
+    /* Enhanced worker card */
+    .worker-card{background:#fff;border:1px solid var(--border);border-radius:16px;padding:18px;transition:all 0.25s;position:relative;display:flex;flex-direction:column}
+    .worker-card:hover{transform:translateY(-4px);box-shadow:0 14px 36px rgba(0,0,0,0.13);border-color:var(--saffron)}
+    .wc-top{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+    .wc-avatar{width:52px;height:52px;border-radius:50%;object-fit:cover;border:2px solid var(--border);flex-shrink:0}
+    .wc-avatar-ph{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#FEF0E6,#FAD7BC);border:2px solid var(--saffron);display:flex;align-items:center;justify-content:center;font-size:1.1rem;color:var(--saffron);font-weight:700;flex-shrink:0}
+    .wc-name{font-weight:700;font-size:0.95rem;color:var(--ink);line-height:1.2}
+    .wc-trade{font-size:0.75rem;color:var(--muted);margin-top:2px}
+    .wc-location{display:inline-flex;align-items:center;gap:4px;font-size:0.74rem;background:rgba(27,107,69,0.1);color:var(--jade);padding:3px 9px;border-radius:10px;margin-bottom:8px;width:fit-content}
+    .wc-skills{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px}
+    .wc-skill{font-size:0.7rem;padding:3px 8px;background:var(--paper);border:1px solid var(--border);border-radius:8px;color:var(--muted);font-weight:500}
+    /* Rate + stars row */
+    .wc-stats{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin-bottom:10px;gap:6px}
+    .wc-rate{font-family:'Baloo Tamma 2',sans-serif;font-size:1rem;font-weight:700;color:var(--jade)}
+    .wc-stars{font-size:0.75rem;color:var(--muted)}
+    .wc-exp{font-size:0.72rem;color:var(--muted);background:var(--paper);padding:2px 8px;border-radius:10px;border:1px solid var(--border)}
+    /* Action buttons */
+    .wc-actions{display:flex;gap:7px;margin-top:auto;padding-top:4px}
+    .wc-btn-msg{flex:1;padding:9px 6px;background:transparent;color:var(--saffron);border:1.5px solid var(--saffron);border-radius:8px;font-size:0.78rem;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:4px}
+    .wc-btn-msg:hover{background:var(--saffron);color:#fff;transform:translateY(-1px)}
+    .wc-btn-book{flex:1;padding:9px 6px;background:var(--saffron);color:#fff;border:none;border-radius:8px;font-size:0.78rem;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:4px}
+    .wc-btn-book:hover{background:#C04E06;transform:translateY(-1px);box-shadow:0 4px 12px rgba(232,89,12,0.3)}
+    /* Like button */
+    .wc-like-btn{position:absolute;top:12px;right:12px;width:30px;height:30px;border-radius:50%;border:none;background:rgba(255,255,255,0.9);backdrop-filter:blur(4px);box-shadow:0 2px 8px rgba(0,0,0,0.12);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:0.95rem;transition:all 0.2s;z-index:2;padding:0}
     .wc-like-btn:hover{transform:scale(1.15);box-shadow:0 4px 14px rgba(232,96,10,0.25)}
     .wc-like-btn.liked{background:linear-gradient(135deg,#ff6b6b,#ee5a24);box-shadow:0 4px 14px rgba(238,90,36,0.4)}
     .wc-like-btn .heart-icon{display:inline-block;line-height:1;transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1)}
     .wc-like-btn.liked .heart-icon{transform:scale(1.2)}
     @keyframes heartPop{0%{transform:scale(1)}40%{transform:scale(1.45)}70%{transform:scale(0.9)}100%{transform:scale(1.2)}}
     .wc-like-btn.just-liked .heart-icon{animation:heartPop 0.4s ease forwards}
-    /* Floating hearts particle */
     @keyframes floatHeart{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-40px) scale(0.4)}}
     .heart-particle{position:absolute;pointer-events:none;font-size:0.9rem;animation:floatHeart 0.7s ease forwards;z-index:10}
+    /* Verified badge */
+    .wc-verified{position:absolute;top:12px;left:12px;background:linear-gradient(135deg,#1B6B45,#2D9E6B);color:#fff;font-size:0.6rem;font-weight:700;padding:2px 7px;border-radius:10px;letter-spacing:0.04em}
+    /* Pagination */
+    .pagination{display:flex;justify-content:center;gap:8px;margin-top:28px;flex-wrap:wrap}
+    .page-btn{width:36px;height:36px;border-radius:8px;border:1.5px solid var(--border);background:#fff;font-size:0.85rem;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:600;transition:all 0.2s;color:var(--muted)}
+    .page-btn.active{background:var(--saffron);color:#fff;border-color:var(--saffron)}
+    .page-btn:hover:not(.active){border-color:var(--saffron);color:var(--saffron)}
 
     /* ── EMPTY / LOADING ── */
     .state-box{text-align:center;padding:60px 20px;color:var(--muted)}
@@ -213,8 +231,10 @@
   <div id="result-count" style="font-weight:600;color:var(--ink)">Loading workers…</div>
   <div class="sort-options">
     <span style="margin-right:8px">Sort by:</span>
-    <button class="sort-btn active" onclick="sortWorkers('name',this)">👤 Name</button>
-    <button class="sort-btn" onclick="sortWorkers('district',this)">📍 District</button>
+    <button class="sort-btn active" id="sort-rating" onclick="sortWorkers('rating',this)">⭐ Rating</button>
+    <button class="sort-btn" id="sort-price-asc" onclick="sortWorkers('price-asc',this)">💰 Price ↑</button>
+    <button class="sort-btn" id="sort-price-desc" onclick="sortWorkers('price-desc',this)">💰 Price ↓</button>
+    <button class="sort-btn" id="sort-exp" onclick="sortWorkers('experience',this)">🏆 Experience</button>
   </div>
 </div>
 
@@ -310,47 +330,118 @@
   window.sortWorkers = function(by, btn) {
     document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-    allWorkers.sort((a,b) => (a[by]||'').localeCompare(b[by]||''));
+    if (by === 'rating') allWorkers.sort((a,b) => (b.rating||0) - (a.rating||0));
+    else if (by === 'price-asc') allWorkers.sort((a,b) => (a.hourlyRate||a.dailyRate||0) - (b.hourlyRate||b.dailyRate||0));
+    else if (by === 'price-desc') allWorkers.sort((a,b) => (b.hourlyRate||b.dailyRate||0) - (a.hourlyRate||a.dailyRate||0));
+    else if (by === 'experience') allWorkers.sort((a,b) => parseInt(b.experience)||0 - parseInt(a.experience)||0);
+    else allWorkers.sort((a,b) => (a[by]||'').localeCompare(b[by]||''));
+    currentPage = 1;
     applyFilter();
   };
 
+  const PAGE_SIZE = 12;
+  let currentPage = 1;
+
   function renderWorkers(workers) {
     const grid = document.getElementById('workers-grid');
-    const newCount = workers.length;
-    const newLabel = newCount > 0 ? ` · <span style="color:var(--saffron);font-size:0.78rem">✨ ${Math.min(newCount,2)} new</span>` : '';
-    document.getElementById('result-count').textContent = '';
-    document.getElementById('result-count').innerHTML = `${newCount} workers found${newLabel}`;
+    document.getElementById('result-count').innerHTML = `<strong>${workers.length}</strong> workers found`;
     if (!workers.length) {
       grid.innerHTML = `<div class="state-box" style="grid-column:1/-1">👷 No workers found. <a href="login.html?role=worker" style="color:var(--saffron)">Register as a Worker →</a></div>`;
+      document.getElementById('pagination')?.remove();
       return;
     }
-    grid.innerHTML = workers.map(w => {
+    // Pagination
+    const totalPages = Math.ceil(workers.length / PAGE_SIZE);
+    if (currentPage > totalPages) currentPage = 1;
+    const pageWorkers = workers.slice((currentPage-1)*PAGE_SIZE, currentPage*PAGE_SIZE);
+
+    grid.innerHTML = pageWorkers.map(w => {
       const initials = (w.name||'U').split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase();
-      const wid = w.uid || w.phone || initials + (w.district||'');
+      const wid = w.uid || w.email || initials + (w.district||'');
       const isLiked = likedWorkers.has(wid);
+      const isApproved = w.isApproved !== false; // show if not explicitly false
+      if (!isApproved) return '';
+
       const avatar = w.photo
-        ? `<img class="wc-avatar" src="${w.photo}" alt="" onerror="this.style.display='none'"/>`
+        ? `<img class="wc-avatar" src="${esc(w.photo)}" alt="" onerror="this.style.display='none'"/>`
         : `<div class="wc-avatar-ph">${initials}</div>`;
-      const skills = (w.skills||[]).slice(0,3).map(s=>`<span class="wc-skill">${s}</span>`).join('');
+      const skills = (w.skills||[]).slice(0,3).map(s=>`<span class="wc-skill">${esc(s)}</span>`).join('');
       const trade = (w.skills||[])[0] || 'Daily Worker';
+      const rating = w.rating ? w.rating.toFixed(1) : null;
+      const reviews = w.reviewCount || 0;
+      const starsHtml = rating
+        ? `⭐ ${rating} <span style="color:var(--muted)">·</span> ${reviews} review${reviews!==1?'s':''}`
+        : `<span style="color:var(--muted);font-size:0.7rem">New worker</span>`;
+      const rateText = w.hourlyRate ? `₹${w.hourlyRate}/hr` : (w.dailyRate ? `₹${w.dailyRate}/day` : '₹—');
+      const expText = w.experience || '—';
+      const locationText = [w.district, w.taluk].filter(Boolean).join(', ') || 'Karnataka';
+
       return `
         <div class="worker-card" id="wcard-${esc(wid)}">
+          ${w.profileComplete ? '<div class="wc-verified">✔ VERIFIED</div>' : ''}
           <button class="wc-like-btn${isLiked?' liked':''}" id="like-${esc(wid)}" onclick="toggleLike(event,'${esc(wid)}')" title="${isLiked?'Saved':'Save worker'}" aria-label="Like">
             <span class="heart-icon">${isLiked?'❤️':'🤍'}</span>
           </button>
-          <div class="wc-top">${avatar}<div><div class="wc-name">${esc(w.name||'Worker')}</div><div class="wc-trade">${esc(trade)}</div></div></div>
-          <div class="wc-district">📍 ${esc(w.district||'Karnataka')}</div>
+          <div class="wc-top">${avatar}<div style="min-width:0"><div class="wc-name">${esc(w.name||'Worker')}</div><div class="wc-trade">${esc(trade)}</div></div></div>
+          <div class="wc-location">📍 ${esc(locationText)}</div>
           <div class="wc-skills">${skills||'<span class="wc-skill">Available</span>'}</div>
-          <button class="wc-btn" onclick="window.location.href='find-jobs.html'">View Profile →</button>
+          <div class="wc-stats">
+            <span class="wc-rate">${rateText}</span>
+            <span class="wc-stars">${starsHtml}</span>
+            <span class="wc-exp">${esc(expText)}</span>
+          </div>
+          <div class="wc-actions">
+            <button class="wc-btn-msg" onclick="msgWorker('${esc(wid)}','${esc(w.name||'Worker')}')">💬 Message</button>
+            <button class="wc-btn-book" onclick="bookWorker('${esc(wid)}','${esc(w.name||'Worker')}')">📅 Book Now</button>
+          </div>
         </div>`;
     }).join('');
+
+    // Render pagination
+    let pagEl = document.getElementById('pagination');
+    if (!pagEl) {
+      pagEl = document.createElement('div');
+      pagEl.id = 'pagination';
+      pagEl.className = 'pagination';
+      document.querySelector('.workers-section').appendChild(pagEl);
+    }
+    if (totalPages <= 1) { pagEl.innerHTML = ''; return; }
+    let pagHtml = '';
+    for (let i=1; i<=totalPages; i++) {
+      pagHtml += `<button class="page-btn${i===currentPage?' active':''}" onclick="goPage(${i})">${i}</button>`;
+    }
+    pagEl.innerHTML = pagHtml;
   }
 
-  function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/'/g,'&#39;')}
+  window.goPage = function(n) { currentPage = n; applyFilter(); window.scrollTo({top:400,behavior:'smooth'}); };
+
+  /* ── CRITICAL REDIRECT LOGIC (Section 2) ── */
+  window.bookWorker = function(wid, wname) {
+    if (!currentUserUid || currentUserRole !== 'hirer') {
+      // Save intent to sessionStorage
+      sessionStorage.setItem('kelasa_intent', JSON.stringify({ workerId: wid, action: 'book', workerName: wname }));
+      window.location.href = `login.html?role=hirer&intent=book&worker=${encodeURIComponent(wid)}`;
+      return;
+    }
+    window.location.href = `book.html?worker=${encodeURIComponent(wid)}`;
+  };
+
+  window.msgWorker = function(wid, wname) {
+    if (!currentUserUid || currentUserRole !== 'hirer') {
+      sessionStorage.setItem('kelasa_intent', JSON.stringify({ workerId: wid, action: 'message', workerName: wname }));
+      window.location.href = `login.html?role=hirer&intent=message&worker=${encodeURIComponent(wid)}`;
+      return;
+    }
+    // Find existing booking with this worker to open chat, or go to book page first
+    window.location.href = `book.html?worker=${encodeURIComponent(wid)}&mode=message`;
+  };
+
+  function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/'/g,'&#39;')}
 
   /* ── LIKE SYSTEM ── */
-  let likedWorkers = new Set(); // Set of worker IDs
+  let likedWorkers = new Set();
   let currentUserUid = null;
+  let currentUserRole = null;
 
   // Load liked workers from Firestore on auth
   async function loadLikedWorkers(uid) {
@@ -436,19 +527,31 @@
         const snap = await getDocFn(docFn(db, 'users', user.uid));
         if (snap.exists()) {
           const data = snap.data();
+          currentUserRole = data.role || null;
           if (data.role === 'hirer') {
             currentHirer = { uid: user.uid, ...data };
           }
           likedWorkers = new Set(data.likedWorkers || []);
-          if (allWorkers.length) applyFilter(); // re-render with like state
+          if (allWorkers.length) applyFilter();
         }
       } catch(e) { console.warn('Auth check error:', e); }
     } else {
       currentUserUid = null;
+      currentUserRole = null;
       likedWorkers = new Set();
     }
   });
+  // Pre-select sort by rating on load
   loadWorkers();
+  // Check if we have a pending intent from a previous redirect
+  try {
+    const intent = JSON.parse(sessionStorage.getItem('kelasa_intent') || 'null');
+    if (intent && currentUserRole === 'hirer') {
+      sessionStorage.removeItem('kelasa_intent');
+      if (intent.action === 'book') window.location.href = `book.html?worker=${intent.workerId}`;
+      else if (intent.action === 'message') window.location.href = `book.html?worker=${intent.workerId}&mode=message`;
+    }
+  } catch(e) {}
 </script>
 <script type="module" src="index-booking-modal.js"></script>
 </body>

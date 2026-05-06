@@ -70,6 +70,7 @@
 
   <div class="tabs">
     <button class="tab active" onclick="switchTab('bookings',this)">📋 My Bookings</button>
+    <button class="tab" onclick="switchTab('conversations',this)">💬 Conversations</button>
     <button class="tab" onclick="switchTab('jobs',this)">💼 Posted Jobs</button>
     <button class="tab" onclick="switchTab('profile',this)">👤 Profile</button>
   </div>
@@ -80,6 +81,11 @@
       <a href="index.html" class="btn-sm btn-primary">+ Book a Worker</a>
     </div>
     <div id="bookings-list"><div class="empty">⏳ Loading bookings…</div></div>
+  </div>
+
+  <div id="tab-conversations" class="tab-pane">
+    <div style="margin-bottom:14px"><strong style="font-family:'Baloo Tamma 2',cursive;font-size:1rem">💬 My Conversations</strong></div>
+    <div id="conversations-list"><div class="empty">⏳ Loading conversations…</div></div>
   </div>
 
   <div id="tab-jobs" class="tab-pane">
@@ -122,6 +128,7 @@
 
     initNotificationBell(user.uid, 'notif-bell-container');
     loadBookings(user.uid);
+    loadConversations(user.uid);
     loadJobs(user.uid);
   });
 
@@ -158,6 +165,34 @@
         el.appendChild(card);
       }
     } catch(e) { console.error(e); el.innerHTML='<div class="empty">Could not load bookings.</div>'; }
+  }
+
+  async function loadConversations(uid) {
+    const el = document.getElementById('conversations-list');
+    try {
+      const q = query(collection(db,'bookings'), where('hirerId','==', uid), where('status','in',['CONFIRMED','COMPLETED']));
+      const snap = await getDocs(q);
+      if (snap.empty) {
+        el.innerHTML = '<div class="empty">💭 No confirmed bookings yet. <a href="index.html" style="color:var(--saffron)">Find workers →</a></div>';
+        return;
+      }
+      const items = snap.docs.map(d=>({id:d.id,...d.data()}));
+      items.sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
+      el.innerHTML = '';
+      for (const b of items) {
+        let workerName='Worker',workerPhoto='';
+        try{const ws=await getDoc(doc(db,'users',b.workerId));if(ws.exists()){workerName=ws.data().name||'Worker';workerPhoto=ws.data().photo||'';}  }catch(e){}
+        const initials=(workerName).split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase();
+        const avatarHtml=workerPhoto?`<img src="${esc(workerPhoto)}" style="width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid var(--saffron)" alt=""/>`:`<div style="width:44px;height:44px;border-radius:50%;background:var(--saffron);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.9rem;flex-shrink:0">${initials}</div>`;
+        const card=document.createElement('div');
+        card.style.cssText='background:#fff;border:1px solid var(--border);border-radius:14px;padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:all 0.2s';
+        card.onmouseenter=()=>card.style.boxShadow='0 6px 20px rgba(0,0,0,0.08)';
+        card.onmouseleave=()=>card.style.boxShadow='';
+        card.innerHTML=`${avatarHtml}<div style="flex:1;min-width:0"><div style="font-weight:700;font-size:0.9rem">${esc(workerName)}</div><div style="font-size:0.78rem;color:var(--muted)">${esc(b.jobTitle)} · ${b.date||'—'}</div></div><a href="chat.html?booking=${b.id}" class="btn-sm btn-primary" onclick="event.stopPropagation()">💬 Open Chat</a>`;
+        card.onclick=()=>window.location.href=`chat.html?booking=${b.id}`;
+        el.appendChild(card);
+      }
+    } catch(e) { el.innerHTML='<div class="empty">Could not load conversations.</div>'; }
   }
 
   async function loadJobs(uid) {

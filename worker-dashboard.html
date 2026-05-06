@@ -234,13 +234,13 @@
       document.getElementById('booking-count').textContent=`${items.length} total`;
       el.innerHTML='';
       for(const b of items){
-        let empName='Employer';
-        try{const es=await getDoc(doc(db,'users',b.hirerId));if(es.exists())empName=es.data().name||'Employer';}catch(e){}
+        let hirerName='Hirer';
+        try{const es=await getDoc(doc(db,'users',b.hirerId));if(es.exists())hirerName=es.data().name||'Hirer';}catch(e){}
         const statusClass=`status-${(b.status||'PENDING').toLowerCase()}`;
         const card=document.createElement('div');card.className='booking-card';
         card.innerHTML=`
           <div class="booking-title">💼 ${esc(b.jobTitle||'Job')} <span class="${statusClass}" style="float:right">${b.status||'PENDING'}</span></div>
-          <div class="booking-meta">👔 Employer: <strong>${esc(empName)}</strong> · 📅 ${b.date||'—'} ${b.time||''} · 📍 ${esc(b.location||'—')}</div>
+          <div class="booking-meta">🏗️ Hirer: <strong>${esc(hirerName)}</strong> · 📅 ${b.date||'—'} ${b.time||''} · 📍 ${esc(b.location||'—')}</div>
           ${b.instructions?`<div style="font-size:0.78rem;color:var(--muted);margin-top:4px">📝 ${esc(b.instructions)}</div>`:''}
           <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
             ${b.status==='PENDING'?`<button class="btn-sm btn-primary" onclick="acceptBooking('${b.id}')">✅ Accept</button><button class="btn-sm btn-outline" style="border-color:#EF4444;color:#EF4444" onclick="declineBooking('${b.id}')">❌ Decline</button>`:''}
@@ -268,10 +268,10 @@
   }
 
   async function showIncoming(n, nid, uid){
-    let empName='Employer';
-    try{const es=await getDoc(doc(db,'users',n.hirerId));if(es.exists())empName=es.data().name||'Employer';}catch(e){}
+    let hirerName='Hirer';
+    try{const es=await getDoc(doc(db,'users',n.hirerId));if(es.exists())hirerName=es.data().name||'Hirer';}catch(e){}
     pendingBookingId=n.bookingId;
-    document.getElementById('inc-hirer').textContent=`From: ${empName}`;
+    document.getElementById('inc-hirer').textContent=`From: ${hirerName}`;
     document.getElementById('inc-details').innerHTML=`<strong>Job:</strong> ${esc(n.jobTitle||'—')}<br><strong>Date:</strong> ${n.date||'—'} at ${n.time||'—'}<br><strong>Location:</strong> ${esc(n.location||'—')}`;
     document.getElementById('incoming-overlay').style.display='flex';
     let secs=60;
@@ -311,12 +311,12 @@
       const snap=await getDocs(q);
       const el=document.getElementById('applied-jobs');
       if(snap.empty){el.innerHTML='<div class="empty">You haven\'t applied to any jobs yet.<br><a href="find-jobs.html" style="color:var(--saffron)">Browse jobs →</a></div>';return;}
-      el.innerHTML=snap.docs.map(d=>{const j=d.data();return`<div class="booking-card"><div class="booking-title">${CAT_EMOJI[j.category]||'💼'} ${esc(j.title||'Job')}</div><div class="booking-meta">📍 ${esc(j.district||'—')} · by ${esc(j.hirerName||'Employer')} · ₹${j.pay||'—'}/day</div><span class="status-confirmed" style="font-size:0.72rem;display:inline-block;margin-top:6px">✓ Applied</span></div>`;}).join('');
+      el.innerHTML=snap.docs.map(d=>{const j=d.data();return`<div class="booking-card"><div class="booking-title">${CAT_EMOJI[j.category]||'💼'} ${esc(j.title||'Job')}</div><div class="booking-meta">📍 ${esc(j.district||'—')} · by ${esc(j.hirerName||'Hirer')} · ₹${j.pay||'—'}/day</div><span class="status-confirmed" style="font-size:0.72rem;display:inline-block;margin-top:6px">✓ Applied</span></div>`;}).join('');
     }catch(e){document.getElementById('applied-jobs').innerHTML='<div class="empty">Could not load jobs.</div>';}
   }
 
   window.doLogout=async function(){await signOut(auth);window.location.href='login.html';};
-  function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+  function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
   function showToast(msg,type){const el=document.getElementById('toast');el.textContent=msg;el.className=`show ${type}`;setTimeout(()=>el.className='',3000);}
 </script>
 </body>
