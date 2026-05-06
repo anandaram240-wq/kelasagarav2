@@ -1,147 +1,253 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-  <title>Login — KelasaGaara</title>
-  <meta name="description" content="Sign in to KelasaGaara — select your role as Worker or Employer."/>
-  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Login / Sign Up — KelasaGaara</title>
   <link href="https://fonts.googleapis.com/css2?family=Baloo+Tamma+2:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    :root{--saffron:#E8590C;--jade:#1B6B45;--gold:#D4920A;--ink:#0F1923;--paper:#F7F2EA;--muted:#7A6A58;--border:rgba(180,130,70,0.2);--white:#FFFFFF;}
+    :root{--saffron:#E8590C;--jade:#1B6B45;--ink:#0F1923;--paper:#F7F2EA;--muted:#7A6A58;--border:rgba(180,130,70,0.2);--white:#fff}
     body{font-family:'DM Sans',sans-serif;background:linear-gradient(160deg,#fff9f4 0%,var(--paper) 70%);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem 1rem}
-    .login-box{background:var(--white);border-radius:20px;border:1px solid var(--border);box-shadow:0 12px 48px rgba(15,25,35,0.12);padding:2.5rem 2rem;width:100%;max-width:480px}
-    .login-logo{display:flex;align-items:center;gap:0.5rem;justify-content:center;margin-bottom:1.5rem;text-decoration:none}
-    .login-logo-icon{width:44px;height:44px;background:linear-gradient(135deg,var(--saffron),var(--gold));border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.4rem}
-    .login-logo-text{font-family:'Baloo Tamma 2',cursive;font-size:1.6rem;font-weight:800;color:var(--ink)}
-    .login-logo-text span{color:var(--saffron)}
-    .login-title{text-align:center;font-family:'Baloo Tamma 2',cursive;font-size:1.4rem;margin-bottom:0.4rem;color:var(--ink)}
-    .login-subtitle{text-align:center;font-size:0.9rem;color:var(--muted);margin-bottom:1.75rem}
-    .role-label{font-size:0.82rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.75rem}
-    .role-cards{display:grid;grid-template-columns:1fr 1fr;gap:0.85rem;margin-bottom:1.5rem}
-    .role-card{display:flex;flex-direction:column;align-items:center;gap:0.5rem;padding:1.25rem 1rem;border-radius:14px;border:2px solid var(--border);background:var(--paper);cursor:pointer;transition:all 0.2s ease;user-select:none}
-    .role-card:hover{border-color:var(--saffron);background:rgba(232,89,12,0.04)}
-    .role-card.selected-worker{border-color:var(--jade);background:rgba(27,107,69,0.08)}
-    .role-card.selected-hirer{border-color:var(--saffron);background:rgba(232,89,12,0.08)}
-    .role-card-icon{font-size:2.2rem}
-    .role-card-name{font-family:'Baloo Tamma 2',cursive;font-size:1rem;font-weight:700;color:var(--ink)}
-    .role-card-desc{font-size:0.78rem;color:var(--muted);text-align:center;line-height:1.4}
-    .role-card .check-dot{width:18px;height:18px;border-radius:50%;border:2px solid var(--border);transition:all 0.2s}
-    .role-card.selected-worker .check-dot{background:var(--jade);border-color:var(--jade)}
-    .role-card.selected-hirer .check-dot{background:var(--saffron);border-color:var(--saffron)}
-    .divider-line{display:flex;align-items:center;gap:0.75rem;color:var(--muted);font-size:0.82rem;margin-bottom:1.25rem}
-    .divider-line::before,.divider-line::after{content:'';flex:1;height:1px;background:var(--border)}
-    .google-btn{width:100%;display:flex;align-items:center;justify-content:center;gap:0.75rem;padding:0.85rem 1.5rem;background:var(--ink);color:#fff;border:none;border-radius:12px;font-family:'DM Sans',sans-serif;font-size:1rem;font-weight:600;cursor:pointer;transition:all 0.2s ease;margin-bottom:1rem}
-    .google-btn:hover{background:#1a2a3a;transform:translateY(-2px);box-shadow:0 6px 20px rgba(15,25,35,0.25)}
-    .google-btn:disabled{opacity:0.55;cursor:not-allowed;transform:none}
-    .google-btn svg{width:20px;height:20px;flex-shrink:0}
-    .role-hint{text-align:center;font-size:0.82rem;color:var(--muted);min-height:1.2em;margin-bottom:0.75rem}
-    .role-hint.active{color:var(--jade);font-weight:600}
-    .back-link{display:block;text-align:center;font-size:0.85rem;color:var(--muted)}
-    .back-link a{color:var(--saffron)}
-    .admin-link{display:block;text-align:center;font-size:0.8rem;color:var(--muted);margin-top:0.75rem}
-    .admin-link a{color:var(--muted);text-decoration:underline}
-    #toast-container{position:fixed;bottom:1.5rem;right:1.5rem;z-index:9999;display:flex;flex-direction:column;gap:0.5rem}
-    .toast{min-width:260px;max-width:360px;padding:0.9rem 1.2rem;background:var(--ink);color:#fff;border-radius:10px;font-size:0.9rem;font-weight:500;box-shadow:0 8px 32px rgba(15,25,35,0.12);display:flex;align-items:center;gap:0.6rem;animation:toastIn 0.3s ease}
-    .toast.success{background:var(--jade)}.toast.error{background:#C0392B}.toast.info{background:var(--saffron)}
-    @keyframes toastIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+    .box{background:#fff;border-radius:22px;border:1px solid var(--border);box-shadow:0 16px 60px rgba(15,25,35,0.12);padding:2.2rem 2rem;width:100%;max-width:460px}
+    .logo{display:flex;align-items:center;gap:8px;justify-content:center;margin-bottom:1.5rem;text-decoration:none}
+    .logo-icon{width:46px;height:46px;background:linear-gradient(135deg,#E8590C,#D4920A);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.5rem}
+    .logo-text{font-family:'Baloo Tamma 2',cursive;font-size:1.65rem;font-weight:800;color:var(--ink)}
+    .logo-text span{color:var(--saffron)}
+    /* Tab switcher */
+    .tab-bar{display:flex;background:var(--paper);border-radius:12px;padding:4px;margin-bottom:1.5rem;gap:4px}
+    .tab-btn{flex:1;padding:9px;border:none;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:0.92rem;font-weight:600;cursor:pointer;transition:all 0.25s;background:transparent;color:var(--muted)}
+    .tab-btn.active{background:#fff;color:var(--ink);box-shadow:0 2px 8px rgba(0,0,0,0.1)}
+    /* Role cards */
+    .role-label{font-size:0.78rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px}
+    .role-cards{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1.25rem}
+    .role-card{display:flex;flex-direction:column;align-items:center;gap:6px;padding:1.1rem 0.75rem;border-radius:14px;border:2px solid var(--border);background:var(--paper);cursor:pointer;transition:all 0.2s;user-select:none}
+    .role-card:hover{border-color:var(--saffron)}
+    .role-card.sel-worker{border-color:var(--jade);background:rgba(27,107,69,0.07)}
+    .role-card.sel-hirer{border-color:var(--saffron);background:rgba(232,89,12,0.07)}
+    .rc-dot{width:16px;height:16px;border-radius:50%;border:2px solid var(--border);transition:all 0.2s}
+    .sel-worker .rc-dot{background:var(--jade);border-color:var(--jade)}
+    .sel-hirer .rc-dot{background:var(--saffron);border-color:var(--saffron)}
+    .rc-icon{font-size:2rem}
+    .rc-name{font-family:'Baloo Tamma 2',cursive;font-weight:700;font-size:0.95rem;color:var(--ink)}
+    .rc-desc{font-size:0.74rem;color:var(--muted);text-align:center}
+    /* Hint */
+    .hint{text-align:center;font-size:0.8rem;color:var(--muted);min-height:1.1em;margin-bottom:10px;transition:color 0.2s}
+    .hint.ok{color:var(--jade);font-weight:600}
+    /* Divider */
+    .div{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:0.8rem;margin-bottom:14px}
+    .div::before,.div::after{content:'';flex:1;height:1px;background:var(--border)}
+    /* Google button */
+    .gbtn{width:100%;display:flex;align-items:center;justify-content:center;gap:10px;padding:13px 1.5rem;background:var(--ink);color:#fff;border:none;border-radius:12px;font-family:'DM Sans',sans-serif;font-size:0.98rem;font-weight:600;cursor:pointer;transition:all 0.2s;margin-bottom:10px}
+    .gbtn:hover{background:#1a2a3a;transform:translateY(-2px);box-shadow:0 6px 20px rgba(15,25,35,0.25)}
+    .gbtn:disabled{opacity:0.55;cursor:not-allowed;transform:none;box-shadow:none}
+    .gbtn svg{width:20px;height:20px;flex-shrink:0}
+    .back{display:block;text-align:center;font-size:0.82rem;color:var(--muted)}
+    .back a{color:var(--saffron);text-decoration:none}
+    .admin-l{display:block;text-align:center;font-size:0.78rem;color:var(--muted);margin-top:6px}
+    .admin-l a{color:var(--muted);text-decoration:underline}
+    /* Tab content pane */
+    .tab-pane{display:none}.tab-pane.active{display:block}
+    /* Login info text */
+    .info-box{background:rgba(27,107,69,0.07);border:1px solid rgba(27,107,69,0.2);border-radius:10px;padding:10px 14px;font-size:0.82rem;color:var(--jade);margin-bottom:14px;line-height:1.5}
+    /* Spinner */
+    .spin{display:inline-block;width:16px;height:16px;border:2.5px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.7s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    /* Toast */
+    #tc{position:fixed;bottom:1.5rem;right:1.5rem;z-index:9999;display:flex;flex-direction:column;gap:8px}
+    .toast{min-width:240px;padding:11px 16px;border-radius:10px;font-size:0.88rem;font-weight:500;display:flex;align-items:center;gap:8px;box-shadow:0 8px 24px rgba(0,0,0,0.15);animation:fadeup 0.3s ease;color:#fff}
+    .t-s{background:#1B6B45}.t-e{background:#C0392B}.t-i{background:#E8590C}
+    @keyframes fadeup{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
   </style>
 </head>
 <body>
-  <div class="login-box">
-    <a class="login-logo" href="index.html">
-      <div class="login-logo-icon">🌾</div>
-      <div class="login-logo-text">Kelasa<span>Gaara</span></div>
-    </a>
-    <h2 class="login-title">Welcome Back!</h2>
-    <p class="login-subtitle">Select your role, then sign in with Google</p>
+<div class="box">
+  <a class="logo" href="index.html">
+    <div class="logo-icon">🌾</div>
+    <div class="logo-text">Kelasa<span>Gaara</span></div>
+  </a>
 
-    <div class="role-label">Step 1 — I am a…</div>
-    <div class="role-cards">
-      <div class="role-card" id="card-worker" onclick="selectRole('worker')">
-        <div class="check-dot"></div>
-        <div class="role-card-icon">👷</div>
-        <div class="role-card-name">Worker</div>
-        <div class="role-card-desc">I look for daily wage jobs</div>
-      </div>
-      <div class="role-card" id="card-hirer" onclick="selectRole('hirer')">
-        <div class="check-dot"></div>
-        <div class="role-card-icon">🏗️</div>
-        <div class="role-card-name">Hirer</div>
-        <div class="role-card-desc">I post jobs and hire workers</div>
-      </div>
-    </div>
-
-    <div class="role-hint" id="role-hint">Please select a role above to continue</div>
-    <div class="divider-line">Step 2 — Sign in</div>
-
-    <button class="google-btn" id="google-btn" onclick="handleGoogleLogin()" disabled>
-      <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
-        <path fill="#FFC107" d="M43.6 20.1H42V20H24v8h11.3C33.7 32.7 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 2.9l5.7-5.7C34.5 6.5 29.5 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.6-.4-3.9z"/>
-        <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.5 15.8 18.9 12 24 12c3.1 0 5.8 1.1 8 2.9l5.7-5.7C34.5 6.5 29.5 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/>
-        <path fill="#4CAF50" d="M24 44c5.2 0 9.9-1.9 13.5-5.1l-6.2-5.2C29.3 35.4 26.8 36 24 36c-5.2 0-9.6-3.4-11.2-8H6.7C10.1 37.9 16.5 44 24 44z"/>
-        <path fill="#1976D2" d="M43.6 20.1H42V20H24v8h11.3c-.7 2-2 3.8-3.7 5.1l6.2 5.2C41.6 35.1 44 30 44 24c0-1.3-.1-2.6-.4-3.9z"/>
-      </svg>
-      Continue with Google
-    </button>
-
-    <p class="back-link">← <a href="index.html">Back to Home</a></p>
-    <p class="admin-link"><a href="admin-login.html">Admin Login →</a></p>
+  <!-- Tab bar -->
+  <div class="tab-bar">
+    <button class="tab-btn active" id="tab-login-btn"  onclick="switchTab('login')">🔑 Login</button>
+    <button class="tab-btn"        id="tab-signup-btn" onclick="switchTab('signup')">✨ Sign Up</button>
   </div>
 
-  <div id="toast-container"></div>
+  <!-- LOGIN TAB -->
+  <div class="tab-pane active" id="tab-login">
+    <div class="info-box">👋 Already have an account? Select your role and sign in with Google.</div>
+    <div class="role-label">I am a…</div>
+    <div class="role-cards">
+      <div class="role-card" id="lw" onclick="selRole('login','worker')">
+        <div class="rc-dot"></div><div class="rc-icon">👷</div>
+        <div class="rc-name">Worker</div><div class="rc-desc">Find daily wage jobs</div>
+      </div>
+      <div class="role-card" id="lh" onclick="selRole('login','hirer')">
+        <div class="rc-dot"></div><div class="rc-icon">🏗️</div>
+        <div class="rc-name">Hirer</div><div class="rc-desc">Post jobs & hire workers</div>
+      </div>
+    </div>
+    <div class="hint" id="lhint">Select your role to continue</div>
+    <div class="div">Sign in with Google</div>
+    <button class="gbtn" id="lbtn" onclick="doLogin()" disabled>
+      <svg viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.1H42V20H24v8h11.3C33.7 32.7 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 2.9l5.7-5.7C34.5 6.5 29.5 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.6-.4-3.9z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.5 15.8 18.9 12 24 12c3.1 0 5.8 1.1 8 2.9l5.7-5.7C34.5 6.5 29.5 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-1.9 13.5-5.1l-6.2-5.2C29.3 35.4 26.8 36 24 36c-5.2 0-9.6-3.4-11.2-8H6.7C10.1 37.9 16.5 44 24 44z"/><path fill="#1976D2" d="M43.6 20.1H42V20H24v8h11.3c-.7 2-2 3.8-3.7 5.1l6.2 5.2C41.6 35.1 44 30 44 24c0-1.3-.1-2.6-.4-3.9z"/></svg>
+      Login with Google
+    </button>
+    <p class="back">← <a href="index.html">Back to Home</a></p>
+    <p class="admin-l"><a href="admin-login.html">Admin Login →</a></p>
+  </div>
 
-  <script type="module">
-    import { showToast }        from './js/app.js';
-    import { signInWithGoogle } from './js/auth.js';
-    import { auth }             from './js/firebase-config.js';
-    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  <!-- SIGNUP TAB -->
+  <div class="tab-pane" id="tab-signup">
+    <div class="info-box">🆕 New to KelasaGaara? Choose your role and sign up with Google. You'll set up your full profile next.</div>
+    <div class="role-label">I want to join as…</div>
+    <div class="role-cards">
+      <div class="role-card" id="sw" onclick="selRole('signup','worker')">
+        <div class="rc-dot"></div><div class="rc-icon">👷</div>
+        <div class="rc-name">Worker</div><div class="rc-desc">Get hired for jobs</div>
+      </div>
+      <div class="role-card" id="sh" onclick="selRole('signup','hirer')">
+        <div class="rc-dot"></div><div class="rc-icon">🏗️</div>
+        <div class="rc-name">Hirer</div><div class="rc-desc">Hire skilled workers</div>
+      </div>
+    </div>
+    <div class="hint" id="shint">Choose how you want to use KelasaGaara</div>
+    <div class="div">Create account with Google</div>
+    <button class="gbtn" id="sbtn" onclick="doSignup()" disabled>
+      <svg viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.1H42V20H24v8h11.3C33.7 32.7 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 2.9l5.7-5.7C34.5 6.5 29.5 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.6-.4-3.9z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.5 15.8 18.9 12 24 12c3.1 0 5.8 1.1 8 2.9l5.7-5.7C34.5 6.5 29.5 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-1.9 13.5-5.1l-6.2-5.2C29.3 35.4 26.8 36 24 36c-5.2 0-9.6-3.4-11.2-8H6.7C10.1 37.9 16.5 44 24 44z"/><path fill="#1976D2" d="M43.6 20.1H42V20H24v8h11.3c-.7 2-2 3.8-3.7 5.1l6.2 5.2C41.6 35.1 44 30 44 24c0-1.3-.1-2.6-.4-3.9z"/></svg>
+      Sign Up with Google
+    </button>
+    <p class="back">Already have an account? <a href="#" onclick="switchTab('login')">Login →</a></p>
+  </div>
+</div>
 
-    let selectedRole = null;
+<div id="tc"></div>
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const preRole   = urlParams.get('role');
-    if (preRole === 'worker' || preRole === 'hirer') selectRole(preRole);
+<script type="module">
+  import { auth, db }          from './js/firebase-config.js';
+  import { GoogleAuthProvider, signInWithPopup, onAuthStateChanged }
+    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { doc, getDoc, setDoc, updateDoc, serverTimestamp }
+    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-    onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        const { db }      = await import('./js/firebase-config.js');
-        const { doc, getDoc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
-        const snap = await getDoc(doc(db, 'users', user.uid));
-        if (snap.exists()) {
-          const role = snap.data().role;
-          if (role === 'worker')   window.location.href = 'worker-dashboard.html';
-          else if (role === 'hirer') window.location.href = 'hirer-dashboard.html';
-        }
-      }
-    });
+  const provider = new GoogleAuthProvider();
+  provider.setCustomParameters({ prompt: 'select_account' });
 
-    window.selectRole = function(role) {
-      selectedRole = role;
-      document.getElementById('card-worker').className   = 'role-card';
-      document.getElementById('card-hirer').className = 'role-card';
-      if (role === 'worker') {
-        document.getElementById('card-worker').className  = 'role-card selected-worker';
-        document.getElementById('role-hint').textContent  = '✅ You selected: Worker — looking for jobs';
-        document.getElementById('role-hint').className    = 'role-hint active';
+  let loginRole = null, signupRole = null;
+
+  // Auto-redirect if already logged in
+  onAuthStateChanged(auth, async user => {
+    if (!user) return;
+    const snap = await getDoc(doc(db,'users',user.uid));
+    if (!snap.exists()) return;
+    const d = snap.data();
+    if (!d.profileComplete) { window.location.href='setup-profile.html'; return; }
+    window.location.href = d.role === 'worker' ? 'worker-dashboard.html' : 'hirer-dashboard.html';
+  });
+
+  // Pre-select role from URL param
+  const pre = new URLSearchParams(window.location.search).get('role');
+  if (pre === 'worker' || pre === 'hirer') {
+    selRole('login', pre);
+    selRole('signup', pre);
+  }
+
+  window.switchTab = function(tab) {
+    document.getElementById('tab-login-btn').classList.toggle('active', tab==='login');
+    document.getElementById('tab-signup-btn').classList.toggle('active', tab==='signup');
+    document.getElementById('tab-login').classList.toggle('active', tab==='login');
+    document.getElementById('tab-signup').classList.toggle('active', tab==='signup');
+  };
+
+  window.selRole = function(form, role) {
+    if (form === 'login') {
+      loginRole = role;
+      document.getElementById('lw').className = 'role-card' + (role==='worker'?' sel-worker':'');
+      document.getElementById('lh').className = 'role-card' + (role==='hirer'?' sel-hirer':'');
+      document.getElementById('lhint').textContent = `✅ ${role==='worker'?'Worker':'Hirer'} selected`;
+      document.getElementById('lhint').className = 'hint ok';
+      document.getElementById('lbtn').disabled = false;
+    } else {
+      signupRole = role;
+      document.getElementById('sw').className = 'role-card' + (role==='worker'?' sel-worker':'');
+      document.getElementById('sh').className = 'role-card' + (role==='hirer'?' sel-hirer':'');
+      document.getElementById('shint').textContent = `✅ Joining as ${role==='worker'?'Worker':'Hirer'}`;
+      document.getElementById('shint').className = 'hint ok';
+      document.getElementById('sbtn').disabled = false;
+    }
+  };
+
+  window.doLogin = async function() {
+    if (!loginRole) { toast('Select a role first','e'); return; }
+    const btn = document.getElementById('lbtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spin"></span> Signing in…';
+    try {
+      const res  = await signInWithPopup(auth, provider);
+      const user = res.user;
+      const snap = await getDoc(doc(db,'users',user.uid));
+      if (!snap.exists()) {
+        // New user via login tab — create doc and send to profile setup
+        await setDoc(doc(db,'users',user.uid), {
+          uid:user.uid, name:user.displayName, email:user.email,
+          photo:user.photoURL, role:loginRole, skills:[],
+          profileComplete:false, createdAt:serverTimestamp(), lastLogin:serverTimestamp()
+        });
+        window.location.href='setup-profile.html';
       } else {
-        document.getElementById('card-hirer').className = 'role-card selected-hirer';
-        document.getElementById('role-hint').textContent   = '✅ You selected: Hirer — posting jobs & hiring';
-        document.getElementById('role-hint').className     = 'role-hint active';
+        await updateDoc(doc(db,'users',user.uid),{lastLogin:serverTimestamp()});
+        const d = snap.data();
+        if(!d.profileComplete){ window.location.href='setup-profile.html'; return; }
+        toast(`Welcome back, ${user.displayName.split(' ')[0]}! 👋`,'s');
+        setTimeout(()=>{ window.location.href = d.role==='worker'?'worker-dashboard.html':'hirer-dashboard.html'; },800);
       }
-      document.getElementById('google-btn').disabled = false;
-    };
+    } catch(e) {
+      console.error(e);
+      toast('Sign-in failed. Try again.','e');
+      btn.disabled=false;
+      btn.innerHTML='<svg viewBox="0 0 48 48" width="20" height="20"><path fill="#FFC107" d="M43.6 20.1H42V20H24v8h11.3C33.7 32.7 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 2.9l5.7-5.7C34.5 6.5 29.5 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.6-.4-3.9z"/></svg> Login with Google';
+    }
+  };
 
-    window.handleGoogleLogin = async function() {
-      const btn = document.getElementById('google-btn');
-      btn.disabled  = true;
-      btn.innerHTML = `<span style="display:inline-block;width:18px;height:18px;border:3px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.7s linear infinite"></span> Signing in…`;
-      await signInWithGoogle(selectedRole);
-      btn.disabled  = false;
-      btn.innerHTML = `<svg viewBox="0 0 48 48" width="20" height="20"><path fill="#FFC107" d="M43.6 20.1H42V20H24v8h11.3C33.7 32.7 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 2.9l5.7-5.7C34.5 6.5 29.5 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.6-.4-3.9z"/></svg> Continue with Google`;
-    };
-  </script>
-  <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+  window.doSignup = async function() {
+    if (!signupRole) { toast('Choose your role first','e'); return; }
+    const btn = document.getElementById('sbtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spin"></span> Creating account…';
+    try {
+      const res  = await signInWithPopup(auth, provider);
+      const user = res.user;
+      const snap = await getDoc(doc(db,'users',user.uid));
+      if (!snap.exists()) {
+        await setDoc(doc(db,'users',user.uid), {
+          uid:user.uid, name:user.displayName, email:user.email,
+          photo:user.photoURL, role:signupRole, skills:[],
+          profileComplete:false, createdAt:serverTimestamp(), lastLogin:serverTimestamp()
+        });
+        toast('Account created! Setting up your profile…','s');
+        setTimeout(()=>window.location.href='setup-profile.html',800);
+      } else {
+        // Already exists — just log in
+        const d = snap.data();
+        await updateDoc(doc(db,'users',user.uid),{lastLogin:serverTimestamp()});
+        toast('Account exists — logging you in!','i');
+        setTimeout(()=>{
+          window.location.href = !d.profileComplete?'setup-profile.html':(d.role==='worker'?'worker-dashboard.html':'hirer-dashboard.html');
+        },800);
+      }
+    } catch(e) {
+      console.error(e);
+      toast('Sign-up failed. Try again.','e');
+      btn.disabled=false;
+      btn.innerHTML='<svg viewBox="0 0 48 48" width="20" height="20"><path fill="#FFC107" d="M43.6 20.1H42V20H24v8h11.3C33.7 32.7 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 2.9l5.7-5.7C34.5 6.5 29.5 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.6-.4-3.9z"/></svg> Sign Up with Google';
+    }
+  };
+
+  function toast(msg,t='i'){
+    const c=document.getElementById('tc');
+    const el=document.createElement('div');
+    el.className=`toast t-${t}`;el.textContent=msg;c.appendChild(el);
+    setTimeout(()=>el.remove(),3200);
+  }
+</script>
 </body>
 </html>

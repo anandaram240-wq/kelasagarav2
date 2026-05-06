@@ -1,334 +1,386 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-  <title>Complete Your Profile — KelasaGaara</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link href="https://fonts.googleapis.com/css2?family=Baloo+Tamma+2:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
-  <style>
-    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    :root{
-      --saffron:#E8600A;--saffron-light:#FEF0E6;--saffron-dark:#C04E06;
-      --jade:#2D6A4F;--jade-light:#E8F5EE;
-      --paper:#FAF8F5;--ink:#1A1A2E;--muted:#6B7280;--border:#E5E2DC;
-    }
-    body{font-family:'DM Sans',sans-serif;background:var(--paper);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px}
-
-    .card{background:#fff;border:1px solid var(--border);border-radius:20px;padding:40px 36px;width:100%;max-width:520px;box-shadow:0 8px 32px rgba(0,0,0,0.08)}
-
-    .step-header{text-align:center;margin-bottom:32px}
-    .avatar-wrap{position:relative;display:inline-block;margin-bottom:16px}
-    .user-avatar{width:72px;height:72px;border-radius:50%;border:3px solid var(--saffron);object-fit:cover}
-    .avatar-placeholder{width:72px;height:72px;border-radius:50%;background:var(--saffron-light);border:3px solid var(--saffron);display:flex;align-items:center;justify-content:center;font-size:1.6rem;color:var(--saffron);font-weight:700}
-    .role-dot{position:absolute;bottom:2px;right:2px;width:22px;height:22px;border-radius:50%;background:var(--jade);border:2px solid #fff;display:flex;align-items:center;justify-content:center;font-size:0.7rem}
-    h1{font-family:'Baloo Tamma 2',sans-serif;font-size:1.5rem;font-weight:800;color:var(--ink);margin-bottom:4px}
-    .subtitle{font-size:0.88rem;color:var(--muted)}
-
-    /* Progress bar */
-    .progress{display:flex;gap:6px;margin-bottom:28px}
-    .progress-step{flex:1;height:4px;border-radius:2px;background:var(--border);transition:background 0.3s}
-    .progress-step.done{background:var(--jade)}
-    .progress-step.active{background:var(--saffron)}
-
-    /* Form */
-    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-    .form-group{display:flex;flex-direction:column;gap:6px}
-    .form-group.full{grid-column:1/-1}
-    label{font-size:0.82rem;font-weight:600;color:var(--ink)}
-    label .required{color:var(--saffron)}
-    input,select,textarea{padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:0.88rem;font-family:'DM Sans',sans-serif;color:var(--ink);background:#fff;outline:none;transition:border 0.2s;width:100%}
-    input:focus,select:focus,textarea:focus{border-color:var(--saffron)}
-    input.error,select.error{border-color:#DC2626}
-    .field-hint{font-size:0.75rem;color:var(--muted)}
-
-    /* Trade pills */
-    .trade-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-    .trade-pill{padding:9px 6px;border:1.5px solid var(--border);border-radius:10px;text-align:center;font-size:0.8rem;cursor:pointer;transition:all 0.2s;background:#fff;color:var(--ink)}
-    .trade-pill:hover{border-color:var(--saffron);background:var(--saffron-light)}
-    .trade-pill.selected{border-color:var(--saffron);background:var(--saffron);color:#fff;font-weight:600}
-    .trade-pill .emoji{display:block;font-size:1.2rem;margin-bottom:2px}
-
-    /* Experience buttons */
-    .exp-row{display:flex;gap:8px;flex-wrap:wrap}
-    .exp-btn{padding:8px 16px;border:1.5px solid var(--border);border-radius:8px;background:#fff;font-size:0.82rem;cursor:pointer;color:var(--muted);transition:all 0.2s;font-family:'DM Sans',sans-serif}
-    .exp-btn.selected{border-color:var(--jade);background:var(--jade-light);color:var(--jade);font-weight:600}
-
-    /* Submit */
-    .btn-submit{width:100%;padding:14px;background:var(--saffron);color:#fff;border:none;border-radius:12px;font-size:1rem;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;margin-top:24px;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:8px}
-    .btn-submit:hover{background:var(--saffron-dark);transform:translateY(-1px)}
-    .btn-submit:disabled{opacity:0.6;cursor:not-allowed;transform:none}
-
-    /* Toast */
-    #toast{position:fixed;bottom:20px;right:20px;padding:12px 20px;border-radius:10px;font-size:0.88rem;font-weight:500;transform:translateY(60px);opacity:0;transition:all 0.3s;z-index:999;max-width:320px}
-    #toast.show{transform:translateY(0);opacity:1}
-    #toast.success{background:#2D6A4F;color:#fff}
-    #toast.error{background:#DC2626;color:#fff}
-  </style>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Setup Profile — KelasaGaara</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+Tamma+2:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--s:#E8590C;--j:#1B6B45;--ink:#0F1923;--paper:#F7F2EA;--m:#7A6A58;--b:rgba(180,130,70,0.2)}
+body{font-family:'DM Sans',sans-serif;background:linear-gradient(160deg,#fff9f4,var(--paper));min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem 1rem}
+.box{background:#fff;border-radius:22px;border:1px solid var(--b);box-shadow:0 16px 60px rgba(15,25,35,0.12);width:100%;max-width:520px;overflow:hidden}
+/* Progress */
+.prog-bar{height:5px;background:var(--paper);position:relative}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--j),var(--s));border-radius:5px;transition:width 0.4s ease}
+.steps-ind{display:flex;justify-content:center;gap:8px;padding:14px 0 0}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--b);transition:all 0.3s}
+.dot.done{background:var(--j)}.dot.active{background:var(--s);transform:scale(1.3)}
+/* Slides wrapper */
+.slides{display:flex;transition:transform 0.4s cubic-bezier(.4,0,.2,1);width:500%}
+.slide{width:20%;padding:2rem;flex-shrink:0}
+.slide-title{font-family:'Baloo Tamma 2',cursive;font-size:1.3rem;font-weight:800;color:var(--ink);margin-bottom:4px}
+.slide-sub{font-size:0.82rem;color:var(--m);margin-bottom:1.5rem}
+/* Fields */
+.fg{margin-bottom:1rem}
+.fg label{display:block;font-size:0.8rem;font-weight:600;color:var(--ink);margin-bottom:5px}
+.fg input,.fg select,.fg textarea{width:100%;padding:10px 13px;border:1.5px solid var(--b);border-radius:10px;font-size:0.9rem;font-family:'DM Sans',sans-serif;outline:none;transition:border 0.2s;background:#fff}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--s)}
+.fg select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237A6A58' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center}
+/* Skills chips */
+.chips{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:10px;min-height:30px}
+.chip{padding:5px 12px;border-radius:20px;background:rgba(27,107,69,0.1);border:1px solid rgba(27,107,69,0.3);color:var(--j);font-size:0.78rem;font-weight:600;display:flex;align-items:center;gap:5px}
+.chip button{background:none;border:none;cursor:pointer;color:var(--j);font-size:0.9rem;line-height:1;padding:0}
+.chip-row{display:flex;gap:8px}
+.chip-inp{flex:1;padding:9px 12px;border:1.5px solid var(--b);border-radius:10px;font-size:0.85rem;font-family:'DM Sans',sans-serif;outline:none}
+.chip-inp:focus{border-color:var(--j)}
+/* Nav buttons */
+.nav{display:flex;gap:10px;margin-top:1.5rem}
+.btn-back{flex:1;padding:11px;background:var(--paper);border:none;border-radius:12px;font-size:0.9rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;color:var(--m);transition:all 0.2s}
+.btn-back:hover{background:var(--b)}
+.btn-next{flex:2;padding:11px;background:var(--s);color:#fff;border:none;border-radius:12px;font-size:0.9rem;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s}
+.btn-next:hover{background:#C04E06;transform:translateY(-1px)}
+.btn-next:disabled{opacity:0.5;cursor:not-allowed;transform:none}
+/* Summary card */
+.summary{background:var(--paper);border-radius:14px;padding:14px;font-size:0.85rem;line-height:2}
+.summary strong{color:var(--ink)}
+/* Spin */
+.spin{display:inline-block;width:15px;height:15px;border:2.5px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:sp 0.7s linear infinite;vertical-align:middle}
+@keyframes sp{to{transform:rotate(360deg)}}
+</style>
 </head>
 <body>
-
-<div class="card">
-  <!-- Step progress -->
-  <div class="progress">
-    <div class="progress-step done"></div>
-    <div class="progress-step active"></div>
-    <div class="progress-step"></div>
+<div class="box">
+  <div class="prog-bar"><div class="prog-fill" id="prog" style="width:20%"></div></div>
+  <div class="steps-ind">
+    <div class="dot active" id="d0"></div>
+    <div class="dot" id="d1"></div>
+    <div class="dot" id="d2"></div>
+    <div class="dot" id="d3"></div>
+    <div class="dot" id="d4"></div>
   </div>
 
-  <!-- Header -->
-  <div class="step-header">
-    <div class="avatar-wrap">
-      <div id="avatar-el" class="avatar-placeholder">👤</div>
-      <div class="role-dot" id="role-dot">👷</div>
+  <div style="overflow:hidden">
+  <div class="slides" id="slides">
+
+    <!-- STEP 1: Basic Info -->
+    <div class="slide">
+      <div class="slide-title">👤 Basic Info</div>
+      <div class="slide-sub">Tell us a bit about yourself</div>
+      <div class="fg"><label>Display Name *</label><input id="f-name" type="text" placeholder="Your full name"/></div>
+      <div class="fg"><label>Phone Number *</label><input id="f-phone" type="tel" maxlength="10" placeholder="10-digit mobile number"/></div>
+      <div class="fg"><label>WhatsApp Number (optional)</label><input id="f-wa" type="tel" maxlength="10" placeholder="If different from phone"/></div>
+      <div class="nav">
+        <button class="btn-next" onclick="go(1)">Next — Location →</button>
+      </div>
     </div>
-    <h1>Complete Your Profile</h1>
-    <p class="subtitle" id="greeting-sub">Tell us about yourself so hirers can find you</p>
-  </div>
 
-  <!-- WORKER FORM -->
-  <div id="worker-form">
-    <div class="form-grid">
-
-      <!-- District -->
-      <div class="form-group">
-        <label>District <span class="required">*</span></label>
-        <select id="district" required>
-          <option value="">Select District</option>
+    <!-- STEP 2: Location -->
+    <div class="slide">
+      <div class="slide-title">📍 Your Location</div>
+      <div class="slide-sub">Select your district and taluk in Karnataka</div>
+      <div class="fg">
+        <label>District *</label>
+        <select id="f-dist" onchange="loadTaluks()">
+          <option value="">— Select District —</option>
         </select>
       </div>
-
-      <!-- Taluk -->
-      <div class="form-group">
-        <label>Taluk / ತಾಲ್ಲೂಕು <span class="required">*</span></label>
-        <input id="taluk" type="text" placeholder="e.g. Mysuru, Hunsur"/>
-      </div>
-
-      <!-- Trade / Skill -->
-      <div class="form-group full">
-        <label>Your Trade / ಕೌಶಲ್ಯ <span class="required">*</span></label>
-        <div class="trade-grid" id="trade-grid"></div>
-        <input id="trade-other" type="text" placeholder="Other trade (type here)" style="margin-top:8px;display:none"/>
-      </div>
-
-      <!-- Experience -->
-      <div class="form-group full">
-        <label>Experience / ಅನುಭವ <span class="required">*</span></label>
-        <div class="exp-row" id="exp-row"></div>
-      </div>
-
-      <!-- Daily Rate -->
-      <div class="form-group">
-        <label>Daily Rate (₹) <span class="required">*</span></label>
-        <input id="daily-rate" type="number" placeholder="e.g. 600" min="100" max="10000"/>
-        <span class="field-hint">Your expected daily wage</span>
-      </div>
-
-      <!-- Phone (optional) -->
-      <div class="form-group">
-        <label>Phone (optional)</label>
-        <input id="phone" type="tel" placeholder="e.g. 9876543210" maxlength="10"/>
-        <span class="field-hint">Visible only to hirers</span>
-      </div>
-
-    </div>
-    <button class="btn-submit" id="btn-save" onclick="saveWorkerProfile()">
-      ✅ Save &amp; Go to Dashboard
-    </button>
-  </div>
-
-  <!-- HIRER FORM -->
-  <div id="hirer-form" style="display:none">
-    <div class="form-grid">
-      <div class="form-group">
-        <label>District <span class="required">*</span></label>
-        <select id="hirer-district" required>
-          <option value="">Select District</option>
+      <div class="fg">
+        <label>Taluk *</label>
+        <select id="f-taluk" disabled>
+          <option value="">— Select District First —</option>
         </select>
       </div>
-      <div class="form-group">
-        <label>Company / Name <span class="required">*</span></label>
-        <input id="hirer-company" type="text" placeholder="e.g. Ramesh Constructions"/>
-      </div>
-      <div class="form-group full">
-        <label>Phone (optional)</label>
-        <input id="hirer-phone" type="tel" placeholder="e.g. 9876543210" maxlength="10"/>
+      <div class="fg"><label>Village / Town</label><input id="f-village" type="text" placeholder="e.g. Hunsur, Sargur"/></div>
+      <div class="nav">
+        <button class="btn-back" onclick="go(-1)">← Back</button>
+        <button class="btn-next" onclick="go(1)">Next — Work Details →</button>
       </div>
     </div>
-    <button class="btn-submit" id="btn-save-hirer" onclick="saveHirerProfile()">
-      ✅ Save &amp; Go to Dashboard
-    </button>
-  </div>
 
+    <!-- STEP 3: Work Details -->
+    <div class="slide">
+      <div class="slide-title" id="s3-title">🛠️ Work Details</div>
+      <div class="slide-sub" id="s3-sub">Your skills and experience</div>
+
+      <!-- Worker fields -->
+      <div id="worker-fields">
+        <div class="fg">
+          <label>Primary Trade / Skill *</label>
+          <select id="f-trade">
+            <option value="">— Select Trade —</option>
+            <option>Mason</option><option>Plumber</option><option>Electrician</option>
+            <option>Carpenter</option><option>Painter</option><option>Welder</option>
+            <option>Driver</option><option>Cook</option><option>Gardener</option>
+            <option>Security Guard</option><option>Helper / Labour</option>
+            <option>Tile Fitter</option><option>AC Technician</option>
+            <option>Mechanic</option><option>Other</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label>Experience *</label>
+          <select id="f-exp">
+            <option value="">— Select —</option>
+            <option>Less than 1 Year</option><option>1–2 Years</option>
+            <option>3–5 Years</option><option>5–10 Years</option><option>10+ Years</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label>Daily Rate (₹) *</label>
+          <input id="f-rate" type="number" min="100" max="5000" placeholder="e.g. 500, 800, 1200"/>
+        </div>
+      </div>
+
+      <!-- Hirer fields -->
+      <div id="hirer-fields" style="display:none">
+        <div class="fg"><label>Company / Business Name (optional)</label><input id="f-company" type="text" placeholder="e.g. Ramesh Constructions"/></div>
+        <div class="fg">
+          <label>Type of Work You Hire For *</label>
+          <select id="f-hiretype">
+            <option value="">— Select —</option>
+            <option>Construction</option><option>Plumbing</option><option>Electrical</option>
+            <option>Painting</option><option>Carpentry</option><option>Domestic Help</option>
+            <option>Agriculture</option><option>Transport</option><option>Other</option>
+          </select>
+        </div>
+        <div class="fg"><label>How often do you hire?</label>
+          <select id="f-freq">
+            <option value="">— Select —</option>
+            <option>Once</option><option>Monthly</option><option>Weekly</option><option>Daily</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="nav">
+        <button class="btn-back" onclick="go(-1)">← Back</button>
+        <button class="btn-next" onclick="go(1)">Next — Skills →</button>
+      </div>
+    </div>
+
+    <!-- STEP 4: Skills (worker) / About (hirer) -->
+    <div class="slide">
+      <div class="slide-title" id="s4-title">🏷️ Skills & Tools</div>
+      <div class="slide-sub" id="s4-sub">Add all your skills so hirers can find you</div>
+
+      <div id="skills-section">
+        <div class="chips" id="chips"></div>
+        <div class="chip-row">
+          <input class="chip-inp" id="skill-inp" type="text" placeholder="Type a skill e.g. Mason, Tiling…" onkeydown="if(event.key==='Enter'){addChip();event.preventDefault()}"/>
+          <button class="btn-next" style="flex:0;padding:9px 16px;font-size:0.85rem" onclick="addChip()">Add</button>
+        </div>
+        <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:7px">
+          <span style="font-size:0.75rem;color:var(--m);width:100%">Quick add:</span>
+          <span id="quick-chips"></span>
+        </div>
+      </div>
+
+      <div id="about-section" style="display:none">
+        <div class="fg"><label>About / Description (optional)</label><textarea id="f-about" rows="4" placeholder="Tell workers what kind of projects you work on…" style="resize:vertical"></textarea></div>
+      </div>
+
+      <div class="nav">
+        <button class="btn-back" onclick="go(-1)">← Back</button>
+        <button class="btn-next" onclick="go(1)">Review Profile →</button>
+      </div>
+    </div>
+
+    <!-- STEP 5: Review & Submit -->
+    <div class="slide">
+      <div class="slide-title">✅ Review Profile</div>
+      <div class="slide-sub">Confirm your details before saving</div>
+      <div class="summary" id="summary"></div>
+      <div class="nav">
+        <button class="btn-back" onclick="go(-1)">← Edit</button>
+        <button class="btn-next" id="save-btn" onclick="saveProfile()">🚀 Save & Go to Dashboard</button>
+      </div>
+    </div>
+
+  </div>
+  </div>
 </div>
 
-<div id="toast"></div>
-
 <script type="module">
-  import { auth, db } from './js/firebase-config.js';
-  import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-  import { doc, getDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { auth, db } from './js/firebase-config.js';
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { doc, getDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-  const DISTRICTS = ["Bagalkot","Ballari","Belagavi","Bengaluru Rural","Bengaluru Urban","Bidar","Chamarajanagar","Chikkaballapura","Chikkamagaluru","Chitradurga","Dakshina Kannada","Davanagere","Dharwad","Gadag","Hassan","Haveri","Kalaburagi","Kodagu","Kolar","Koppal","Mandya","Mysuru","Raichur","Ramanagera","Shivamogga","Tumakuru","Udupi","Uttara Kannada","Vijayapura","Yadgir","Vijayanagara"];
-  const TRADES = [
-    {emoji:"🧱",label:"Mason / ಮೇಸ್ತ್ರಿ",en:"Mason"},
-    {emoji:"🔧",label:"Plumber / ಪ್ಲಂಬರ್",en:"Plumber"},
-    {emoji:"⚡",label:"Electrician",en:"Electrician"},
-    {emoji:"🪵",label:"Carpenter / ಮರಗೆಲಸ",en:"Carpenter"},
-    {emoji:"🎨",label:"Painter / ಪೇಂಟರ್",en:"Painter"},
-    {emoji:"🚗",label:"Driver / ಡ್ರೈವರ್",en:"Driver"},
-    {emoji:"🍳",label:"Cook / ಅಡಿಗೆ",en:"Cook"},
-    {emoji:"🌿",label:"Gardener / ತೋಟಗಾರ",en:"Gardener"},
-    {emoji:"🔒",label:"Security Guard",en:"Security Guard"},
-    {emoji:"🤝",label:"Helper / ಸಹಾಯಕ",en:"Helper"},
-    {emoji:"🏗️",label:"Labour / ಕೂಲಿ",en:"Labour"},
-    {emoji:"✏️",label:"Other / ಇತರ",en:"Other"}
-  ];
-  const EXP = ["< 1 Year","1–2 Years","3–5 Years","5–10 Years","10+ Years"];
+const DISTRICTS = {
+  "Bagalkot":["Bagalkot","Badami","Bilagi","Hungund","Jamkhandi","Mudhol","Bilagi"],
+  "Ballari":["Ballari","Hagaribommanahalli","Hospet","Kudligi","Sandur","Siruguppa"],
+  "Belagavi":["Belagavi","Athani","Bailhongal","Chikodi","Gokak","Hukkeri","Khanapur","Raibag","Ramdurg","Saundatti","Savadatti"],
+  "Bengaluru Rural":["Devanahalli","Doddaballapura","Hosakote","Nelamangala"],
+  "Bengaluru Urban":["Anekal","Bengaluru East","Bengaluru North","Bengaluru South","Bengaluru West","Dasarahalli","Yeshwanthapura"],
+  "Bidar":["Aurad","Basavakalyan","Bhalki","Bidar","Humnabad"],
+  "Chamarajanagar":["Chamarajanagar","Gundlupet","Kollegal","Yelandur"],
+  "Chikkaballapura":["Bagepalli","Chikkaballapura","Chintamani","Gauribidanur","Gudibande","Sidlaghatta"],
+  "Chikkamagaluru":["Chikkamagaluru","Kadur","Koppa","Mudigere","N.R.Pura","Sringeri","Tarikere"],
+  "Chitradurga":["Challakere","Chitradurga","Hiriyur","Holalkere","Hosadurga","Molakalmuru"],
+  "Dakshina Kannada":["Bantwal","Belthangady","Mangaluru","Puttur","Sullia","Ullal"],
+  "Davanagere":["Channagiri","Davanagere","Harihar","Harpanahalli","Jagalur","Nyamathi"],
+  "Dharwad":["Dharwad","Hubli","Kalagatagi","Navalgund","Kundgol"],
+  "Gadag":["Gadag","Mundargi","Naragund","Ron","Shirahatti"],
+  "Hassan":["Alur","Arkalgud","Arsikere","Belur","Channarayapatna","Hassan","Holenarasipur","Sakleshpur"],
+  "Haveri":["Byadgi","Hanagal","Haveri","Hirekerur","Ranebennur","Savanur","Shiggaon"],
+  "Kalaburagi":["Afzalpur","Aland","Chincholi","Chittapur","Gulbarga","Jevargi","Sedam","Yadgir"],
+  "Kodagu":["Madikeri","Somwarpet","Virajpet"],
+  "Kolar":["Bangarpet","Kolar","Malur","Mulbagal","Srinivaspur"],
+  "Koppal":["Gangavati","Koppal","Kushtagi","Yelburga"],
+  "Mandya":["Kirugavalu","Krishnarajapete","Maddur","Malavalli","Mandya","Nagamangala","Pandavapura","Srirangapatna"],
+  "Mysuru":["H.D.Kote","Hunsur","K.R.Nagar","Mysuru","Nanjangud","Periyapatna","T.Narasipur"],
+  "Raichur":["Devadurga","Lingsugur","Manvi","Raichur","Sindhanur","Mudgal"],
+  "Ramanagara":["Channapatna","Kanakapura","Magadi","Ramanagara"],
+  "Shivamogga":["Bhadravati","Hosanagara","Sagara","Shikaripur","Shivamogga","Soraba","Thirthahalli"],
+  "Tumakuru":["Chikkanayakanahalli","Gubbi","Koratagere","Kunigal","Madhugiri","Pavagada","Sira","Tiptur","Tumakuru","Turuvekere"],
+  "Udupi":["Karkala","Kundapura","Udupi"],
+  "Uttara Kannada":["Ankola","Bhatkal","Dandeli","Haliyal","Haveri","Honavar","Karwar","Kumta","Mundgod","Siddapur","Sirsi","Yellapur"],
+  "Vijayapura":["Basavana Bagewadi","Bijapur","Indi","Muddebihal","Sindagi"],
+  "Yadgir":["Gurumitkal","Shorapur","Yadgir"],
+  "Vijayanagara":["Hadagali","Harapanahalli","Hospet","Kottur","Kotturu","Sandur"]
+};
 
-  let currentUser = null, userRole = null, selectedTrade = '', selectedExp = '';
+const QUICK_SKILLS = ['Mason','Plumber','Electrician','Carpenter','Painter','Driver','Cook','Welder','Tiling','Helper'];
+let userRole='worker', currentUser=null, step=0, skills=[];
 
-  // Populate district dropdowns
-  ['district','hirer-district'].forEach(id => {
-    const sel = document.getElementById(id);
-    if (!sel) return;
-    DISTRICTS.forEach(d => { const o = document.createElement('option'); o.value = d; o.textContent = d; sel.appendChild(o); });
-  });
+onAuthStateChanged(auth, async user=>{
+  if(!user){window.location.href='login.html';return;}
+  currentUser=user;
+  const snap=await getDoc(doc(db,'users',user.uid));
+  if(!snap.exists()){window.location.href='login.html';return;}
+  const d=snap.data();
+  if(d.profileComplete){window.location.href=d.role==='worker'?'worker-dashboard.html':'hirer-dashboard.html';return;}
+  userRole=d.role||'worker';
 
-  // Build trade grid
-  const tg = document.getElementById('trade-grid');
-  TRADES.forEach(t => {
-    const btn = document.createElement('button');
-    btn.className = 'trade-pill';
-    btn.innerHTML = `<span class="emoji">${t.emoji}</span>${t.label}`;
-    btn.onclick = () => {
-      document.querySelectorAll('.trade-pill').forEach(p => p.classList.remove('selected'));
-      btn.classList.add('selected');
-      selectedTrade = t.en;
-      document.getElementById('trade-other').style.display = t.en === 'Other' ? 'block' : 'none';
-    };
-    tg.appendChild(btn);
-  });
+  // Pre-fill name
+  document.getElementById('f-name').value=d.name||user.displayName||'';
 
-  // Build experience buttons
-  const er = document.getElementById('exp-row');
-  EXP.forEach(e => {
-    const btn = document.createElement('button');
-    btn.className = 'exp-btn';
-    btn.textContent = e;
-    btn.onclick = () => {
-      document.querySelectorAll('.exp-btn').forEach(b => b.classList.remove('selected'));
-      btn.classList.add('selected');
-      selectedExp = e;
-    };
-    er.appendChild(btn);
-  });
-
-  // Auth guard
-  onAuthStateChanged(auth, async (user) => {
-    if (!user) { window.location.href = 'login.html'; return; }
-    currentUser = user;
-
-    const snap = await getDoc(doc(db, 'users', user.uid));
-    if (!snap.exists()) { window.location.href = 'login.html'; return; }
-    const data = snap.data();
-    userRole = data.role;
-
-    // If profile already set up, skip this page
-    if (data.district && data.profileComplete) {
-      window.location.href = userRole === 'worker' ? 'worker-dashboard.html' : 'hirer-dashboard.html';
-      return;
-    }
-
-    // Show user avatar
-    const avatarEl = document.getElementById('avatar-el');
-    if (user.photoURL) {
-      avatarEl.outerHTML = `<img class="user-avatar" id="avatar-el" src="${user.photoURL}" alt=""/>`;
-    } else {
-      const initials = (user.displayName||'U').split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase();
-      avatarEl.textContent = initials;
-    }
-
-    // Show role dot & correct form
-    if (userRole === 'hirer') {
-      document.getElementById('role-dot').textContent = '🏗️';
-      document.getElementById('greeting-sub').textContent = `${user.displayName} — Tell us about your business`;
-      document.getElementById('worker-form').style.display = 'none';
-      document.getElementById('hirer-form').style.display = 'block';
-    } else {
-      document.getElementById('greeting-sub').textContent = `${user.displayName} — Hirers will find you by your profile`;
-    }
-  });
-
-  // ── Save Worker Profile ───────────────────────────────────────
-  window.saveWorkerProfile = async function() {
-    const district  = document.getElementById('district').value;
-    const taluk     = document.getElementById('taluk').value.trim();
-    const trade     = selectedTrade === 'Other' ? document.getElementById('trade-other').value.trim() : selectedTrade;
-    const exp       = selectedExp;
-    const rate      = document.getElementById('daily-rate').value;
-    const phone     = document.getElementById('phone').value.trim();
-
-    if (!district)  return toast('Please select your district', 'error');
-    if (!taluk)     return toast('Please enter your taluk', 'error');
-    if (!trade)     return toast('Please select your trade / skill', 'error');
-    if (!exp)       return toast('Please select your experience', 'error');
-    if (!rate || rate < 100) return toast('Please enter a valid daily rate (min ₹100)', 'error');
-
-    const btn = document.getElementById('btn-save');
-    btn.disabled = true; btn.textContent = 'Saving…';
-
-    try {
-      await updateDoc(doc(db, 'users', currentUser.uid), {
-        district,
-        taluk,
-        skills:          [trade],
-        experience:      exp,
-        dailyRate:       parseInt(rate),
-        phone:           phone || null,
-        profileComplete: true,
-        updatedAt:       serverTimestamp()
-      });
-      toast('Profile saved! 🎉', 'success');
-      setTimeout(() => window.location.href = 'worker-dashboard.html', 1200);
-    } catch(e) {
-      btn.disabled = false; btn.textContent = '✅ Save & Go to Dashboard';
-      toast('Failed to save. Please try again.', 'error');
-    }
-  };
-
-  // ── Save Hirer Profile ────────────────────────────────────────
-  window.saveHirerProfile = async function() {
-    const district = document.getElementById('hirer-district').value;
-    const company  = document.getElementById('hirer-company').value.trim();
-    const phone    = document.getElementById('hirer-phone').value.trim();
-
-    if (!district) return toast('Please select your district', 'error');
-    if (!company)  return toast('Please enter your company or business name', 'error');
-
-    const btn = document.getElementById('btn-save-hirer');
-    btn.disabled = true; btn.textContent = 'Saving…';
-
-    try {
-      await updateDoc(doc(db, 'users', currentUser.uid), {
-        district, company,
-        phone:           phone || null,
-        profileComplete: true,
-        updatedAt:       serverTimestamp()
-      });
-      toast('Profile saved! 🎉', 'success');
-      setTimeout(() => window.location.href = 'hirer-dashboard.html', 1200);
-    } catch(e) {
-      btn.disabled = false; btn.textContent = '✅ Save & Go to Dashboard';
-      toast('Failed to save. Please try again.', 'error');
-    }
-  };
-
-  function toast(msg, type) {
-    const el = document.getElementById('toast');
-    el.textContent = msg; el.className = `show ${type}`;
-    setTimeout(() => el.className = '', 3000);
+  // Show/hide role-specific fields
+  if(userRole==='hirer'){
+    document.getElementById('worker-fields').style.display='none';
+    document.getElementById('hirer-fields').style.display='block';
+    document.getElementById('skills-section').style.display='none';
+    document.getElementById('about-section').style.display='block';
+    document.getElementById('s3-title').textContent='🏗️ Hiring Details';
+    document.getElementById('s3-sub').textContent='Tell workers what you hire for';
+    document.getElementById('s4-title').textContent='📝 About You';
+    document.getElementById('s4-sub').textContent='Optional description for workers';
   }
+
+  // Populate districts
+  const dsel=document.getElementById('f-dist');
+  Object.keys(DISTRICTS).sort().forEach(d=>{
+    const o=document.createElement('option');o.value=d;o.textContent=d;dsel.appendChild(o);
+  });
+
+  // Quick chips
+  const qc=document.getElementById('quick-chips');
+  QUICK_SKILLS.forEach(s=>{
+    const sp=document.createElement('span');
+    sp.style.cssText='padding:4px 10px;border-radius:20px;background:rgba(27,107,69,0.08);border:1px solid rgba(27,107,69,0.2);color:var(--j);font-size:0.75rem;cursor:pointer;display:inline-block;margin:0 4px 4px 0';
+    sp.textContent='+ '+s;sp.onclick=()=>{if(!skills.includes(s)){skills.push(s);renderChips();}};
+    qc.appendChild(sp);
+  });
+});
+
+window.loadTaluks=function(){
+  const dist=document.getElementById('f-dist').value;
+  const tsel=document.getElementById('f-taluk');
+  tsel.innerHTML='<option value="">— Select Taluk —</option>';
+  if(dist&&DISTRICTS[dist]){
+    DISTRICTS[dist].forEach(t=>{const o=document.createElement('option');o.value=t;o.textContent=t;tsel.appendChild(o);});
+    tsel.disabled=false;
+  } else {tsel.disabled=true;}
+};
+
+function renderChips(){
+  document.getElementById('chips').innerHTML=skills.map((s,i)=>
+    `<span class="chip">${s}<button onclick="removeChip(${i})">×</button></span>`
+  ).join('');
+}
+window.removeChip=i=>{skills.splice(i,1);renderChips();};
+window.addChip=function(){
+  const inp=document.getElementById('skill-inp'),v=inp.value.trim();
+  if(v&&!skills.includes(v)){skills.push(v);renderChips();}
+  inp.value='';
+};
+
+window.go=function(dir){
+  if(dir===1){
+    // Validate
+    if(step===0){
+      if(!document.getElementById('f-name').value.trim()){alert('Enter your name');return;}
+      if(!document.getElementById('f-phone').value.trim()||document.getElementById('f-phone').value.length<10){alert('Enter a valid 10-digit phone');return;}
+    }
+    if(step===1){
+      if(!document.getElementById('f-dist').value){alert('Select your district');return;}
+      if(!document.getElementById('f-taluk').value){alert('Select your taluk');return;}
+    }
+    if(step===2&&userRole==='worker'){
+      if(!document.getElementById('f-trade').value){alert('Select your trade');return;}
+      if(!document.getElementById('f-exp').value){alert('Select your experience');return;}
+      if(!document.getElementById('f-rate').value){alert('Enter your daily rate');return;}
+    }
+    if(step===3) buildSummary();
+  }
+  step=Math.max(0,Math.min(4,step+dir));
+  document.getElementById('slides').style.transform=`translateX(-${step*20}%)`;
+  document.getElementById('prog').style.width=`${(step+1)*20}%`;
+  for(let i=0;i<5;i++){
+    const d=document.getElementById('d'+i);
+    d.className='dot'+(i<step?' done':i===step?' active':'');
+  }
+};
+
+function buildSummary(){
+  const name=document.getElementById('f-name').value;
+  const phone=document.getElementById('f-phone').value;
+  const dist=document.getElementById('f-dist').value;
+  const taluk=document.getElementById('f-taluk').value;
+  const village=document.getElementById('f-village').value;
+  let extra='';
+  if(userRole==='worker'){
+    const trade=document.getElementById('f-trade').value;
+    const exp=document.getElementById('f-exp').value;
+    const rate=document.getElementById('f-rate').value;
+    extra=`<br>🛠️ <strong>Trade:</strong> ${trade}<br>⏳ <strong>Experience:</strong> ${exp}<br>💰 <strong>Daily Rate:</strong> ₹${rate}<br>🏷️ <strong>Skills:</strong> ${skills.join(', ')||'None added'}`;
+  } else {
+    const htype=document.getElementById('f-hiretype').value;
+    const company=document.getElementById('f-company').value;
+    extra=`<br>🏗️ <strong>Company:</strong> ${company||'—'}<br>🔧 <strong>Hires For:</strong> ${htype}`;
+  }
+  document.getElementById('summary').innerHTML=
+    `👤 <strong>Name:</strong> ${name}<br>📱 <strong>Phone:</strong> ${phone}<br>📍 <strong>District:</strong> ${dist}<br>🏘️ <strong>Taluk:</strong> ${taluk}${village?'<br>🏡 <strong>Village:</strong> '+village:''}${extra}<br>🎭 <strong>Role:</strong> ${userRole==='worker'?'👷 Worker':'🏗️ Hirer'}`;
+}
+
+window.saveProfile=async function(){
+  const btn=document.getElementById('save-btn');
+  btn.disabled=true;btn.innerHTML='<span class="spin"></span> Saving…';
+  try{
+    const data={
+      name:       document.getElementById('f-name').value.trim(),
+      phone:      document.getElementById('f-phone').value.trim(),
+      whatsapp:   document.getElementById('f-wa').value.trim()||null,
+      district:   document.getElementById('f-dist').value,
+      taluk:      document.getElementById('f-taluk').value,
+      village:    document.getElementById('f-village').value.trim()||null,
+      profileComplete: true,
+      updatedAt:  serverTimestamp()
+    };
+    if(userRole==='worker'){
+      data.trade=document.getElementById('f-trade').value;
+      data.experience=document.getElementById('f-exp').value;
+      data.dailyRate=parseInt(document.getElementById('f-rate').value)||0;
+      data.skills=skills.length?skills:[document.getElementById('f-trade').value];
+    } else {
+      data.company=document.getElementById('f-company').value.trim()||null;
+      data.hireType=document.getElementById('f-hiretype').value;
+      data.about=document.getElementById('f-about').value.trim()||null;
+    }
+    await updateDoc(doc(db,'users',currentUser.uid),data);
+    window.location.href=userRole==='worker'?'worker-dashboard.html':'hirer-dashboard.html';
+  }catch(e){
+    console.error(e);alert('Failed to save. Please try again.');
+    btn.disabled=false;btn.innerHTML='🚀 Save & Go to Dashboard';
+  }
+};
 </script>
 </body>
 </html>
