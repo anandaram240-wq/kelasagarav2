@@ -341,6 +341,7 @@
 
   const PAGE_SIZE = 12;
   let currentPage = 1;
+  window._workerMap = {}; // Global map: wid -> worker data (avoids onclick string escaping bugs)
 
   function renderWorkers(workers) {
     const grid = document.getElementById('workers-grid');
@@ -358,8 +359,11 @@
     grid.innerHTML = pageWorkers.map(w => {
       const initials = (w.name||'U').split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase();
       const wid = w.uid || w.email || initials + (w.district||'');
+      // Store in global map — avoids passing data through onclick attributes
+      window._workerMap[wid] = w;
+
       const isLiked = likedWorkers.has(wid);
-      const isApproved = w.isApproved !== false; // show if not explicitly false
+      const isApproved = w.isApproved !== false;
       if (!isApproved) return '';
 
       const avatar = w.photo
@@ -375,11 +379,13 @@
       const rateText = w.hourlyRate ? `₹${w.hourlyRate}/hr` : (w.dailyRate ? `₹${w.dailyRate}/day` : '₹—');
       const expText = w.experience || '—';
       const locationText = [w.district, w.taluk].filter(Boolean).join(', ') || 'Karnataka';
+      // Use safe encoded wid (base64) in onclick to avoid ANY special-char issues
+      const safeId = encodeURIComponent(wid);
 
       return `
         <div class="worker-card" id="wcard-${esc(wid)}">
           ${w.profileComplete ? '<div class="wc-verified">✔ VERIFIED</div>' : ''}
-          <button class="wc-like-btn${isLiked?' liked':''}" id="like-${esc(wid)}" onclick="toggleLike(event,'${esc(wid)}')" title="${isLiked?'Saved':'Save worker'}" aria-label="Like">
+          <button class="wc-like-btn${isLiked?' liked':''}" id="like-${esc(wid)}" onclick="toggleLike(event,decodeURIComponent('${safeId}'))" title="${isLiked?'Saved':'Save worker'}" aria-label="Like">
             <span class="heart-icon">${isLiked?'❤️':'🤍'}</span>
           </button>
           <div class="wc-top">${avatar}<div style="min-width:0"><div class="wc-name">${esc(w.name||'Worker')}</div><div class="wc-trade">${esc(trade)}</div></div></div>
@@ -391,8 +397,8 @@
             <span class="wc-exp">${esc(expText)}</span>
           </div>
           <div class="wc-actions">
-            <button class="wc-btn-msg" onclick="msgWorker('${esc(wid)}','${esc(w.name||'Worker')}')">💬 Message</button>
-            <button class="wc-btn-book" onclick="bookWorker('${esc(wid)}','${esc(w.name||'Worker')}')">📅 Book Now</button>
+            <button class="wc-btn-msg"  onclick="msgWorker(decodeURIComponent('${safeId}'))">💬 Message</button>
+            <button class="wc-btn-book" onclick="bookWorker(decodeURIComponent('${safeId}'))">📅 Book Now</button>
           </div>
         </div>`;
     }).join('');
@@ -416,24 +422,27 @@
   window.goPage = function(n) { currentPage = n; applyFilter(); window.scrollTo({top:400,behavior:'smooth'}); };
 
   /* ── CRITICAL REDIRECT LOGIC (Section 2) ── */
-  window.bookWorker = function(wid, wname) {
+  // wid only — name is looked up safely from _workerMap
+  window.bookWorker = function(wid) {
+    const w = window._workerMap[wid] || {};
+    const wname = w.name || 'Worker';
     if (!currentUserUid || currentUserRole !== 'hirer') {
-      // Save intent to sessionStorage
       sessionStorage.setItem('kelasa_intent', JSON.stringify({ workerId: wid, action: 'book', workerName: wname }));
-      window.location.href = `login.html?role=hirer&intent=book&worker=${encodeURIComponent(wid)}`;
+      window.location.href = 'login.html?role=hirer&intent=book&worker=' + encodeURIComponent(wid);
       return;
     }
-    window.location.href = `book.html?worker=${encodeURIComponent(wid)}`;
+    window.location.href = 'book.html?worker=' + encodeURIComponent(wid);
   };
 
-  window.msgWorker = function(wid, wname) {
+  window.msgWorker = function(wid) {
+    const w = window._workerMap[wid] || {};
+    const wname = w.name || 'Worker';
     if (!currentUserUid || currentUserRole !== 'hirer') {
       sessionStorage.setItem('kelasa_intent', JSON.stringify({ workerId: wid, action: 'message', workerName: wname }));
-      window.location.href = `login.html?role=hirer&intent=message&worker=${encodeURIComponent(wid)}`;
+      window.location.href = 'login.html?role=hirer&intent=message&worker=' + encodeURIComponent(wid);
       return;
     }
-    // Find existing booking with this worker to open chat, or go to book page first
-    window.location.href = `book.html?worker=${encodeURIComponent(wid)}&mode=message`;
+    window.location.href = 'book.html?worker=' + encodeURIComponent(wid) + '&mode=message';
   };
 
   function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/'/g,'&#39;')}
