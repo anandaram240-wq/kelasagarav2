@@ -140,6 +140,9 @@
     /* ── FOOTER ── */
     footer{border-top:1px solid var(--border);padding:20px 32px;text-align:center;font-size:0.8rem;color:var(--muted);margin-top:40px}
   @keyframes toastIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+  .nav-btn.outline{background:transparent;color:var(--saffron);border:1.5px solid var(--saffron)}
+  .nav-btn.outline:hover{background:var(--saffron);color:#fff}
+  #account-menu a,#account-menu button{transition:background 0.15s}
 </style>
 </head>
 <body>
@@ -159,7 +162,25 @@
     <a href="worker-dashboard.html" class="nav-link">👷 Worker</a>
     <a href="hirer-dashboard.html" class="nav-link">🏗️ Hirer</a>
     <a href="admin-login.html" class="nav-link">🛡️ Admin</a>
-    <a href="login.html" class="nav-btn" style="margin-left:8px">Login</a>
+    <!-- Auth nav: shown/hidden by JS -->
+    <div id="nav-guest" style="display:flex;align-items:center;gap:6px">
+      <a href="login.html" class="nav-btn outline">Login</a>
+      <a href="login.html" class="nav-btn">Sign Up</a>
+    </div>
+    <div id="nav-user" style="display:none;position:relative">
+      <button id="account-btn" onclick="toggleAccountMenu()" style="display:flex;align-items:center;gap:8px;padding:7px 14px;background:var(--paper);border:1.5px solid var(--border);border-radius:10px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:0.85rem;font-weight:600;color:var(--ink);transition:all 0.2s" onmouseenter="this.style.borderColor='var(--saffron)'" onmouseleave="this.style.borderColor='var(--border)'">
+        <span id="nav-avatar-circle" style="width:28px;height:28px;border-radius:50%;background:var(--saffron);color:#fff;display:flex;align-items:center;justify-content:center;font-size:0.8rem;font-weight:700;flex-shrink:0">👤</span>
+        <span id="nav-user-name">My Account</span>
+        <span>▾</span>
+      </button>
+      <div id="account-menu" style="display:none;position:absolute;right:0;top:calc(100%+8px);background:#fff;border:1px solid var(--border);border-radius:12px;box-shadow:0 8px 28px rgba(0,0,0,0.12);min-width:180px;z-index:200;overflow:hidden">
+        <a id="menu-dashboard" href="hirer-dashboard.html" style="display:flex;align-items:center;gap:10px;padding:12px 16px;font-size:0.85rem;color:var(--ink);text-decoration:none;transition:background 0.15s" onmouseenter="this.style.background='var(--paper)'" onmouseleave="this.style.background=''">📊 My Dashboard</a>
+        <a id="menu-profile" href="hirer-dashboard.html" style="display:flex;align-items:center;gap:10px;padding:12px 16px;font-size:0.85rem;color:var(--ink);text-decoration:none;transition:background 0.15s" onmouseenter="this.style.background='var(--paper)'" onmouseleave="this.style.background=''">👤 My Profile</a>
+        <a href="chat.html" style="display:flex;align-items:center;gap:10px;padding:12px 16px;font-size:0.85rem;color:var(--ink);text-decoration:none;transition:background 0.15s" onmouseenter="this.style.background='var(--paper)'" onmouseleave="this.style.background=''">💬 My Messages</a>
+        <div style="border-top:1px solid var(--border);margin:4px 0"></div>
+        <button onclick="doLogout()" style="width:100%;display:flex;align-items:center;gap:10px;padding:12px 16px;font-size:0.85rem;color:#EF4444;background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;text-align:left;transition:background 0.15s" onmouseenter="this.style.background='#FEF2F2'" onmouseleave="this.style.background=''">🚪 Logout</button>
+      </div>
+    </div>
   </div>
 </nav>
 
@@ -171,24 +192,24 @@
       <span class="hero-badge badge-orange"><span class="pulse"></span><span id="online-count">0</span> online now</span>
     </div>
     <h1>Find Skilled <span class="accent">Workers</span></h1>
-    <p class="hero-kannada">ನಿಮ್ಮ ಹತ್ತಿರದಲ್ಲಿರುವ ಕುಶಲ ಕಾರ್ಮಿಕರನ್ನು ಹುಡುಕಿ</p>
-    <p class="hero-sub">ಪೇಂಟರ್, ಪ್ಲಂಬರ್, ಎಲೆಕ್ಟ್ರಿಶಿಯನ್, ಮೇಸ್ತ್ರಿ ಮತ್ತು 40+ ಕೌಶಲ್ಯ ಕಾರ್ಮಿಕರನ್ನು<br>ಕರ್ನಾಟಕದ ಎಲ್ಲ 31 ಜಿಲ್ಲೆಗಳಲ್ಲಿ ಹುಡುಕಿ.</p>
+    <p class="hero-kannada">Find Skilled Workers Near You</p>
+    <p class="hero-sub">Painters, Plumbers, Electricians, Masons & 40+ trades<br>across all 31 Karnataka districts — 0% commission.</p>
     <div class="hero-stats">
       <div class="stat">
         <div class="stat-num" id="stat-workers">—</div>
-        <div class="stat-label">Workers / ಕಾರ್ಮಿಕರು</div>
+        <div class="stat-label">Workers</div>
       </div>
       <div class="stat">
         <div class="stat-num">31</div>
-        <div class="stat-label">Districts / ಜಿಲ್ಲೆ</div>
+        <div class="stat-label">Districts</div>
       </div>
       <div class="stat">
         <div class="stat-num" id="stat-jobs">—</div>
-        <div class="stat-label">Jobs Posted / ಕೆಲಸಗಳು</div>
+        <div class="stat-label">Jobs Posted</div>
       </div>
       <div class="stat">
         <div class="stat-num">0%</div>
-        <div class="stat-label">Commission / ಕಮಿಷನ್</div>
+        <div class="stat-label">Commission</div>
       </div>
     </div>
   </div>
@@ -218,6 +239,9 @@
     <div class="search-row">
       <select class="search-select" id="filter-district" onchange="applyFilter()">
         <option value="">All Districts</option>
+      </select>
+      <select class="search-select" id="filter-taluk" onchange="applyFilter()" style="min-width:140px">
+        <option value="">All Taluks</option>
       </select>
       <input class="search-input" id="search-name" type="text" placeholder="🔍 Search name, trade..." oninput="applyFilter()"/>
       <button class="btn-search" onclick="applyFilter()">🔍 Search</button>
@@ -298,7 +322,7 @@
     pillsEl.appendChild(btn);
   });
 
-  // Load workers from Firestore (role = 'worker')
+  // Load workers from Firestore
   async function loadWorkers() {
     try {
       const q = query(collection(db,'users'), where('role','==','worker'));
@@ -306,10 +330,8 @@
       allWorkers = snap.docs.map(d => d.data());
       document.getElementById('stat-workers').textContent = allWorkers.length;
       document.getElementById('worker-count').textContent = allWorkers.length;
-    } catch(e) {
-      allWorkers = [];
-    }
-    // Load job count
+      buildTalukOptions(); // populate taluk dropdown
+    } catch(e) { allWorkers = []; }
     try {
       const js = await getDocs(collection(db,'jobs'));
       document.getElementById('stat-jobs').textContent = js.size;
@@ -317,13 +339,37 @@
     applyFilter();
   }
 
+  // Build/refresh taluk dropdown (filtered by selected district)
+  function buildTalukOptions(selectedDistrict) {
+    const talukSel = document.getElementById('filter-taluk');
+    const prev = talukSel.value;
+    const taluks = [...new Set(
+      allWorkers
+        .filter(w => !selectedDistrict || w.district === selectedDistrict)
+        .map(w => w.taluk).filter(Boolean)
+    )].sort();
+    talukSel.innerHTML = '<option value="">All Taluks</option>';
+    taluks.forEach(t => {
+      const o = document.createElement('option');
+      o.value = t; o.textContent = t;
+      if (t === prev) o.selected = true;
+      talukSel.appendChild(o);
+    });
+  }
+
   window.applyFilter = function() {
     const district = document.getElementById('filter-district').value;
-    const search = document.getElementById('search-name').value.toLowerCase().trim();
+    const taluk    = document.getElementById('filter-taluk').value;
+    const search   = document.getElementById('search-name').value.toLowerCase().trim();
+    // Update taluk options based on district selection
+    buildTalukOptions(district);
+    if (taluk) document.getElementById('filter-taluk').value = taluk; // restore after rebuild
     let filtered = allWorkers;
     if (district) filtered = filtered.filter(w => (w.district||'') === district);
+    if (taluk)    filtered = filtered.filter(w => (w.taluk||'') === taluk);
     if (activeCategory !== 'All') filtered = filtered.filter(w => (w.skills||[]).some(s => s.toLowerCase().includes(activeCategory.toLowerCase())));
-    if (search) filtered = filtered.filter(w => (w.name||'').toLowerCase().includes(search) || (w.skills||[]).some(s => s.toLowerCase().includes(search)));
+    if (search)   filtered = filtered.filter(w => (w.name||'').toLowerCase().includes(search) || (w.skills||[]).some(s => s.toLowerCase().includes(search)));
+    currentPage = 1;
     renderWorkers(filtered);
   };
 
@@ -527,6 +573,24 @@
     clearTimeout(t._timer);
     t._timer = setTimeout(()=>{ t.style.opacity='0'; },1800);
   }
+  // ── MY ACCOUNT DROPDOWN ──
+  window.toggleAccountMenu = function() {
+    const m = document.getElementById('account-menu');
+    m.style.display = m.style.display === 'none' ? 'block' : 'none';
+  };
+  document.addEventListener('click', e => {
+    if (!document.getElementById('nav-user')?.contains(e.target)) {
+      const m = document.getElementById('account-menu');
+      if (m) m.style.display = 'none';
+    }
+  });
+
+  window.doLogout = async function() {
+    const { signOut } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js");
+    await signOut(auth);
+    window.location.href = 'login.html';
+  };
+
   // Check auth state — load hirer status & liked workers
   onAuthStateChanged(auth, async user => {
     if (user) {
@@ -537,17 +601,27 @@
         if (snap.exists()) {
           const data = snap.data();
           currentUserRole = data.role || null;
-          if (data.role === 'hirer') {
-            currentHirer = { uid: user.uid, ...data };
-          }
+          if (data.role === 'hirer') { currentHirer = { uid: user.uid, ...data }; }
           likedWorkers = new Set(data.likedWorkers || []);
           if (allWorkers.length) applyFilter();
+          // ── Show My Account button ──
+          document.getElementById('nav-guest').style.display = 'none';
+          document.getElementById('nav-user').style.display = 'block';
+          const displayName = data.name || user.displayName || 'Account';
+          document.getElementById('nav-user-name').textContent = displayName.split(' ')[0];
+          document.getElementById('nav-avatar-circle').textContent = displayName[0]?.toUpperCase() || '👤';
+          // Set correct dashboard link
+          const dashUrl = data.role === 'worker' ? 'worker-dashboard.html' : 'hirer-dashboard.html';
+          document.getElementById('menu-dashboard').href = dashUrl;
+          document.getElementById('menu-profile').href = dashUrl;
         }
       } catch(e) { console.warn('Auth check error:', e); }
     } else {
       currentUserUid = null;
       currentUserRole = null;
       likedWorkers = new Set();
+      document.getElementById('nav-guest').style.display = 'flex';
+      document.getElementById('nav-user').style.display = 'none';
     }
   });
   // Pre-select sort by rating on load
