@@ -146,7 +146,7 @@
     <div class="incoming-title">New Booking Request!</div>
     <div class="incoming-hirer" id="inc-hirer"></div>
     <div class="incoming-details" id="inc-details"></div>
-    <div class="incoming-timer" id="inc-timer">⏱ Expires in 60s</div>
+    <div class="incoming-timer" id="inc-timer" style="display:none"></div>
     <div class="incoming-actions">
       <button class="btn-accept" onclick="respondBooking('accept')">✅ ACCEPT</button>
       <button class="btn-decline" onclick="respondBooking('decline')">❌ DECLINE</button>
@@ -348,23 +348,7 @@
     document.getElementById('inc-hirer').textContent=`From: ${hirerName}`;
     document.getElementById('inc-details').innerHTML=`<strong>Job:</strong> ${esc(n.jobTitle||'—')}<br><strong>Date:</strong> ${n.date||'—'} at ${n.time||'—'}<br><strong>Location:</strong> ${esc(n.location||'—')}`;
     document.getElementById('incoming-overlay').style.display='flex';
-    let secs=60;
-    clearInterval(incTimer);
-    incTimer=setInterval(()=>{
-      secs--;
-      document.getElementById('inc-timer').textContent=`⏱ Expires in ${secs}s`;
-      if(secs<=0){
-        clearInterval(incTimer);
-        document.getElementById('incoming-overlay').style.display='none';
-        if(pendingBookingId){
-          import('./js/firebase-config.js').then(({db})=>{
-            import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js").then(({doc,updateDoc,serverTimestamp})=>{
-              updateDoc(doc(db,'bookings',pendingBookingId),{status:'EXPIRED',updatedAt:serverTimestamp()});
-            });
-          });
-        }
-      }
-    },1000);
+    // No auto-expire — worker decides when ready
   }
 
   window.respondBooking=async function(action){
