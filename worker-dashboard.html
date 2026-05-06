@@ -314,7 +314,7 @@
         const card=document.createElement('div');card.className='booking-card';
         card.innerHTML=`
           <div class="booking-title">💼 ${esc(b.jobTitle||'Job')} <span class="${statusClass}" style="float:right">${b.status||'PENDING'}</span></div>
-          <div class="booking-meta">🏗️ Hirer: <strong>${esc(hirerName)}</strong> · 📅 ${b.date||'—'} ${b.time||''} · 📍 ${esc(b.location||'—')}</div>
+          <div class="booking-meta">🏗️ Hirer: <strong>${esc(hirerName)}</strong> · 📅 ${b.date||'—'} ${b.time||''} · 📍 ${esc(b.location||'—')}${b.locationUrl?` <a href="${esc(b.locationUrl)}" target="_blank" style="color:var(--jade);font-weight:600;margin-left:4px">🗺️ Maps</a>`:''}</div>
           ${b.instructions?`<div style="font-size:0.78rem;color:var(--muted);margin-top:4px">📝 ${esc(b.instructions)}</div>`:''}
           <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
             ${b.status==='PENDING'?`<button class="btn-sm btn-primary" onclick="acceptBooking('${b.id}')">✅ Accept</button><button class="btn-sm btn-outline" style="border-color:#EF4444;color:#EF4444" onclick="declineBooking('${b.id}')">❌ Decline</button>`:''}
@@ -346,7 +346,7 @@
     try{const es=await getDoc(doc(db,'users',n.hirerId));if(es.exists())hirerName=es.data().name||'Hirer';}catch(e){}
     pendingBookingId=n.bookingId;
     document.getElementById('inc-hirer').textContent=`From: ${hirerName}`;
-    document.getElementById('inc-details').innerHTML=`<strong>Job:</strong> ${esc(n.jobTitle||'—')}<br><strong>Date:</strong> ${n.date||'—'} at ${n.time||'—'}<br><strong>Location:</strong> ${esc(n.location||'—')}`;
+    document.getElementById('inc-details').innerHTML=`<strong>Job:</strong> ${esc(n.jobTitle||'—')}<br><strong>Date:</strong> ${n.date||'—'} at ${n.time||'—'}<br><strong>Location:</strong> ${esc(n.location||'—')}${n.locationUrl?`<br><a href="${esc(n.locationUrl)}" target="_blank" style="color:#1B6B45;font-weight:600;display:inline-flex;align-items:center;gap:4px;margin-top:6px;text-decoration:none">🗺️ Open in Google Maps →</a>`:''}`;
     document.getElementById('incoming-overlay').style.display='flex';
     // No auto-expire — worker decides when ready
   }

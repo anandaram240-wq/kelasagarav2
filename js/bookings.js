@@ -19,6 +19,7 @@ export async function createBooking(hirerId, workerId, form) {
     time:         form.time,
     duration:     form.duration || '',
     location:     form.location,
+    locationUrl:  form.locationUrl || '',
     instructions: form.instructions || '',
     status:       'PENDING',
     createdAt:    serverTimestamp(),
@@ -27,17 +28,18 @@ export async function createBooking(hirerId, workerId, form) {
 
   // Real-time push to worker via RTDB
   await push(ref(rtdb, `notifications/${workerId}`), {
-    type:      'BOOKING_REQUEST',
-    bookingId: bookingRef.id,
+    type:        'BOOKING_REQUEST',
+    bookingId:   bookingRef.id,
     hirerId,
-    jobTitle:  form.jobTitle,
-    date:      form.date,
-    time:      form.time,
-    duration:  form.duration || '',
-    location:  form.location,
-    isRead:    false,
-    shown:     false,
-    createdAt: Date.now()
+    jobTitle:    form.jobTitle,
+    date:        form.date,
+    time:        form.time,
+    duration:    form.duration || '',
+    location:    form.location,
+    locationUrl: form.locationUrl || '',
+    isRead:      false,
+    shown:       false,
+    createdAt:   Date.now()
   });
 
 

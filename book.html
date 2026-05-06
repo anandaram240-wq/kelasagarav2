@@ -109,7 +109,15 @@
       </div>
       <div class="fg">
         <label>📍 Work Location / Address *</label>
-        <input type="text" id="location" placeholder="e.g. 12 MG Road, Davangere, Karnataka"/>
+        <div style="display:flex;gap:8px;align-items:stretch">
+          <input type="text" id="location" placeholder="e.g. 12 MG Road, Davangere, Karnataka" style="flex:1"/>
+          <button type="button" id="locate-btn" onclick="useMyLocation()" title="Use current location" style="padding:0 14px;background:var(--jade);color:#fff;border:none;border-radius:10px;font-size:1.1rem;cursor:pointer;transition:all 0.2s;flex-shrink:0" onmouseenter="this.style.background='#1B5E3A'" onmouseleave="this.style.background='var(--jade)'">📍</button>
+        </div>
+        <div id="map-preview" style="display:none;margin-top:8px">
+          <a id="map-link" href="#" target="_blank" style="font-size:0.82rem;color:var(--jade);text-decoration:none;display:inline-flex;align-items:center;gap:5px;background:rgba(27,107,69,0.08);padding:5px 12px;border-radius:8px;border:1px solid rgba(27,107,69,0.2)">
+            🗺️ View on Google Maps →
+          </a>
+        </div>
       </div>
       <div class="fg">
         <label>📝 Additional Instructions (optional)</label>
@@ -234,10 +242,9 @@
       document.getElementById('no-book-worker-name').textContent = workerData.name;
     }
 
-    // --- MESSAGE MODE: open direct chat immediately, no booking required ---
+    // --- MESSAGE MODE ---
     if (mode === 'message') {
       const threadId = [user.uid, workerId].sort().join('_');
-      // Save thread to Firestore so worker can see it in their dashboard
       try {
         await setDoc(doc(db,'direct_threads', threadId), {
           participants: [user.uid, workerId],
@@ -248,6 +255,59 @@
       } catch(e) { console.error(e); }
       window.location.href = 'chat.html?direct=' + threadId + '&worker=' + encodeURIComponent(workerId) + '&hirer=' + encodeURIComponent(user.uid);
       return;
+    }
+  });
+
+  // ── GOOGLE MAPS LOCATION ──
+  let _locationUrl = '';
+
+  window.useMyLocation = function() {
+    const btn = document.getElementById('locate-btn');
+    btn.textContent = '⏳';
+    btn.disabled = true;
+    if (!navigator.geolocation) {
+      showToast('Geolocation not supported by your browser', 'error');
+      btn.textContent = '📍'; btn.disabled = false; return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      async pos => {
+        const { latitude: lat, longitude: lng } = pos.coords;
+        const mapsUrl = `https://www.google.com/maps?q=${lat},${lng}`;
+        _locationUrl = mapsUrl;
+        // Reverse geocode using free Nominatim API (no key needed)
+        try {
+          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`);
+          const data = await res.json();
+          const addr = data.display_name || `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+          document.getElementById('location').value = addr;
+        } catch(e) {
+          document.getElementById('location').value = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+        }
+        // Show map preview link
+        document.getElementById('map-link').href = mapsUrl;
+        document.getElementById('map-preview').style.display = 'block';
+        btn.textContent = '✅'; btn.disabled = false;
+        showToast('Location detected! 📍', 'success');
+      },
+      err => {
+        showToast('Could not get location. Enter address manually.', 'error');
+        btn.textContent = '📍'; btn.disabled = false;
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  };
+
+  // Also update map link when user types manually
+  document.getElementById('location').addEventListener('input', function() {
+    const val = this.value.trim();
+    if (val.length > 5) {
+      const mapsUrl = `https://www.google.com/maps/search/${encodeURIComponent(val)}`;
+      _locationUrl = mapsUrl;
+      document.getElementById('map-link').href = mapsUrl;
+      document.getElementById('map-preview').style.display = 'block';
+    } else {
+      document.getElementById('map-preview').style.display = 'none';
+      _locationUrl = '';
     }
   });
 
@@ -271,7 +331,7 @@
     btn.innerHTML = '<span class="spin"></span> Sending request…';
 
     try {
-      await createBooking(hirerId, workerId, { jobTitle, date: workDate, time: startTime, duration, location, instructions });
+      await createBooking(hirerId, workerId, { jobTitle, date: workDate, time: startTime, duration, location, locationUrl: _locationUrl, instructions });
       // Show success
       document.getElementById('form-area').style.display = 'none';
       document.getElementById('success-box').style.display = 'block';
