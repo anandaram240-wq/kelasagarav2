@@ -359,11 +359,15 @@
 
   window.applyFilter = function() {
     const district = document.getElementById('filter-district').value;
-    const taluk    = document.getElementById('filter-taluk').value;
     const search   = document.getElementById('search-name').value.toLowerCase().trim();
-    // Update taluk options based on district selection
+    // Rebuild taluk options for selected district, preserve valid selection
+    const prevTaluk = document.getElementById('filter-taluk').value;
     buildTalukOptions(district);
-    if (taluk) document.getElementById('filter-taluk').value = taluk; // restore after rebuild
+    const talukOpts = [...document.getElementById('filter-taluk').options].map(o => o.value);
+    if (prevTaluk && talukOpts.includes(prevTaluk)) {
+      document.getElementById('filter-taluk').value = prevTaluk;
+    }
+    const taluk = document.getElementById('filter-taluk').value; // read AFTER rebuild
     let filtered = allWorkers;
     if (district) filtered = filtered.filter(w => (w.district||'') === district);
     if (taluk)    filtered = filtered.filter(w => (w.taluk||'') === taluk);
