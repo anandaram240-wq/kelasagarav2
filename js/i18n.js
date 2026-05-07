@@ -46,7 +46,7 @@ const I18N = {
     "cat.help":   "Helper",
     // Card buttons
     "card.msg":  "💬 Message",
-    "card.book": "📅 Book Now",
+    "card.book": "Book Now",
     // Footer
     "footer": "Karnataka Daily Worker Marketplace",
     // Auth
@@ -99,7 +99,7 @@ const I18N = {
     "cat.help":   "ಸಹಾಯಕ",
     // Card buttons
     "card.msg":  "💬 ಸಂದೇಶ",
-    "card.book": "📅 ಈಗ ಬುಕ್",
+    "card.book": "ಈಗ ಬುಕ್",
     // Footer
     "footer": "ಕರ್ನಾಟಕ ದೈನಂದಿನ ಕೆಲಸಗಾರ ಮಾರುಕಟ್ಟೆ",
     // Auth

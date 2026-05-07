@@ -13,69 +13,198 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default"/>
   <meta name="apple-mobile-web-app-title" content="KelasaGaara"/>
   <link rel="apple-touch-icon" href="/icons/icon-192.png"/>
-  <meta name="msapplication-TileImage" content="/icons/icon-192.png"/>
-  <meta name="msapplication-TileColor" content="#E25519"/>
-  <!-- Performance: Preconnect -->
+
+  <!-- ══ PERFORMANCE: DNS + Preconnect ══ -->
+  <link rel="dns-prefetch" href="https://fonts.googleapis.com"/>
+  <link rel="dns-prefetch" href="https://fonts.gstatic.com"/>
+  <link rel="dns-prefetch" href="https://firestore.googleapis.com"/>
+  <link rel="dns-prefetch" href="https://www.gstatic.com"/>
+  <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin/>
   <link rel="preconnect" href="https://firestore.googleapis.com"/>
-  <link rel="preconnect" href="https://firebase.googleapis.com"/>
-  <link rel="preconnect" href="https://storage.googleapis.com"/>
-  <!-- Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Baloo+Tamma+2:wght@500;700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+
+  <!-- ══ FONTS: Non-blocking load (no render block) ══ -->
+  <!-- 1. Preload the font CSS -->
+  <link rel="preload" as="style"
+    href="https://fonts.googleapis.com/css2?family=Baloo+Tamma+2:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap"/>
+  <!-- 2. Load it async (media trick = non-blocking) -->
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Baloo+Tamma+2:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap"
+    media="print" onload="this.media='all'"/>
+  <!-- 3. Fallback for no-JS -->
+  <noscript>
+    <link rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Baloo+Tamma+2:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap"/>
+  </noscript>
+
+  <!-- ══ FIREBASE SDK: Modulepreload (parse before needed) ══ -->
+  <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"/>
+  <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js"/>
+  <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"/>
+
+  <!-- ══ CRITICAL INLINE STYLES (zero flash) ══ -->
   <style>
+    /* System font stack first — used until web font loads */
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     :root{
       --saffron:#E8600A; --saffron-light:#FEF0E6; --saffron-dark:#C04E06;
       --jade:#2D6A4F;    --jade-light:#E8F5EE;
       --paper:#FAF8F5;   --ink:#1A1A2E;
       --muted:#6B7280;   --border:#E5E2DC;
+      --nav-h:60px;
+      font-display:swap;
     }
-    body{font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--ink);min-height:100vh}
+    html{overflow-x:hidden}
+    body{
+      font-family:-apple-system,BlinkMacSystemFont,'DM Sans','Segoe UI',sans-serif;
+      background:var(--paper);color:var(--ink);min-height:100vh;
+      overflow-x:hidden;
+    }
+    .fonts-loaded body{font-family:'DM Sans',-apple-system,sans-serif;}
+
+    /* ── HAMBURGER MENU ── */
+    #hamburger{
+      display:none;flex-direction:column;justify-content:center;align-items:center;
+      width:44px;height:44px;background:none;border:none;cursor:pointer;
+      gap:5px;flex-shrink:0;border-radius:8px;transition:background .2s;
+    }
+    #hamburger:hover{background:var(--paper)}
+    #hamburger span{
+      display:block;width:22px;height:2px;
+      background:var(--ink);border-radius:2px;
+      transition:transform .25s ease,opacity .2s;
+    }
+    #hamburger.open span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+    #hamburger.open span:nth-child(2){opacity:0}
+    #hamburger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+    /* Mobile nav drawer */
+    #mobile-drawer{
+      display:none;position:fixed;top:var(--nav-h);left:0;right:0;bottom:0;
+      background:rgba(26,26,46,0.55);z-index:190;backdrop-filter:blur(4px);
+    }
+    #mobile-drawer.open{display:block}
+    #mobile-drawer-panel{
+      position:absolute;top:0;left:0;right:0;
+      background:#fff;border-bottom-left-radius:20px;border-bottom-right-radius:20px;
+      padding:16px;box-shadow:0 12px 40px rgba(0,0,0,0.2);
+      transform:translateY(-100%);transition:transform .28s cubic-bezier(0.22,1,0.36,1);
+    }
+    #mobile-drawer.open #mobile-drawer-panel{transform:translateY(0)}
+    .drawer-link{
+      display:flex;align-items:center;gap:12px;
+      padding:14px 16px;border-radius:12px;text-decoration:none;
+      font-size:1rem;font-weight:600;color:var(--ink);
+      transition:background .15s;min-height:48px;
+    }
+    .drawer-link:hover,.drawer-link:active{background:var(--paper);color:var(--saffron)}
+    .drawer-divider{height:1px;background:var(--border);margin:8px 0}
+    .drawer-btn{
+      display:flex;align-items:center;justify-content:center;gap:8px;
+      width:100%;padding:14px;border-radius:12px;
+      font-size:0.95rem;font-weight:700;cursor:pointer;
+      font-family:'DM Sans',sans-serif;transition:all .18s;
+      min-height:48px;border:none;
+    }
+    .drawer-btn-primary{background:var(--saffron);color:#fff}
+    .drawer-btn-primary:hover{background:var(--saffron-dark)}
+    .drawer-btn-outline{
+      background:transparent;color:var(--saffron);
+      border:1.5px solid var(--saffron) !important;
+    }
+
 
     /* ── NAVBAR ── */
-    .navbar{background:#fff;border-bottom:1px solid var(--border);padding:0 16px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 1px 8px rgba(0,0,0,0.06);gap:8px;overflow:visible}
+    .navbar{
+      background:#fff;border-bottom:1px solid var(--border);
+      padding:0 clamp(12px,3vw,40px);
+      height:var(--nav-h);
+      display:flex;align-items:center;justify-content:space-between;
+      position:sticky;top:0;z-index:200;
+      box-shadow:0 1px 8px rgba(0,0,0,0.06);gap:8px;
+    }
     .brand{display:flex;align-items:center;gap:8px;text-decoration:none;flex-shrink:0}
-    .brand-icon{width:36px;height:36px;background:var(--saffron);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:1rem;color:#fff;font-family:'Baloo Tamma 2',sans-serif;font-weight:800;flex-shrink:0}
-    .brand-text{font-family:'Baloo Tamma 2',sans-serif;font-size:1.05rem;font-weight:800;color:var(--ink)}
+    .brand-icon{
+      width:36px;height:36px;background:var(--saffron);border-radius:9px;
+      display:flex;align-items:center;justify-content:center;
+      font-size:1rem;color:#fff;font-family:'Baloo Tamma 2',sans-serif;
+      font-weight:800;flex-shrink:0;
+    }
+    .brand-text{font-family:'Baloo Tamma 2',sans-serif;font-size:clamp(0.9rem,2vw,1.1rem);font-weight:800;color:var(--ink)}
     .brand-text span{color:var(--saffron)}
     .brand-sub{font-size:0.6rem;color:var(--muted);display:block;font-weight:400}
-    .nav-links{display:flex;align-items:center;gap:2px;flex:1;justify-content:flex-end;flex-wrap:nowrap;overflow:hidden;min-width:0}
-    .nav-link{padding:6px 10px;border-radius:8px;text-decoration:none;font-size:0.8rem;font-weight:500;color:var(--muted);transition:all 0.2s;white-space:nowrap}
+    .nav-links{display:flex;align-items:center;gap:4px;flex:1;justify-content:flex-end;flex-wrap:nowrap;min-width:0}
+    .nav-link{
+      padding:8px 10px;border-radius:8px;text-decoration:none;
+      font-size:clamp(0.72rem,1.2vw,0.85rem);font-weight:500;
+      color:var(--muted);transition:background .15s,color .15s;white-space:nowrap;
+      min-height:44px;display:flex;align-items:center;
+    }
     .nav-link:hover{background:var(--paper);color:var(--ink)}
     .nav-link.active{color:var(--saffron);background:var(--saffron-light)}
-    .nav-btn{padding:7px 14px;background:var(--saffron);color:#fff;border:none;border-radius:8px;font-size:0.8rem;font-weight:600;cursor:pointer;text-decoration:none;transition:all 0.2s;font-family:'DM Sans',sans-serif;white-space:nowrap}
+    .nav-btn{
+      padding:8px 14px;background:var(--saffron);color:#fff;border:none;
+      border-radius:8px;font-size:0.82rem;font-weight:600;cursor:pointer;
+      text-decoration:none;transition:all .2s;font-family:'DM Sans',sans-serif;
+      white-space:nowrap;min-height:44px;display:inline-flex;align-items:center;
+    }
     .nav-btn:hover{background:var(--saffron-dark)}
     .nav-btn.outline{background:transparent;color:var(--saffron);border:1.5px solid var(--saffron)}
     .nav-btn.outline:hover{background:var(--saffron-light)}
-    /* Account button — fixed width, no overflow */
-    #account-btn{max-width:160px;overflow:hidden}
-    #nav-user-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:80px;display:inline-block}
-    /* Mobile nav: hide text links, show hamburger */
-    @media(max-width:640px){
-      .nav-link:not(.active){display:none}
+    #account-btn{max-width:180px;overflow:hidden;white-space:nowrap;min-height:44px}
+    #nav-user-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:80px;display:inline-block;vertical-align:middle}
+    #account-menu{position:fixed !important;top:68px !important;right:12px !important;left:auto !important;z-index:9999 !important}
+
+    /* ── Mobile navbar: show hamburger, hide desktop links ── */
+    @media(max-width:768px){
+      #hamburger{display:flex}
+      .nav-links{display:none !important}
       .brand-sub{display:none}
-      #nav-guest .nav-btn.outline{display:none}
-      .navbar{padding:0 12px;height:56px}
+      #account-menu{top:60px !important;right:8px !important;min-width:200px}
+    }
+    @media(min-width:769px){
+      #mobile-drawer{display:none !important}
     }
 
     /* ── HERO ── */
-    .hero{background:linear-gradient(135deg,var(--ink) 0%,#2a1a3e 100%);color:#fff;padding:56px 32px 48px;position:relative;overflow:hidden}
+    .hero{
+      background:linear-gradient(135deg,var(--ink) 0%,#2a1a3e 100%);
+      color:#fff;padding:clamp(28px,6vw,64px) clamp(16px,4vw,48px) clamp(24px,5vw,52px);
+      position:relative;overflow:hidden;
+    }
     .hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 70% 50%,rgba(232,96,10,0.15),transparent 60%)}
-    .hero-inner{max-width:1100px;margin:0 auto;position:relative}
-    .hero-badges{display:flex;gap:10px;margin-bottom:24px;flex-wrap:wrap}
-    .hero-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:20px;font-size:0.78rem;font-weight:600;border:1px solid}
+    .hero-inner{max-width:1200px;margin:0 auto;position:relative}
+    .hero-badges{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap}
+    .hero-badge{
+      display:inline-flex;align-items:center;gap:6px;
+      padding:6px 12px;border-radius:20px;
+      font-size:clamp(0.68rem,1.5vw,0.82rem);font-weight:600;border:1px solid;
+    }
     .badge-green{background:rgba(45,106,79,0.2);border-color:rgba(45,106,79,0.5);color:#6EE7B7}
     .badge-orange{background:rgba(232,96,10,0.2);border-color:rgba(232,96,10,0.5);color:#FDBA74}
     .pulse{width:7px;height:7px;border-radius:50%;background:currentColor;animation:pulse 1.5s ease-in-out infinite}
     @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
-    .hero h1{font-family:'Baloo Tamma 2',sans-serif;font-size:clamp(2.2rem,5vw,3.8rem);font-weight:800;line-height:1.1;margin-bottom:10px}
+    .hero h1{
+      font-family:'Baloo Tamma 2',sans-serif;
+      font-size:clamp(1.9rem,5vw,3.8rem);
+      font-weight:800;line-height:1.1;margin-bottom:10px;
+    }
     .hero h1 .accent{color:var(--saffron)}
-    .hero-kannada{font-size:1rem;color:rgba(255,255,255,0.55);margin-bottom:8px}
-    .hero-sub{font-size:0.95rem;color:rgba(255,255,255,0.6);margin-bottom:32px;max-width:480px;line-height:1.6}
-    .hero-stats{display:flex;gap:32px;flex-wrap:wrap}
+    .hero-kannada{font-size:clamp(0.82rem,1.8vw,1rem);color:rgba(255,255,255,0.55);margin-bottom:8px}
+    .hero-sub{
+      font-size:clamp(0.82rem,1.8vw,0.95rem);
+      color:rgba(255,255,255,0.6);margin-bottom:clamp(20px,4vw,32px);
+      max-width:520px;line-height:1.6;
+    }
+    .hero-stats{display:flex;gap:clamp(16px,4vw,36px);flex-wrap:wrap}
     .stat{text-align:left}
-    .stat-num{font-family:'Baloo Tamma 2',sans-serif;font-size:2rem;font-weight:800;color:var(--saffron);line-height:1}
-    .stat-label{font-size:0.75rem;color:rgba(255,255,255,0.45);margin-top:2px}
+    .stat-num{
+      font-family:'Baloo Tamma 2',sans-serif;
+      font-size:clamp(1.4rem,3.5vw,2.1rem);
+      font-weight:800;color:var(--saffron);line-height:1;
+    }
+    .stat-label{font-size:clamp(0.65rem,1.2vw,0.78rem);color:rgba(255,255,255,0.45);margin-top:2px}
     .stat-label-kn{font-size:0.7rem;color:rgba(255,255,255,0.3)}
 
     /* ── TICKER ── */
@@ -87,142 +216,827 @@
     .ticker-dot{width:4px;height:4px;border-radius:50%;background:rgba(255,255,255,0.5)}
 
     /* ── SEARCH SECTION ── */
-    .search-section{background:#fff;border-bottom:1px solid var(--border);padding:20px 32px}
-    .search-inner{max-width:1100px;margin:0 auto}
-    .search-row{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
-    .search-select{flex:1;min-width:160px;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:0.88rem;font-family:'DM Sans',sans-serif;background:#fff;color:var(--ink);cursor:pointer;outline:none;transition:border 0.2s}
-    .search-select:focus{border-color:var(--saffron)}
-    .search-input{flex:2;min-width:200px;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:0.88rem;font-family:'DM Sans',sans-serif;outline:none;transition:border 0.2s}
-    .search-input:focus{border-color:var(--saffron)}
+    .search-section{
+      background:#fff;border-bottom:1px solid var(--border);
+      padding:clamp(12px,2.5vw,24px) clamp(16px,4vw,40px);
+    }
+    .search-inner{max-width:1200px;margin:0 auto}
+    .search-row{display:flex;gap:10px;align-items:stretch;flex-wrap:wrap;margin-bottom:14px}
+    .search-select,.search-input{
+      flex:1;min-width:min(160px,100%);
+      padding:12px 14px;border:1.5px solid var(--border);border-radius:10px;
+      font-size:clamp(0.82rem,1.5vw,0.9rem);font-family:'DM Sans',sans-serif;
+      background:#fff;color:var(--ink);outline:none;transition:border .2s;
+      min-height:44px;
+    }
+    .search-select{cursor:pointer}
+    .search-select:focus,.search-input:focus{border-color:var(--saffron)}
     .search-input::placeholder{color:var(--muted)}
-    .btn-search{padding:11px 24px;background:var(--saffron);color:#fff;border:none;border-radius:10px;font-size:0.9rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;transition:all 0.2s}
+    .search-input{flex:2;min-width:min(200px,100%)}
+    .btn-search{
+      padding:12px clamp(16px,3vw,28px);background:var(--saffron);color:#fff;
+      border:none;border-radius:10px;font-size:0.9rem;font-weight:600;
+      cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;
+      transition:background .2s;min-height:44px;
+    }
     .btn-search:hover{background:var(--saffron-dark)}
     /* Category pills */
     .category-pills{display:flex;gap:8px;flex-wrap:wrap}
-    .pill{padding:7px 14px;border-radius:20px;border:1.5px solid var(--border);background:#fff;font-size:0.82rem;cursor:pointer;transition:all 0.2s;white-space:nowrap;color:var(--ink)}
+    .pill{
+      padding:9px 15px;border-radius:20px;border:1.5px solid var(--border);
+      background:#fff;font-size:clamp(0.75rem,1.4vw,0.84rem);
+      cursor:pointer;transition:background .15s,border-color .15s,color .15s;
+      white-space:nowrap;color:var(--ink);min-height:44px;
+      display:inline-flex;align-items:center;
+    }
     .pill:hover{border-color:var(--saffron);color:var(--saffron);background:var(--saffron-light)}
     .pill.active{background:var(--saffron);color:#fff;border-color:var(--saffron)}
     /* Sort bar */
-    .sort-bar{display:flex;align-items:center;justify-content:space-between;max-width:1100px;margin:14px auto 0;padding:0 32px;font-size:0.82rem;color:var(--muted)}
-    .sort-options{display:flex;gap:4px}
-    .sort-btn{padding:5px 12px;border:1px solid var(--border);border-radius:6px;background:#fff;font-size:0.8rem;cursor:pointer;color:var(--muted);font-family:'DM Sans',sans-serif;transition:all 0.2s}
+    .sort-bar{
+      display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;
+      max-width:1200px;margin:12px auto 0;
+      padding:0 clamp(16px,4vw,40px);
+      font-size:clamp(0.75rem,1.3vw,0.85rem);color:var(--muted);
+    }
+    .sort-options{display:flex;gap:4px;flex-wrap:wrap}
+    .sort-btn{
+      padding:8px 12px;border:1px solid var(--border);border-radius:8px;
+      background:#fff;font-size:clamp(0.72rem,1.2vw,0.82rem);cursor:pointer;
+      color:var(--muted);font-family:'DM Sans',sans-serif;transition:all .2s;
+      min-height:44px;
+    }
     .sort-btn.active{background:var(--saffron-light);color:var(--saffron);border-color:var(--saffron)}
 
     /* ── WORKERS GRID ── */
-    .workers-section{max-width:1100px;margin:28px auto;padding:0 32px}
-    .workers-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:16px}
-    @media(max-width:1024px){.workers-grid{grid-template-columns:repeat(2,1fr)}}
-    @media(max-width:580px){.workers-grid{grid-template-columns:1fr}}
-    /* Enhanced worker card */
-    .worker-card{background:#fff;border:1px solid var(--border);border-radius:16px;padding:18px;transition:all 0.25s;position:relative;display:flex;flex-direction:column}
-    .worker-card:hover{transform:translateY(-4px);box-shadow:0 14px 36px rgba(0,0,0,0.13);border-color:var(--saffron)}
-    .wc-top{display:flex;align-items:center;gap:12px;margin-bottom:10px}
-    .wc-avatar{width:52px;height:52px;border-radius:50%;object-fit:cover;border:2px solid var(--border);flex-shrink:0}
-    .wc-avatar-ph{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#FEF0E6,#FAD7BC);border:2px solid var(--saffron);display:flex;align-items:center;justify-content:center;font-size:1.1rem;color:var(--saffron);font-weight:700;flex-shrink:0}
-    .wc-name{font-weight:700;font-size:0.95rem;color:var(--ink);line-height:1.2}
-    .wc-trade{font-size:0.75rem;color:var(--muted);margin-top:2px}
-    .wc-location{display:inline-flex;align-items:center;gap:4px;font-size:0.74rem;background:rgba(27,107,69,0.1);color:var(--jade);padding:3px 9px;border-radius:10px;margin-bottom:8px;width:fit-content}
+    .workers-section{max-width:1200px;margin:28px auto;padding:0 32px}
+    /* Desktop: 3-column premium grid */
+    .workers-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:16px}
+    @media(max-width:1100px){.workers-grid{grid-template-columns:repeat(2,1fr)}}
+    @media(max-width:640px){
+      .workers-section{padding:0;margin:12px 0}
+      /* Mobile: compact list rows — 65% less scroll */
+      .workers-grid{display:flex;flex-direction:column;gap:0;margin-top:0;border-top:1px solid var(--border)}
+    }
+    /* ── DESKTOP CARD: Premium floating card ── */
+    .worker-card{
+      background:#fff;
+      border:1px solid var(--border);
+      border-radius:18px;
+      padding:20px;
+      transition:transform 0.2s cubic-bezier(0.22,1,0.36,1),box-shadow 0.2s ease,border-color 0.2s;
+      position:relative;
+      display:flex;
+      flex-direction:column;
+      box-shadow:0 2px 12px rgba(0,0,0,0.06);
+    }
+    .worker-card:hover{
+      transform:translateY(-6px) translateZ(0);
+      box-shadow:0 20px 48px rgba(0,0,0,0.13);
+      border-color:var(--saffron);
+    }
+    /* Desktop: wc-top = avatar + name+trade row */
+    .wc-top{display:flex;align-items:center;gap:12px;margin-bottom:4px}
+    /* On desktop, name+trade are separate divs but we pull them visually into the top area */
+    .wc-name{font-weight:700;font-size:0.97rem;color:var(--ink);line-height:1.2;padding:0 0 2px}
+    .wc-trade{font-size:0.76rem;color:var(--muted);font-weight:500;margin-bottom:8px}
+    /* On desktop, wc-top only has avatar — show name+trade inline via adjacent sibling */
+    .wc-top + .wc-name{margin-top:8px}
+    .wc-avatar{width:56px;height:56px;border-radius:50%;object-fit:cover;border:2px solid var(--border);flex-shrink:0}
+    .wc-avatar-ph{
+      width:56px;height:56px;border-radius:50%;
+      background:linear-gradient(135deg,#FEF0E6,#E8600A);
+      border:2.5px solid var(--saffron);
+      display:flex;align-items:center;justify-content:center;
+      font-size:1.15rem;color:#fff;font-weight:800;flex-shrink:0;
+    }
+    .wc-location{
+      display:inline-flex;align-items:center;gap:4px;
+      font-size:0.74rem;background:rgba(45,106,79,0.1);
+      color:var(--jade);padding:3px 10px;border-radius:12px;
+      margin-bottom:8px;width:fit-content;font-weight:600;
+    }
     .wc-skills{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px}
-    .wc-skill{font-size:0.7rem;padding:3px 8px;background:var(--paper);border:1px solid var(--border);border-radius:8px;color:var(--muted);font-weight:500}
-    /* Rate + stars row */
-    .wc-stats{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin-bottom:10px;gap:6px}
-    .wc-rate{font-family:'Baloo Tamma 2',sans-serif;font-size:1rem;font-weight:700;color:var(--jade)}
-    .wc-stars{font-size:0.75rem;color:var(--muted)}
-    .wc-exp{font-size:0.72rem;color:var(--muted);background:var(--paper);padding:2px 8px;border-radius:10px;border:1px solid var(--border)}
-    /* Action buttons */
+    .wc-skill{
+      font-size:0.7rem;padding:3px 9px;
+      background:var(--paper);border:1px solid var(--border);
+      border-radius:8px;color:var(--muted);font-weight:500;
+    }
+    .wc-stats{
+      display:flex;align-items:center;justify-content:space-between;
+      padding:8px 0;border-top:1px solid var(--border);
+      border-bottom:1px solid var(--border);
+      margin-bottom:10px;gap:6px;
+    }
+    .wc-rate{font-weight:800;font-size:1.05rem;color:var(--jade)}
+    .wc-stars{font-size:0.74rem;color:var(--muted)}
+    .wc-exp{
+      font-size:0.7rem;color:var(--muted);
+      background:var(--paper);padding:2px 8px;
+      border-radius:10px;border:1px solid var(--border);
+    }
     .wc-actions{display:flex;gap:7px;margin-top:auto;padding-top:4px}
-    .wc-btn-msg{flex:1;padding:9px 6px;background:transparent;color:var(--saffron);border:1.5px solid var(--saffron);border-radius:8px;font-size:0.78rem;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:4px}
+    .wc-btn-msg{
+      flex:1;padding:10px 6px;
+      background:transparent;color:var(--saffron);
+      border:1.5px solid var(--saffron);border-radius:9px;
+      font-size:0.78rem;font-weight:700;cursor:pointer;
+      font-family:'DM Sans',sans-serif;transition:all 0.18s;
+      display:flex;align-items:center;justify-content:center;gap:4px;
+    }
     .wc-btn-msg:hover{background:var(--saffron);color:#fff;transform:translateY(-1px)}
-    .wc-btn-book{flex:1;padding:9px 6px;background:var(--saffron);color:#fff;border:none;border-radius:8px;font-size:0.78rem;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:4px}
-    .wc-btn-book:hover{background:#C04E06;transform:translateY(-1px);box-shadow:0 4px 12px rgba(232,89,12,0.3)}
-    /* Like button */
-    .wc-like-btn{position:absolute;top:12px;right:12px;width:30px;height:30px;border-radius:50%;border:none;background:rgba(255,255,255,0.9);backdrop-filter:blur(4px);box-shadow:0 2px 8px rgba(0,0,0,0.12);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:0.95rem;transition:all 0.2s;z-index:2;padding:0}
-    .wc-like-btn:hover{transform:scale(1.15);box-shadow:0 4px 14px rgba(232,96,10,0.25)}
-    .wc-like-btn.liked{background:linear-gradient(135deg,#ff6b6b,#ee5a24);box-shadow:0 4px 14px rgba(238,90,36,0.4)}
+    .wc-btn-book{
+      flex:1;padding:10px 6px;
+      background:linear-gradient(135deg,#E8600A,#C84800);
+      color:#fff;border:none;border-radius:9px;
+      font-size:0.78rem;font-weight:700;cursor:pointer;
+      font-family:'DM Sans',sans-serif;transition:all 0.18s;
+      display:flex;align-items:center;justify-content:center;gap:4px;
+      box-shadow:0 3px 10px rgba(232,96,10,0.3);
+    }
+    .wc-btn-book:hover{background:linear-gradient(135deg,#C84800,#A83600);transform:translateY(-1px);box-shadow:0 6px 18px rgba(232,89,12,0.45)}
+    .wc-like-btn{
+      position:absolute;top:14px;right:14px;
+      width:32px;height:32px;border-radius:50%;border:none;
+      background:rgba(255,255,255,0.92);backdrop-filter:blur(6px);
+      box-shadow:0 2px 10px rgba(0,0,0,0.12);
+      cursor:pointer;display:flex;align-items:center;justify-content:center;
+      font-size:1rem;transition:all 0.2s;z-index:2;padding:0;
+    }
+    .wc-like-btn:hover{transform:scale(1.15);box-shadow:0 4px 14px rgba(232,96,10,0.3)}
+    .wc-like-btn.liked{background:linear-gradient(135deg,#ff6b6b,#ee5a24);box-shadow:0 4px 14px rgba(238,90,36,0.45)}
     .wc-like-btn .heart-icon{display:inline-block;line-height:1;transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1)}
     .wc-like-btn.liked .heart-icon{transform:scale(1.2)}
+    /* Verified badge */
+    .wc-verified{
+      position:absolute;top:14px;left:14px;
+      background:linear-gradient(135deg,#2D6A4F,#40916C);
+      color:#fff;font-size:0.6rem;font-weight:700;
+      padding:2px 7px;border-radius:6px;letter-spacing:0.05em;
+      z-index:2;
+    }
+
+
+    /* ═══════════════════════════════════════════════════════
+       MOBILE: Swiggy-style 2-column card grid
+       Premium, app-like, zero ugliness
+    ═══════════════════════════════════════════════════════ */
+    @media(max-width:640px){
+      /* Grid: 2 columns, tight gap */
+      .workers-grid{
+        display:grid !important;
+        grid-template-columns:1fr 1fr !important;
+        gap:12px !important;
+        padding:12px 12px 80px !important;
+        margin:0 !important;
+        background:#F4F1ED !important;
+      }
+
+      /* CARD: vertical Swiggy-style */
+      .worker-card{
+        display:flex !important;
+        flex-direction:column !important;
+        border-radius:16px !important;
+        border:none !important;
+        box-shadow:0 2px 12px rgba(0,0,0,0.1) !important;
+        padding:0 !important;
+        overflow:hidden;
+        background:#fff !important;
+        transition:transform 0.18s,box-shadow 0.18s !important;
+        position:relative;
+      }
+      .worker-card:active{transform:scale(0.97) !important;box-shadow:0 1px 6px rgba(0,0,0,0.1) !important}
+
+      /* Colorful avatar banner (top portion of card) */
+      .wc-top{
+        display:flex !important;
+        align-items:center;
+        justify-content:center;
+        margin-bottom:0 !important;
+        gap:0 !important;
+        padding:18px 0 12px;
+        background:linear-gradient(135deg,#FEF0E6 0%,#FDDCC4 100%);
+        position:relative;
+        min-height:90px;
+      }
+      /* Avatar bigger, centred */
+      .wc-avatar{
+        width:60px !important;
+        height:60px !important;
+        border-radius:50% !important;
+        object-fit:cover;
+        border:3px solid #fff !important;
+        box-shadow:0 4px 14px rgba(0,0,0,0.15);
+      }
+      .wc-avatar-ph{
+        width:60px !important;
+        height:60px !important;
+        font-size:1.3rem !important;
+        border-radius:50% !important;
+        border:3px solid rgba(255,255,255,0.7) !important;
+        box-shadow:0 4px 14px rgba(232,96,10,0.25);
+        background:linear-gradient(135deg,#E8600A,#C84800) !important;
+        color:#fff !important;
+      }
+
+      /* Name under avatar - hide the desktop name-inside-top layout */
+      .wc-top > div{ display:none !important }
+
+      /* Card body padding */
+      .wc-location{
+        font-size:0.65rem !important;
+        padding:2px 8px !important;
+        margin:0 10px 0 !important;
+        display:inline-flex !important;
+        max-width:calc(100% - 20px);
+        white-space:nowrap;
+        overflow:hidden;
+        text-overflow:ellipsis;
+      }
+      .wc-skills{
+        padding:0 10px !important;
+        margin-bottom:6px !important;
+        gap:3px !important;
+        flex-wrap:wrap;
+        display:flex;
+      }
+      .wc-skill{
+        font-size:0.6rem !important;
+        padding:2px 6px !important;
+        border-radius:6px !important;
+        background:#F4F1ED !important;
+        border-color:transparent !important;
+        color:var(--muted) !important;
+      }
+
+      /* Name + trade below avatar */
+      .wc-name{
+        display:block !important;
+        font-size:0.85rem !important;
+        font-weight:800 !important;
+        text-align:center;
+        padding:8px 10px 2px;
+        color:var(--ink) !important;
+        white-space:nowrap;
+        overflow:hidden;
+        text-overflow:ellipsis;
+      }
+      .wc-trade{
+        display:block !important;
+        text-align:center;
+        font-size:0.65rem !important;
+        color:var(--muted);
+        padding:0 10px 6px;
+        white-space:nowrap;
+        overflow:hidden;
+        text-overflow:ellipsis;
+      }
+
+      /* Stats row: rate + stars */
+      .wc-stats{
+        padding:6px 10px !important;
+        border-top:1px solid #F0EDE9 !important;
+        border-bottom:1px solid #F0EDE9 !important;
+        margin:4px 0 !important;
+        gap:4px !important;
+        flex-wrap:wrap;
+      }
+      .wc-rate{
+        font-size:0.92rem !important;
+        font-weight:800 !important;
+        color:var(--jade) !important;
+      }
+      .wc-stars{font-size:0.62rem !important}
+      .wc-exp{display:none !important}
+
+      /* Book button: full width, big, orange */
+      .wc-actions{
+        padding:8px 10px 10px !important;
+        gap:0 !important;
+        margin-top:0 !important;
+        flex-direction:column !important;
+      }
+      .wc-btn-msg{display:none !important}
+      .wc-btn-book{
+        width:100% !important;
+        padding:10px 8px !important;
+        font-size:0.78rem !important;
+        border-radius:10px !important;
+        box-shadow:0 3px 10px rgba(232,96,10,0.3) !important;
+        font-weight:800 !important;
+        letter-spacing:0.02em;
+      }
+
+      /* Like button: top-right corner */
+      .wc-like-btn{
+        display:flex !important;
+        width:28px !important;
+        height:28px !important;
+        top:8px !important;
+        right:8px !important;
+        font-size:0.85rem !important;
+        box-shadow:0 2px 8px rgba(0,0,0,0.15) !important;
+      }
+
+      /* Verified badge */
+      .wc-verified{
+        top:8px !important;
+        left:8px !important;
+        font-size:0.5rem !important;
+        padding:2px 5px !important;
+        border-radius:5px !important;
+      }
+
+      /* Name+trade injected directly under .wc-top by CSS approach */
+      /* We show name/trade from wc-top children differently on mobile */
+    }
     @keyframes heartPop{0%{transform:scale(1)}40%{transform:scale(1.45)}70%{transform:scale(0.9)}100%{transform:scale(1.2)}}
     .wc-like-btn.just-liked .heart-icon{animation:heartPop 0.4s ease forwards}
     @keyframes floatHeart{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-40px) scale(0.4)}}
     .heart-particle{position:absolute;pointer-events:none;font-size:0.9rem;animation:floatHeart 0.7s ease forwards;z-index:10}
-    /* Verified badge */
     .wc-verified{position:absolute;top:12px;left:12px;background:linear-gradient(135deg,#1B6B45,#2D9E6B);color:#fff;font-size:0.6rem;font-weight:700;padding:2px 7px;border-radius:10px;letter-spacing:0.04em}
     /* Pagination */
-    .pagination{display:flex;justify-content:center;gap:8px;margin-top:28px;flex-wrap:wrap}
-    .page-btn{width:36px;height:36px;border-radius:8px;border:1.5px solid var(--border);background:#fff;font-size:0.85rem;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:600;transition:all 0.2s;color:var(--muted)}
-    .page-btn.active{background:var(--saffron);color:#fff;border-color:var(--saffron)}
+    .pagination{display:flex;justify-content:center;gap:8px;margin-top:28px;flex-wrap:wrap;padding-bottom:80px}
+    .page-btn{width:40px;height:40px;border-radius:10px;border:1.5px solid var(--border);background:#fff;font-size:0.85rem;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:600;transition:all 0.2s;color:var(--muted)}
+    .page-btn.active{background:var(--saffron);color:#fff;border-color:var(--saffron);box-shadow:0 3px 12px rgba(232,96,10,0.35)}
     .page-btn:hover:not(.active){border-color:var(--saffron);color:var(--saffron)}
 
-    /* ── EMPTY / LOADING ── */
+    /* ── SKELETON CARDS ── */
+    @keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+    /* Desktop skeleton */
+    .skeleton-card{background:#fff;border:1px solid var(--border);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:10px}
+    .sk-line{border-radius:6px;background:linear-gradient(90deg,#f0ede9 25%,#e8e4df 50%,#f0ede9 75%);background-size:200% 100%;animation:shimmer 1.4s ease-in-out infinite;height:12px}
+    .sk-avatar{width:52px;height:52px;border-radius:50%;background:linear-gradient(90deg,#f0ede9 25%,#e8e4df 50%,#f0ede9 75%);background-size:200% 100%;animation:shimmer 1.4s ease-in-out infinite;flex-shrink:0}
+    .sk-w60{width:60%}.sk-w40{width:40%}.sk-w80{width:80%}.sk-w30{width:30%}.sk-h32{height:32px;border-radius:8px}
+    /* Mobile skeleton: match 2-col card shape */
+    @media(max-width:640px){
+      .skeleton-card{
+        border-radius:16px;border:none;
+        box-shadow:0 2px 10px rgba(0,0,0,0.08);
+        padding:0;overflow:hidden;
+      }
+      .sk-avatar{
+        width:100%;height:80px;border-radius:0;
+        border-bottom-left-radius:0;border-bottom-right-radius:0;
+      }
+      .sk-line{margin:8px 10px 0;width:calc(100% - 20px)}
+      .sk-h32{margin:8px 10px 10px;width:calc(100% - 20px)}
+    }
+    /* ── SPINNER ── */
     .state-box{text-align:center;padding:60px 20px;color:var(--muted)}
     .spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--saffron);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 14px}
     @keyframes spin{to{transform:rotate(360deg)}}
+
 
     /* ── FAB ── */
     .fab{position:fixed;bottom:28px;right:28px;width:52px;height:52px;border-radius:50%;background:var(--saffron);color:#fff;border:none;font-size:1.5rem;cursor:pointer;box-shadow:0 4px 16px rgba(232,96,10,0.4);transition:all 0.2s;z-index:99}
     .fab:hover{transform:scale(1.1);box-shadow:0 6px 24px rgba(232,96,10,0.5)}
 
     /* ── FOOTER ── */
-    footer{border-top:1px solid var(--border);padding:20px 32px;text-align:center;font-size:0.8rem;color:var(--muted);margin-top:40px}
+    footer{border-top:1px solid var(--border);padding:20px 32px;text-align:center;font-size:0.8rem;color:var(--muted);margin-top:0}
+
+    /* ══ DOWNLOAD APP SECTION ══ */
+    .download-section{
+      background:linear-gradient(135deg,#1A1A2E 0%,#2a1a3e 60%,#1a2a1e 100%);
+      padding:clamp(40px,6vw,80px) clamp(16px,5vw,48px);
+      position:relative;overflow:hidden;margin-top:40px;
+    }
+    .download-section::before{
+      content:'';position:absolute;inset:0;
+      background:radial-gradient(ellipse at 80% 20%,rgba(232,96,10,0.12),transparent 55%),
+                 radial-gradient(ellipse at 20% 80%,rgba(45,106,79,0.1),transparent 50%);
+    }
+    .download-inner{
+      max-width:1100px;margin:0 auto;position:relative;
+      display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center;
+    }
+    .dl-left{}
+    .dl-tag{
+      display:inline-flex;align-items:center;gap:8px;
+      background:rgba(232,96,10,0.18);border:1px solid rgba(232,96,10,0.4);
+      color:#FDBA74;border-radius:20px;padding:5px 14px;
+      font-size:0.75rem;font-weight:700;letter-spacing:0.04em;
+      margin-bottom:18px;
+    }
+    .dl-heading{
+      font-family:'Baloo Tamma 2',sans-serif;
+      font-size:clamp(1.8rem,4vw,3rem);
+      font-weight:800;color:#fff;line-height:1.15;margin-bottom:12px;
+    }
+    .dl-heading span{color:var(--saffron)}
+    .dl-sub{
+      font-size:clamp(0.85rem,1.5vw,1rem);
+      color:rgba(255,255,255,0.6);line-height:1.7;margin-bottom:28px;max-width:460px;
+    }
+    /* Features grid */
+    .dl-features{
+      display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:28px;
+    }
+    .dl-feat{
+      display:flex;align-items:center;gap:10px;
+      background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);
+      border-radius:12px;padding:10px 14px;
+    }
+    .dl-feat-icon{font-size:1.2rem;flex-shrink:0}
+    .dl-feat-text{font-size:0.82rem;color:rgba(255,255,255,0.8);font-weight:500;line-height:1.3}
+
+    /* Main CTA buttons */
+    .dl-btns{display:flex;gap:12px;flex-wrap:wrap}
+    .dl-btn-primary{
+      display:inline-flex;align-items:center;gap:10px;
+      padding:14px 28px;background:linear-gradient(135deg,#E8600A,#C84800);
+      color:#fff;border:none;border-radius:14px;
+      font-size:0.95rem;font-weight:800;cursor:pointer;
+      font-family:'DM Sans',sans-serif;text-decoration:none;
+      box-shadow:0 6px 24px rgba(232,96,10,0.4);
+      transition:transform .2s,box-shadow .2s;
+    }
+    .dl-btn-primary:hover{transform:translateY(-2px);box-shadow:0 10px 32px rgba(232,96,10,0.55)}
+    .dl-btn-secondary{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:14px 24px;background:rgba(255,255,255,0.08);
+      color:#fff;border:1.5px solid rgba(255,255,255,0.2);border-radius:14px;
+      font-size:0.9rem;font-weight:600;cursor:pointer;
+      font-family:'DM Sans',sans-serif;text-decoration:none;
+      transition:background .2s,border-color .2s;
+    }
+    .dl-btn-secondary:hover{background:rgba(255,255,255,0.14);border-color:rgba(255,255,255,0.4)}
+
+    /* Right: platform cards */
+    .dl-right{display:flex;flex-direction:column;gap:14px}
+    .dl-platform{
+      background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);
+      border-radius:18px;padding:18px 20px;
+      display:flex;align-items:center;gap:16px;
+      transition:background .2s,border-color .2s;cursor:default;
+    }
+    .dl-platform:hover{background:rgba(255,255,255,0.09);border-color:rgba(232,96,10,0.4)}
+    .dl-plat-icon{
+      width:52px;height:52px;border-radius:14px;
+      display:flex;align-items:center;justify-content:center;
+      font-size:1.5rem;flex-shrink:0;
+    }
+    .plat-android{background:linear-gradient(135deg,#3DDC84,#2B9D5C)}
+    .plat-ios{background:linear-gradient(135deg,#999,#555)}
+    .plat-desktop{background:linear-gradient(135deg,#4F8EF7,#2563EB)}
+    .dl-plat-info{flex:1;min-width:0}
+    .dl-plat-name{font-weight:700;color:#fff;font-size:0.95rem;margin-bottom:3px}
+    .dl-plat-steps{font-size:0.76rem;color:rgba(255,255,255,0.5);line-height:1.5}
+    .dl-plat-btn{
+      padding:8px 16px;border:none;border-radius:10px;
+      font-size:0.78rem;font-weight:700;cursor:pointer;
+      font-family:'DM Sans',sans-serif;white-space:nowrap;
+      transition:all .18s;flex-shrink:0;min-height:36px;
+    }
+    .plat-btn-android{background:linear-gradient(135deg,#3DDC84,#2B9D5C);color:#fff}
+    .plat-btn-android:hover{background:#2B9D5C}
+    .plat-btn-ios{background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.25)!important}
+    .plat-btn-ios:hover{background:rgba(255,255,255,0.25)}
+    .plat-btn-desktop{background:linear-gradient(135deg,#4F8EF7,#2563EB);color:#fff}
+    .plat-btn-desktop:hover{background:#2563EB}
+
+    /* Stats row */
+    .dl-stats{
+      display:flex;gap:24px;margin-top:20px;
+      padding-top:20px;border-top:1px solid rgba(255,255,255,0.1);
+    }
+    .dl-stat-item{text-align:center}
+    .dl-stat-num{font-family:'Baloo Tamma 2',sans-serif;font-size:1.5rem;font-weight:800;color:var(--saffron)}
+    .dl-stat-label{font-size:0.7rem;color:rgba(255,255,255,0.4);margin-top:2px}
+
+    /* iOS install modal */
+    #ios-modal{
+      display:none;position:fixed;inset:0;z-index:10000;
+      background:rgba(0,0,0,0.65);backdrop-filter:blur(6px);
+      align-items:flex-end;justify-content:center;padding:0;
+    }
+    #ios-modal.show{display:flex}
+    #ios-modal-panel{
+      background:#fff;border-radius:24px 24px 0 0;width:100%;max-width:480px;
+      padding:28px 24px 40px;
+      animation:slideUpModal .3s cubic-bezier(0.22,1,0.36,1);
+    }
+    @keyframes slideUpModal{from{transform:translateY(100%)}to{transform:translateY(0)}}
+    .ios-step{
+      display:flex;align-items:center;gap:14px;
+      padding:12px 0;border-bottom:1px solid var(--border);
+    }
+    .ios-step:last-child{border:none}
+    .ios-step-num{
+      width:32px;height:32px;border-radius:50%;
+      background:var(--saffron);color:#fff;
+      display:flex;align-items:center;justify-content:center;
+      font-weight:800;font-size:0.9rem;flex-shrink:0;
+    }
+
+    /* Responsive */
+    @media(max-width:768px){
+      .download-inner{grid-template-columns:1fr;gap:32px}
+      .dl-right{order:-1}
+      .dl-features{grid-template-columns:1fr 1fr}
+    }
+    @media(max-width:480px){
+      .dl-features{grid-template-columns:1fr}
+      .dl-btns{flex-direction:column}
+      .dl-btn-primary,.dl-btn-secondary{width:100%;justify-content:center}
+      .dl-stats{gap:14px}
+    }
+
+
+    /* ── PWA INSTALL ── */
+    #pwa-install-btn{
+      display:none;align-items:center;gap:6px;
+      padding:7px 13px;background:linear-gradient(135deg,#E8600A,#D4450A);
+      color:#fff;border:none;border-radius:9px;
+      font-size:0.8rem;font-weight:700;cursor:pointer;
+      font-family:'DM Sans',sans-serif;white-space:nowrap;
+      box-shadow:0 2px 10px rgba(232,96,10,0.35);
+      transition:all 0.2s;animation:pwaGlow 2.5s ease-in-out infinite;
+    }
+    #pwa-install-btn:hover{transform:translateY(-1px);box-shadow:0 4px 18px rgba(232,96,10,0.5)}
+    @keyframes pwaGlow{
+      0%,100%{box-shadow:0 2px 10px rgba(232,96,10,0.35)}
+      50%{box-shadow:0 2px 20px rgba(232,96,10,0.7)}
+    }
+    /* ── PWA INSTALL STRIP ── */
+    #pwa-strip{
+      display:none;background:linear-gradient(135deg,#1A1A2E 0%,#2a1a3e 100%);
+      color:#fff;padding:14px 24px;
+      align-items:center;justify-content:space-between;gap:16px;
+      border-bottom:2px solid rgba(232,96,10,0.4);
+      animation:slideDown 0.4s cubic-bezier(0.32,0.72,0,1);
+    }
+    @keyframes slideDown{from{transform:translateY(-100%);opacity:0}to{transform:translateY(0);opacity:1}}
+    #pwa-strip-left{display:flex;align-items:center;gap:14px}
+    #pwa-strip-icon{width:44px;height:44px;background:var(--saffron);border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0}
+    .pwa-strip-title{font-weight:800;font-size:0.95rem}
+    .pwa-strip-sub{font-size:0.76rem;color:rgba(255,255,255,0.6);margin-top:1px}
+    #pwa-strip-actions{display:flex;gap:8px;flex-shrink:0}
+    .pwa-install-now{padding:9px 18px;background:var(--saffron);color:#fff;border:none;border-radius:9px;font-size:0.85rem;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:.2s}
+    .pwa-install-now:hover{background:#C04E06}
+    .pwa-strip-close{padding:8px 12px;background:rgba(255,255,255,0.1);color:#fff;border:none;border-radius:9px;font-size:0.82rem;cursor:pointer;font-family:'DM Sans',sans-serif;transition:.2s}
+    .pwa-strip-close:hover{background:rgba(255,255,255,0.2)}
+    /* PWA install card (in page) */
+    #pwa-feature-card{
+      background:linear-gradient(135deg,#1A1A2E,#2a1a3e);
+      border-radius:20px;padding:28px;margin:0 auto 32px;
+      max-width:1100px;display:none;
+      align-items:center;gap:24px;flex-wrap:wrap;
+      border:1px solid rgba(232,96,10,0.3);
+    }
+    .pwa-feat-left{flex:1;min-width:220px}
+    .pwa-feat-tag{display:inline-flex;align-items:center;gap:6px;background:rgba(232,96,10,0.2);color:#FDBA74;border:1px solid rgba(232,96,10,0.4);border-radius:20px;padding:4px 12px;font-size:0.75rem;font-weight:700;margin-bottom:12px}
+    .pwa-feat-title{font-family:'Baloo Tamma 2',sans-serif;font-size:1.6rem;font-weight:800;color:#fff;line-height:1.2;margin-bottom:8px}
+    .pwa-feat-sub{font-size:0.88rem;color:rgba(255,255,255,0.6);line-height:1.6}
+    .pwa-feat-points{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+    .pwa-feat-pt{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:6px 12px;font-size:0.8rem;color:rgba(255,255,255,0.8);font-weight:500}
+    .pwa-feat-right{text-align:center;flex-shrink:0}
+    .pwa-mockup{width:90px;height:90px;background:linear-gradient(135deg,var(--saffron),#D4450A);border-radius:22px;display:flex;align-items:center;justify-content:center;font-size:2.8rem;margin:0 auto 16px;box-shadow:0 8px 28px rgba(232,96,10,0.4)}
+    .pwa-big-btn{padding:13px 28px;background:linear-gradient(135deg,var(--saffron),#D4450A);color:#fff;border:none;border-radius:12px;font-size:0.95rem;font-weight:800;cursor:pointer;font-family:'DM Sans',sans-serif;box-shadow:0 4px 18px rgba(232,96,10,0.45);transition:all 0.25s;white-space:nowrap}
+    .pwa-big-btn:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(232,96,10,0.6)}
+    .pwa-ios-hint{font-size:0.74rem;color:rgba(255,255,255,0.45);margin-top:10px;line-height:1.5}
+    /* PWA already installed badge */
+    .pwa-installed-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(34,197,94,0.15);border:1px solid rgba(34,197,94,0.4);color:#4ade80;border-radius:8px;padding:6px 14px;font-size:0.82rem;font-weight:600}
+    @media(max-width:640px){
+      #pwa-strip{flex-direction:column;gap:10px;text-align:center}
+      #pwa-strip-left{flex-direction:column;gap:8px}
+      #pwa-feature-card{padding:20px 16px;margin:0 12px 24px}
+      .pwa-feat-title{font-size:1.3rem}
+    }
   @keyframes toastIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
   .nav-btn.outline{background:transparent;color:var(--saffron);border:1.5px solid var(--saffron)}
   .nav-btn.outline:hover{background:var(--saffron);color:#fff}
   #account-menu a,#account-menu button{transition:background 0.15s}
-    /* ── PWA & Performance CSS ─────────────────────────── */
-    html { scroll-behavior: smooth; }
-    /* GPU-accelerate animated elements */
-    .worker-card { will-change: transform, opacity; contain: layout style; }
-    .bottom-nav  { will-change: transform; }
-    .modal       { will-change: transform, opacity; }
-    /* Card entrance animation */
-    @keyframes fadeSlideUp {
-      from { opacity: 0; transform: translateY(16px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-    .worker-card { animation: fadeSlideUp .35s ease both; }
-    /* Button press feedback */
-    button:active, .nav-btn:active, .pill:active {
-      transform: scale(0.96);
-      transition: transform .1s ease;
-    }
-    /* Safe-area padding for notched phones */
-    nav, .topbar { padding-top: env(safe-area-inset-top); }
-    /* Reduced motion accessibility */
-    @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
-    }
-    /* Stagger card animations */
-    .worker-card:nth-child(1)  { animation-delay: 0ms; }
-    .worker-card:nth-child(2)  { animation-delay: 40ms; }
-    .worker-card:nth-child(3)  { animation-delay: 80ms; }
-    .worker-card:nth-child(4)  { animation-delay: 120ms; }
-    .worker-card:nth-child(5)  { animation-delay: 160ms; }
-    .worker-card:nth-child(6+) { animation-delay: 200ms; }
 
-    /* ── MOBILE RESPONSIVE ── */
+    /* ══════════════════════════════════════════════════
+       ULTRA-PERFORMANCE CSS
+    ══════════════════════════════════════════════════ */
+
+    /* Smooth everything */
+    html {
+      scroll-behavior: smooth;
+      /* iOS momentum scroll */
+      -webkit-overflow-scrolling: touch;
+      /* Prevent layout shift */
+      scrollbar-gutter: stable;
+    }
+
+    /* ── GPU Compositing Layers ── */
+    .navbar        { transform: translateZ(0); backface-visibility: hidden; }
+    .hero          { transform: translateZ(0); }
+    .worker-card   { transform: translateZ(0); backface-visibility: hidden; }
+    .ticker-inner  { transform: translateZ(0); }
+    #mobile-bottom-nav { transform: translateZ(0); }
+    .bottom-nav-premium { transform: translateZ(0); backface-visibility: hidden; }
+    #mob-install-bar   { transform: translateZ(0); }
+
+    /* ── Content Visibility: Skip off-screen rendering ── */
+    .workers-section { content-visibility: auto; contain-intrinsic-size: 0 600px; }
+
+    /* ── Layout containment prevents reflows ── */
+    .worker-card  { contain: layout style paint; }
+    .wc-top       { contain: layout; }
+    .wc-actions   { contain: layout; }
+
+    /* ── Touch optimisation ── */
+    .category-pills { touch-action: pan-x; }
+    .workers-grid   { touch-action: pan-y; }
+    .workers-section{ touch-action: pan-y; }
+
+    /* ── Card entrance: GPU-only animation (transform + opacity) ── */
+    @keyframes cardIn {
+      from { opacity: 0; transform: translateY(12px) scale(0.98); }
+      to   { opacity: 1; transform: translateY(0)     scale(1);    }
+    }
+    .worker-card {
+      animation: cardIn 0.3s cubic-bezier(0.22,1,0.36,1) both;
+    }
+    /* Stagger — only first 8 cards */
+    .worker-card:nth-child(1) { animation-delay:  0ms; }
+    .worker-card:nth-child(2) { animation-delay: 30ms; }
+    .worker-card:nth-child(3) { animation-delay: 60ms; }
+    .worker-card:nth-child(4) { animation-delay: 90ms; }
+    .worker-card:nth-child(5) { animation-delay:120ms; }
+    .worker-card:nth-child(6) { animation-delay:150ms; }
+    .worker-card:nth-child(7) { animation-delay:180ms; }
+    .worker-card:nth-child(8) { animation-delay:200ms; }
+
+    /* ── Hover: GPU-only transform (no layout) ── */
+    .worker-card:hover {
+      transform: translateY(-4px) translateZ(0);
+      box-shadow: 0 14px 36px rgba(0,0,0,0.13);
+      border-color: var(--saffron);
+    }
+
+    /* ── Button press: instant tactile feedback ── */
+    button:active, .nav-btn:active, .pill:active, .sort-btn:active {
+      transform: scale(0.95) translateZ(0);
+      transition: transform 0.08s ease;
+    }
+
+    /* ── Smooth transitions (GPU-only props) ── */
+    .worker-card    { transition: transform 0.2s cubic-bezier(0.22,1,0.36,1), box-shadow 0.2s ease, border-color 0.2s ease; }
+    .nav-link       { transition: color 0.15s, background 0.15s; }
+    .pill           { transition: background 0.15s, border-color 0.15s, color 0.15s; }
+    .wc-btn-msg,
+    .wc-btn-book    { transition: transform 0.15s ease, background 0.15s, box-shadow 0.15s; }
+    .wc-btn-msg:hover  { transform: translateY(-1px) translateZ(0); }
+    .wc-btn-book:hover { transform: translateY(-1px) translateZ(0); }
+
+    /* ── Page fade-in (smooth load feel) ── */
+    @keyframes pageFadeIn { from { opacity:0; } to { opacity:1; } }
+    body { animation: pageFadeIn 0.25s ease both; }
+
+    /* ── Skeleton shimmer (GPU-only background-position) ── */
+    .sk-line, .sk-avatar { will-change: background-position; }
+
+    /* ── Prevent invisible CLS (Cumulative Layout Shift) ── */
+    img { aspect-ratio: attr(width) / attr(height); }
+    .wc-avatar { aspect-ratio: 1 / 1; }
+
+    /* ── Safe-area for notched phones ── */
+    .navbar { padding-top: env(safe-area-inset-top, 0px); }
+
+    /* ── Reduced Motion Accessibility ── */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-delay: 0ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    /* ══ RESPONSIVE BREAKPOINTS ══ */
+
+    @media(min-width:1280px){
+      .hero-inner,.search-inner,.workers-section,.sort-bar{max-width:1280px}
+    }
+    @media(max-width:1024px){
+      .workers-grid{grid-template-columns:repeat(2,1fr)}
+    }
+    @media(max-width:768px){
+      .search-row{flex-wrap:wrap}
+      .search-select{min-width:calc(50% - 5px);flex:unset}
+      .search-input{flex:1 1 100%;min-width:0}
+      .btn-search{width:100%}
+      .sort-bar{flex-direction:column;align-items:flex-start;gap:6px;padding:8px 16px}
+    }
+
+    /* ══════════════════════════════════════════════
+       640px MOBILE — Swiggy / Zomato Premium Grade
+    ══════════════════════════════════════════════ */
     @media(max-width:640px){
-      .hero{padding:32px 16px 24px}
-      .hero h1{font-size:2rem}
-      .hero-stats{gap:16px}
-      .stat-num{font-size:1.6rem}
-      .search-section{padding:16px}
-      .search-row{flex-direction:column;gap:10px}
-      .search-select,.search-input,.btn-search{width:100%;min-width:0}
-      .workers-grid{grid-template-columns:1fr;gap:14px;padding:16px}
-      .sort-bar{flex-direction:column;gap:10px;align-items:flex-start;padding:12px 16px}
-      .sort-options{flex-wrap:wrap;gap:6px}
-      .sort-btn{font-size:0.75rem;padding:6px 10px}
-      .category-pills{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:4px}
+
+      /* ── Hero: app-store style compact ── */
+      .hero{
+        padding:20px 16px 24px;
+        background:linear-gradient(160deg,#1A1A2E 0%,#2D1446 50%,#1A2A20 100%);
+      }
+      .hero h1{font-size:1.8rem;line-height:1.15;margin-bottom:6px}
+      .hero-badges{gap:6px;margin-bottom:14px}
+      .hero-badge{font-size:0.7rem;padding:4px 10px}
+      .hero-kannada{font-size:0.82rem;margin-bottom:4px}
+      .hero-sub{font-size:0.8rem;margin-bottom:16px;line-height:1.5}
+      .hero-stats{
+        display:grid;grid-template-columns:repeat(4,1fr);
+        gap:0;
+        background:rgba(255,255,255,0.07);
+        border-radius:14px;padding:12px 8px;
+        border:1px solid rgba(255,255,255,0.1);
+      }
+      .stat{text-align:center;border-right:1px solid rgba(255,255,255,0.1)}
+      .stat:last-child{border-right:none}
+      .stat-num{font-size:1.2rem;color:var(--saffron)}
+      .stat-label{font-size:0.58rem;color:rgba(255,255,255,0.5)}
+
+      /* ── Search: clean app-style ── */
+      .search-section{
+        background:#fff;
+        padding:12px 14px 0;
+        border-bottom:none;
+      }
+      .search-row{flex-direction:column;gap:8px;margin-bottom:12px}
+      .search-select,.search-input{
+        width:100%;min-width:0;font-size:0.85rem;
+        border-radius:12px;padding:12px 14px;
+        border:1.5px solid #E8E5E0;
+      }
+      .btn-search{
+        width:100%;border-radius:12px;padding:13px;
+        font-size:0.9rem;font-weight:800;letter-spacing:0.02em;
+      }
+
+      /* ── Category pills: Swiggy-style colorful scroll ── */
+      .category-pills{
+        flex-wrap:nowrap;overflow-x:auto;
+        -webkit-overflow-scrolling:touch;
+        padding:12px 14px 14px;
+        margin:0;gap:8px;
+        scroll-snap-type:x mandatory;
+        border-bottom:1px solid #EDE9E3;
+        background:#fff;
+      }
       .category-pills::-webkit-scrollbar{display:none}
+      .pill{
+        scroll-snap-align:start;flex-shrink:0;
+        min-height:40px;font-size:0.76rem;
+        padding:8px 14px;border-radius:20px;
+        border:1.5px solid #E8E5E0;
+        background:#fff;font-weight:600;
+        white-space:nowrap;color:#374151;
+      }
+      .pill.active{
+        background:#E8600A;color:#fff;
+        border-color:#E8600A;
+        box-shadow:0 2px 10px rgba(232,96,10,0.3);
+      }
+
+      /* ── Sort bar: app-style compact ── */
+      .sort-bar{
+        flex-direction:row;flex-wrap:nowrap;
+        overflow-x:auto;
+        padding:8px 14px;gap:6px;
+        -webkit-overflow-scrolling:touch;
+        background:#F7F4F0;
+        border-bottom:1px solid #EDE9E3;
+        align-items:center;
+      }
+      .sort-bar::-webkit-scrollbar{display:none}
+      #result-count{
+        white-space:nowrap;font-size:0.75rem;
+        font-weight:700;color:#374151;flex-shrink:0;
+      }
+      .sort-options{flex-wrap:nowrap;gap:5px;flex-shrink:0}
+      .sort-btn{
+        font-size:0.7rem;padding:6px 11px;
+        min-height:34px;border-radius:20px;
+        white-space:nowrap;flex-shrink:0;
+        background:#fff;border-color:#E8E5E0;
+      }
+      .sort-btn.active{
+        background:#E8600A;color:#fff;
+        border-color:#E8600A;
+        box-shadow:0 2px 8px rgba(232,96,10,0.25);
+      }
+
+      /* ── Workers section background ── */
+      .workers-section{padding:0;margin:0}
     }
-    @media(min-width:641px){
-      .navbar{padding:0 24px}
+
+    @media(max-width:480px){
+      .hero h1{font-size:1.6rem}
+      .stat-num{font-size:1.1rem}
     }
-    @media(min-width:1024px){
-      .navbar{padding:0 40px}
+    @media(max-width:320px){
+      .hero h1{font-size:1.35rem}
+      .brand-text{font-size:0.85rem}
     }
+    @media(min-width:769px){ .navbar{padding:0 clamp(20px,3vw,40px)} }
   </style>
+  <!-- Premium UI overrides — Swiggy / Urban Company / Zomato inspired -->
+  <link rel="stylesheet" href="css/premium.css">
 </head>
+
+
 <body>
 
 <!-- NAVBAR -->
@@ -234,35 +1048,174 @@
       <span class="brand-sub">ಕೆಲಸಗಾರ — KelasaGaara</span>
     </div>
   </a>
+  <!-- Desktop nav links -->
   <div class="nav-links">
     <a href="index.html" class="nav-link active" data-i18n="nav.home">🏠 Home</a>
     <a href="find-jobs.html" class="nav-link" data-i18n="nav.jobs">💼 Jobs</a>
     <a href="worker-dashboard.html" class="nav-link" data-i18n="nav.worker">👷 Worker</a>
     <a href="hirer-dashboard.html" class="nav-link" data-i18n="nav.hirer">🏗️ Hirer</a>
     <a href="admin-login.html" class="nav-link" data-i18n="nav.admin">🛡️ Admin</a>
-    <!-- Auth nav: shown/hidden by JS -->
+    <button id="pwa-install-btn" onclick="triggerPWAInstall()" title="Install KelasaGaara as an App">📲 Install App</button>
     <div id="nav-guest" style="display:flex;align-items:center;gap:6px">
       <div style="display:flex;gap:4px"><button id="btn-lang-en" onclick="window._setLang('en')" style="padding:5px 13px;border:1.5px solid #E25519;border-radius:8px;font-size:0.8rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:.2s;background:#E25519;color:#fff">English</button><button id="btn-lang-kn" onclick="window._setLang('kn')" style="padding:5px 13px;border:1.5px solid #E25519;border-radius:8px;font-size:0.8rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:.2s;background:transparent;color:#E25519">ಕನ್ನಡ</button></div>
       <a href="login.html" class="nav-btn outline" data-i18n="nav.login">Login</a>
       <a href="login.html" class="nav-btn" data-i18n="nav.signup">Sign Up</a>
     </div>
     <div id="nav-user" style="display:none;position:relative">
-      <div style="display:flex;gap:4px;margin-right:4px"><button id="btn-lang-en2" onclick="window._setLang('en')" style="padding:5px 13px;border:1.5px solid #E25519;border-radius:8px;font-size:0.8rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:.2s;background:#E25519;color:#fff">English</button><button id="btn-lang-kn2" onclick="window._setLang('kn')" style="padding:5px 13px;border:1.5px solid #E25519;border-radius:8px;font-size:0.8rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:.2s;background:transparent;color:#E25519">ಕನ್ನಡ</button></div>
+      <div style="display:flex;gap:4px;margin-right:4px" class="nav-lang-btns"><button id="btn-lang-en2" onclick="window._setLang('en')" style="padding:5px 13px;border:1.5px solid #E25519;border-radius:8px;font-size:0.8rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:.2s;background:#E25519;color:#fff">English</button><button id="btn-lang-kn2" onclick="window._setLang('kn')" style="padding:5px 13px;border:1.5px solid #E25519;border-radius:8px;font-size:0.8rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:.2s;background:transparent;color:#E25519">ಕನ್ನಡ</button></div>
       <button id="account-btn" onclick="toggleAccountMenu()" style="display:flex;align-items:center;gap:8px;padding:7px 14px;background:var(--paper);border:1.5px solid var(--border);border-radius:10px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:0.85rem;font-weight:600;color:var(--ink);transition:all 0.2s" onmouseenter="this.style.borderColor='var(--saffron)'" onmouseleave="this.style.borderColor='var(--border)'">
         <span id="nav-avatar-circle" style="width:28px;height:28px;border-radius:50%;background:var(--saffron);color:#fff;display:flex;align-items:center;justify-content:center;font-size:0.8rem;font-weight:700;flex-shrink:0">👤</span>
         <span id="nav-user-name">My Account</span>
-        <span>▾</span>
+        <span class="nav-arrow">▾</span>
       </button>
-      <div id="account-menu" style="display:none;position:absolute;right:0;top:calc(100%+8px);background:#fff;border:1px solid var(--border);border-radius:12px;box-shadow:0 8px 28px rgba(0,0,0,0.12);min-width:180px;z-index:200;overflow:hidden">
+      <div id="account-menu" style="display:none;position:fixed;right:12px;top:68px;background:#fff;border:1px solid var(--border);border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,0.18);min-width:200px;z-index:9999;overflow:hidden">
         <a id="menu-dashboard" href="hirer-dashboard.html" style="display:flex;align-items:center;gap:10px;padding:12px 16px;font-size:0.85rem;color:var(--ink);text-decoration:none;transition:background 0.15s" onmouseenter="this.style.background='var(--paper)'" onmouseleave="this.style.background=''">📊 My Dashboard</a>
         <a id="menu-profile" href="hirer-dashboard.html" style="display:flex;align-items:center;gap:10px;padding:12px 16px;font-size:0.85rem;color:var(--ink);text-decoration:none;transition:background 0.15s" onmouseenter="this.style.background='var(--paper)'" onmouseleave="this.style.background=''">👤 My Profile</a>
         <a href="chat.html" style="display:flex;align-items:center;gap:10px;padding:12px 16px;font-size:0.85rem;color:var(--ink);text-decoration:none;transition:background 0.15s" onmouseenter="this.style.background='var(--paper)'" onmouseleave="this.style.background=''">💬 My Messages</a>
         <div style="border-top:1px solid var(--border);margin:4px 0"></div>
-        <button onclick="doLogout()" style="width:100%;display:flex;align-items:center;gap:10px;padding:12px 16px;font-size:0.85rem;color:#EF4444;background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;text-align:left;transition:background 0.15s" onmouseenter="this.style.background='#FEF2F2'" onmouseleave="this.style.background=''">🚪 Logout</button>
+        <button onclick="doLogout()" style="width:100%;display:flex;align-items:center;gap:10px;padding:12px 16px;font-size:0.85rem;color:#EF4444;background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;text-align:left;transition:background 0.15s" onmouseenter="this.style.background='#FEF2F2'" onmouseleave="this.style.background=''">🚩 Logout</button>
       </div>
     </div>
   </div>
+  <!-- Hamburger (mobile only) -->
+  <button id="hamburger" aria-label="Menu" aria-expanded="false" onclick="toggleDrawer()">
+    <span></span><span></span><span></span>
+  </button>
 </nav>
+
+<!-- Mobile slide-down drawer -->
+<div id="mobile-drawer" role="dialog" aria-label="Navigation menu" onclick="closeDrawer(event)">
+  <div id="mobile-drawer-panel">
+    <a href="index.html" class="drawer-link">🏠 Home</a>
+    <a href="find-jobs.html" class="drawer-link">💼 Jobs</a>
+    <a href="worker-dashboard.html" class="drawer-link">👷 Worker Dashboard</a>
+    <a href="hirer-dashboard.html" class="drawer-link">🏗️ Hirer Dashboard</a>
+    <a href="admin-login.html" class="drawer-link">🛡️ Admin</a>
+    <div class="drawer-divider"></div>
+
+    <!-- ⬇️ DOWNLOAD APP — prominent inside drawer -->
+    <button onclick="handleMainInstall();closeDrawer()" style="
+      width:100%;display:flex;align-items:center;gap:14px;
+      padding:16px;border:none;border-radius:14px;cursor:pointer;
+      background:linear-gradient(135deg,#E8600A,#C84800);
+      color:#fff;font-family:'DM Sans',sans-serif;
+      margin-bottom:10px;text-align:left;
+      box-shadow:0 4px 18px rgba(232,96,10,0.35);
+    ">
+      <span style="font-size:1.6rem;line-height:1;flex-shrink:0">📲</span>
+      <div>
+        <div style="font-size:1rem;font-weight:800;line-height:1.2">Download App</div>
+        <div style="font-size:0.72rem;opacity:0.85;margin-top:2px">Install on your phone — works offline</div>
+      </div>
+      <span style="margin-left:auto;font-size:1.1rem">⬇️</span>
+    </button>
+
+    <!-- iOS Guide shortcut -->
+    <button onclick="showIOSModal(null);closeDrawer()" style="
+      width:100%;display:flex;align-items:center;gap:12px;
+      padding:12px 14px;border:1.5px solid #E8600A;border-radius:12px;
+      background:transparent;color:#E8600A;font-family:'DM Sans',sans-serif;
+      margin-bottom:12px;cursor:pointer;text-align:left;font-weight:600;font-size:0.88rem;
+    ">
+      <span style="font-size:1.1rem">🍎</span>
+      iPhone / iPad Install Guide
+    </button>
+
+    <div class="drawer-divider"></div>
+    <div style="display:flex;gap:8px;padding:4px 0 8px">
+      <button onclick="window._setLang('en');closeDrawer()" style="flex:1;padding:10px;border:1.5px solid #E25519;border-radius:10px;background:#E25519;color:#fff;font-weight:700;font-family:'DM Sans',sans-serif;font-size:0.85rem;cursor:pointer;min-height:44px">English</button>
+      <button onclick="window._setLang('kn');closeDrawer()" style="flex:1;padding:10px;border:1.5px solid #E25519;border-radius:10px;background:transparent;color:#E25519;font-weight:700;font-family:'DM Sans',sans-serif;font-size:0.85rem;cursor:pointer;min-height:44px">ಕನ್ನಡ</button>
+    </div>
+    <a href="login.html" class="drawer-btn drawer-btn-primary" style="text-decoration:none;margin-bottom:8px">Login / Sign Up</a>
+  </div>
+</div>
+
+
+
+<!-- Mobile bottom install bar (shown on Chrome Android when installable) -->
+<div id="mob-install-bar" style="display:none;position:fixed;bottom:66px;left:0;right:0;z-index:9998;background:linear-gradient(135deg,#1A1A2E 0%,#2D1B4E 100%);padding:10px 14px;border-top:2px solid rgba(232,96,10,0.6);flex-direction:row;align-items:center;justify-content:space-between;gap:10px;box-shadow:0 -4px 24px rgba(0,0,0,0.35)">
+  <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
+    <div style="width:36px;height:36px;background:linear-gradient(135deg,#E8600A,#D4450A);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0">🌾</div>
+    <div style="min-width:0">
+      <div style="font-weight:800;font-size:0.84rem;color:#fff">Install KelasaGaara</div>
+      <div style="font-size:0.68rem;color:rgba(255,255,255,0.5)">Offline · Face ID · Fast</div>
+    </div>
+  </div>
+  <button onclick="triggerPWAInstall()" style="padding:8px 16px;background:linear-gradient(135deg,#E8600A,#D4450A);color:#fff;border:none;border-radius:9px;font-size:0.82rem;font-weight:800;cursor:pointer;font-family:'DM Sans',sans-serif;flex-shrink:0">⬇️ Install</button>
+  <button onclick="dismissMobBar()" style="padding:8px 10px;background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.6);border:none;border-radius:8px;font-size:0.75rem;cursor:pointer;font-family:'DM Sans',sans-serif;flex-shrink:0">✕</button>
+</div>
+
+<!-- Mobile Bottom Navigation Bar — Swiggy Premium Style -->
+<nav id="mobile-bottom-nav" class="bottom-nav-premium">
+  <div class="bnav-inner">
+
+    <!-- Home -->
+    <a href="index.html" class="bnav-item bnav-active" id="bnav-home">
+      <div class="bnav-icon-wrap">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/>
+          <polyline points="9,21 9,12 15,12 15,21"/>
+        </svg>
+      </div>
+      <span class="bnav-label">Home</span>
+      <span class="bnav-dot"></span>
+    </a>
+
+    <!-- Jobs -->
+    <a href="find-jobs.html" class="bnav-item" id="bnav-jobs">
+      <div class="bnav-icon-wrap">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="7" width="20" height="14" rx="2"/>
+          <path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/>
+          <line x1="12" y1="12" x2="12" y2="16"/>
+          <line x1="10" y1="14" x2="14" y2="14"/>
+        </svg>
+      </div>
+      <span class="bnav-label">Jobs</span>
+      <span class="bnav-dot"></span>
+    </a>
+
+    <!-- Worker (center highlight button) -->
+    <a href="worker-dashboard.html" class="bnav-item bnav-center" id="bnav-worker">
+      <div class="bnav-center-fab">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 00-3-3.87"/>
+          <path d="M16 3.13a4 4 0 010 7.75"/>
+        </svg>
+      </div>
+      <span class="bnav-label bnav-center-label">Workers</span>
+    </a>
+
+    <!-- Post Job -->
+    <a href="post-job.html" class="bnav-item" id="bnav-post">
+      <div class="bnav-icon-wrap">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="16"/>
+          <line x1="8" y1="12" x2="16" y2="12"/>
+        </svg>
+      </div>
+      <span class="bnav-label">Post Job</span>
+      <span class="bnav-dot"></span>
+    </a>
+
+    <!-- Account -->
+    <a id="mob-account-link" href="login.html" class="bnav-item" id="bnav-account">
+      <div class="bnav-icon-wrap">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" id="mob-account-icon">
+          <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+          <circle cx="12" cy="7" r="4"/>
+        </svg>
+      </div>
+      <span class="bnav-label" id="mob-account-label">Account</span>
+      <span class="bnav-dot"></span>
+    </a>
+
+  </div>
+</nav>
+
 
 <!-- HERO -->
 <section class="hero">
@@ -345,9 +1298,54 @@
 <!-- WORKERS GRID -->
 <div class="workers-section">
   <div class="workers-grid" id="workers-grid">
-    <div class="state-box" style="grid-column:1/-1">
-      <div class="spinner"></div>
-      Loading workers from Firestore…
+    <!-- Skeleton cards shown immediately — replaced by real data -->
+    <script>
+    (function(){
+      const sk = () => `<div class="skeleton-card"><div style="display:flex;gap:12px;align-items:center"><div class="sk-avatar"></div><div style="flex:1"><div class="sk-line sk-w60" style="margin-bottom:8px"></div><div class="sk-line sk-w40"></div></div></div><div class="sk-line sk-w80" style="margin-top:6px"></div><div style="display:flex;gap:6px;margin-top:4px"><div class="sk-line sk-w30"></div><div class="sk-line sk-w30"></div></div><div class="sk-line" style="margin-top:8px;height:1px;background:#E5E2DC;animation:none"></div><div style="display:flex;gap:8px;margin-top:8px"><div class="sk-line sk-h32" style="flex:1"></div><div class="sk-line sk-h32" style="flex:1"></div></div></div>`;
+      const count = window.innerWidth < 640 ? 4 : 8;
+      document.currentScript.parentElement.innerHTML = Array(count).fill(sk()).join('');
+    })();
+    </script>
+  </div>
+</div>
+
+<!-- PWA Install Strip (top banner) -->
+<div id="pwa-strip">
+  <div id="pwa-strip-left">
+    <div id="pwa-strip-icon">🌾</div>
+    <div>
+      <div class="pwa-strip-title">📲 Install KelasaGaara App — Works Offline!</div>
+      <div class="pwa-strip-sub">Faster · No browser bar · Native app feel · Works without internet</div>
+    </div>
+  </div>
+  <div id="pwa-strip-actions">
+    <button class="pwa-install-now" onclick="triggerPWAInstall()">⬇️ Install Free</button>
+    <button class="pwa-strip-close" onclick="dismissPWAStrip()">Not now</button>
+  </div>
+</div>
+
+<!-- PWA Feature Install Card (in-page) -->
+<div id="pwa-feature-card" style="display:none;padding:28px 32px;">
+  <div class="pwa-feat-left">
+    <div class="pwa-feat-tag">📲 Progressive Web App</div>
+    <div class="pwa-feat-title">Install KelasaGaara<br>on Your Phone</div>
+    <div class="pwa-feat-sub">Get the full app experience — no Play Store needed. Works on Android, iPhone &amp; Desktop.</div>
+    <div class="pwa-feat-points">
+      <span class="pwa-feat-pt">⚡ Instant Load</span>
+      <span class="pwa-feat-pt">📶 Works Offline</span>
+      <span class="pwa-feat-pt">🔔 Push Alerts</span>
+      <span class="pwa-feat-pt">🏠 Home Screen Icon</span>
+      <span class="pwa-feat-pt">🔐 Face ID Login</span>
+      <span class="pwa-feat-pt">💯 Free Forever</span>
+    </div>
+  </div>
+  <div class="pwa-feat-right">
+    <div class="pwa-mockup">🌾</div>
+    <div id="pwa-card-action">
+      <button class="pwa-big-btn" onclick="triggerPWAInstall()">📲 Install App Now</button>
+      <div class="pwa-ios-hint" id="pwa-ios-hint" style="display:none">
+        Tap <strong>⬆️ Share</strong> → <strong>"Add to Home Screen"</strong>
+      </div>
     </div>
   </div>
 </div>
@@ -355,7 +1353,196 @@
 <!-- FAB — Hirer CTA -->
 <button class="fab" title="Post a Job" onclick="window.location.href='login.html?role=hirer'">+</button>
 
-<footer>KelasaGaara (ಕೆಲಸಗಾರ) — Karnataka Daily Worker Marketplace &nbsp;|&nbsp; Built with Firebase &amp; ❤️</footer>
+<!-- ══ DOWNLOAD APP SECTION ══ -->
+<section class="download-section" id="download-app">
+  <div class="download-inner">
+    <!-- Left: copy -->
+    <div class="dl-left">
+      <div class="dl-tag">📲 Free PWA App — No Play Store Needed</div>
+      <h2 class="dl-heading">Download<br><span>KelasaGaara</span> App</h2>
+      <p class="dl-sub">Install the full app directly on your phone or desktop — works offline, loads instantly, and feels completely native. No Play Store, no App Store required.</p>
+
+      <div class="dl-features">
+        <div class="dl-feat"><span class="dl-feat-icon">⚡</span><span class="dl-feat-text">Instant Load<br>even on 2G</span></div>
+        <div class="dl-feat"><span class="dl-feat-icon">📶</span><span class="dl-feat-text">Works Offline<br>cached data</span></div>
+        <div class="dl-feat"><span class="dl-feat-icon">🔔</span><span class="dl-feat-text">Push Alerts<br>for new jobs</span></div>
+        <div class="dl-feat"><span class="dl-feat-icon">🔐</span><span class="dl-feat-text">Face ID / Fingerprint<br>login</span></div>
+        <div class="dl-feat"><span class="dl-feat-icon">🏠</span><span class="dl-feat-text">Home Screen<br>icon</span></div>
+        <div class="dl-feat"><span class="dl-feat-icon">💯</span><span class="dl-feat-text">100% Free<br>forever</span></div>
+      </div>
+
+      <div class="dl-btns">
+        <button class="dl-btn-primary" id="dl-main-btn" onclick="handleMainInstall()">
+          📲 Install App Now
+        </button>
+        <a href="#download-app" class="dl-btn-secondary" onclick="showIOSModal(event)">
+          🍎 iPhone / iPad Guide
+        </a>
+      </div>
+
+      <div class="dl-stats">
+        <div class="dl-stat-item">
+          <div class="dl-stat-num">100+</div>
+          <div class="dl-stat-label">Workers Listed</div>
+        </div>
+        <div class="dl-stat-item">
+          <div class="dl-stat-num">31</div>
+          <div class="dl-stat-label">Districts</div>
+        </div>
+        <div class="dl-stat-item">
+          <div class="dl-stat-num">0%</div>
+          <div class="dl-stat-label">Commission</div>
+        </div>
+        <div class="dl-stat-item">
+          <div class="dl-stat-num">Free</div>
+          <div class="dl-stat-label">Always</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: platform cards -->
+    <div class="dl-right">
+      <!-- Android -->
+      <div class="dl-platform">
+        <div class="dl-plat-icon plat-android">🤖</div>
+        <div class="dl-plat-info">
+          <div class="dl-plat-name">Android (Chrome)</div>
+          <div class="dl-plat-steps">Tap the Install button below → "Add to Home Screen" → Done!</div>
+        </div>
+        <button class="dl-plat-btn plat-btn-android" onclick="handleMainInstall()">⬇️ Install</button>
+      </div>
+
+      <!-- iOS -->
+      <div class="dl-platform">
+        <div class="dl-plat-icon plat-ios">🍎</div>
+        <div class="dl-plat-info">
+          <div class="dl-plat-name">iPhone / iPad (Safari)</div>
+          <div class="dl-plat-steps">Tap ⬆️ Share → "Add to Home Screen" → Add</div>
+        </div>
+        <button class="dl-plat-btn plat-btn-ios" onclick="showIOSModal(event)">📖 Guide</button>
+      </div>
+
+      <!-- Desktop -->
+      <div class="dl-platform">
+        <div class="dl-plat-icon plat-desktop">🖥️</div>
+        <div class="dl-plat-info">
+          <div class="dl-plat-name">Desktop (Chrome / Edge)</div>
+          <div class="dl-plat-steps">Click the install icon (⊕) in the address bar → Install</div>
+        </div>
+        <button class="dl-plat-btn plat-btn-desktop" onclick="handleMainInstall()">⬇️ Install</button>
+      </div>
+
+      <!-- Already installed badge (shown after install) -->
+      <div id="dl-installed-badge" style="display:none;background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.35);border-radius:14px;padding:16px 20px;display:none;align-items:center;gap:12px">
+        <span style="font-size:1.4rem">✅</span>
+        <div>
+          <div style="font-weight:700;color:#4ade80;font-size:0.92rem">App Installed!</div>
+          <div style="font-size:0.76rem;color:rgba(255,255,255,0.5);margin-top:2px">Open KelasaGaara from your home screen</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- iOS Install Guide Modal -->
+<div id="ios-modal" onclick="if(event.target===this)closeIOSModal()">
+  <div id="ios-modal-panel">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+      <div style="font-family:'Baloo Tamma 2',sans-serif;font-size:1.2rem;font-weight:800;color:var(--ink)">
+        🍎 Install on iPhone / iPad
+      </div>
+      <button onclick="closeIOSModal()" style="width:36px;height:36px;border:none;background:var(--paper);border-radius:50%;font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
+    </div>
+    <div class="ios-step">
+      <div class="ios-step-num">1</div>
+      <div>
+        <div style="font-weight:700;font-size:0.9rem;color:var(--ink);margin-bottom:2px">Open in Safari</div>
+        <div style="font-size:0.8rem;color:var(--muted)">Make sure you're using Safari browser (not Chrome or Firefox) on your iPhone/iPad</div>
+      </div>
+    </div>
+    <div class="ios-step">
+      <div class="ios-step-num">2</div>
+      <div>
+        <div style="font-weight:700;font-size:0.9rem;color:var(--ink);margin-bottom:2px">Tap the Share button ⬆️</div>
+        <div style="font-size:0.8rem;color:var(--muted)">Tap the Share icon at the bottom of Safari (the box with arrow pointing up)</div>
+      </div>
+    </div>
+    <div class="ios-step">
+      <div class="ios-step-num">3</div>
+      <div>
+        <div style="font-weight:700;font-size:0.9rem;color:var(--ink);margin-bottom:2px">Tap "Add to Home Screen" 🏠</div>
+        <div style="font-size:0.8rem;color:var(--muted)">Scroll down in the share sheet and tap "Add to Home Screen"</div>
+      </div>
+    </div>
+    <div class="ios-step">
+      <div class="ios-step-num">4</div>
+      <div>
+        <div style="font-weight:700;font-size:0.9rem;color:var(--ink);margin-bottom:2px">Tap "Add" ✅</div>
+        <div style="font-size:0.8rem;color:var(--muted)">Confirm by tapping "Add" in the top-right corner. KelasaGaara icon appears on your home screen!</div>
+      </div>
+    </div>
+    <div style="margin-top:16px;padding:12px 16px;background:rgba(232,96,10,0.08);border-radius:12px;font-size:0.8rem;color:var(--saffron);font-weight:600">
+      💡 The app works fully offline after installation!
+    </div>
+  </div>
+</div>
+
+<footer>KelasaGaara (ಕೆಲಸಗಾರ) — Karnataka Daily Worker Marketplace &nbsp;|&nbsp; Built with Firebase &amp; ❤️ | <a href="#download-app" style="color:var(--saffron);text-decoration:none">📲 Download App</a></footer>
+
+<script>
+// Download App section logic
+function handleMainInstall() {
+  if (window._pwaPrompt) {
+    window._pwaPrompt.prompt();
+    window._pwaPrompt.userChoice.then(r => {
+      if (r.outcome === 'accepted') showInstallSuccess();
+    });
+  } else {
+    // Fallback: show iOS guide or browser tip
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    if (isIOS) {
+      showIOSModal(null);
+    } else {
+      alert('📲 To install: Look for the install icon (⊕) in your browser address bar, or open this site in Chrome / Edge on Android for the best experience!');
+    }
+  }
+}
+function showIOSModal(e) {
+  if (e) e.preventDefault();
+  document.getElementById('ios-modal').classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+function closeIOSModal() {
+  document.getElementById('ios-modal').classList.remove('show');
+  document.body.style.overflow = '';
+}
+function showInstallSuccess() {
+  const badge = document.getElementById('dl-installed-badge');
+  const btn   = document.getElementById('dl-main-btn');
+  if (badge) badge.style.display = 'flex';
+  if (btn)   { btn.textContent = '✅ App Installed!'; btn.style.background = 'linear-gradient(135deg,#22c55e,#16a34a)'; }
+}
+// Hook into beforeinstallprompt to update the button
+document.addEventListener('DOMContentLoaded', () => {
+  window.addEventListener('beforeinstallprompt', e => {
+    window._pwaPrompt = e;
+    const btn = document.getElementById('dl-main-btn');
+    if (btn) { btn.textContent = '📲 Install App Now'; btn.style.opacity = '1'; }
+  });
+  window.addEventListener('appinstalled', showInstallSuccess);
+  // Detect already installed (standalone mode)
+  if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
+    showInstallSuccess();
+  }
+  // Detect iOS for button label
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  if (isIOS) {
+    const btn = document.getElementById('dl-main-btn');
+    if (btn) btn.textContent = '🍎 iPhone Install Guide';
+  }
+});
+</script>
+
 
 <script type="module">
   import { db, auth } from './js/firebase-config.js';
@@ -412,21 +1599,54 @@
   window._i18n = null; // will be set by i18n module
 
   // Load workers from Firestore
+  const WORKERS_CACHE_KEY = 'kg_workers_cache';
+  const WORKERS_CACHE_TTL = 5 * 60 * 1000; // 5 min
+
   async function loadWorkers() {
+    // ── 1. INSTANT: Serve from localStorage cache if fresh ──
+    try {
+      const cached = JSON.parse(localStorage.getItem(WORKERS_CACHE_KEY) || 'null');
+      if (cached && cached.ts && (Date.now() - cached.ts < WORKERS_CACHE_TTL) && cached.workers?.length) {
+        allWorkers = cached.workers;
+        document.getElementById('stat-workers').textContent = allWorkers.length;
+        document.getElementById('worker-count').textContent = allWorkers.length;
+        buildTalukOptions();
+        applyFilter(); // render immediately from cache
+        // Then refresh in background (stale-while-revalidate)
+        _fetchWorkersFromFirestore(true);
+        return;
+      }
+    } catch(e) {}
+    // ── 2. Network fetch (first visit or stale cache) ──
+    await _fetchWorkersFromFirestore(false);
+  }
+
+  async function _fetchWorkersFromFirestore(background) {
     try {
       const q = query(collection(db,'users'), where('role','==','worker'));
       const snap = await getDocs(q);
-      allWorkers = snap.docs.map(d => d.data());
-      document.getElementById('stat-workers').textContent = allWorkers.length;
-      document.getElementById('worker-count').textContent = allWorkers.length;
-      buildTalukOptions(); // populate taluk dropdown
-    } catch(e) { allWorkers = []; }
-    try {
-      const js = await getDocs(collection(db,'jobs'));
-      document.getElementById('stat-jobs').textContent = js.size;
-    } catch(e){}
-    applyFilter();
+      const fresh = snap.docs.map(d => d.data());
+      // Only update UI if data changed or not background
+      if (!background || JSON.stringify(fresh) !== JSON.stringify(allWorkers)) {
+        allWorkers = fresh;
+        document.getElementById('stat-workers').textContent = allWorkers.length;
+        document.getElementById('worker-count').textContent = allWorkers.length;
+        buildTalukOptions();
+        if (!background) applyFilter();
+        // Save to cache
+        try {
+          localStorage.setItem(WORKERS_CACHE_KEY, JSON.stringify({ ts: Date.now(), workers: allWorkers }));
+        } catch(e) {}
+        if (background) applyFilter(); // re-render with fresh data
+      }
+    } catch(e) { if (!allWorkers.length) { allWorkers = []; applyFilter(); } }
+    // Jobs count (low priority, fire-and-forget)
+    getDocs(collection(db,'jobs')).then(js => {
+      const el = document.getElementById('stat-jobs');
+      if (el) el.textContent = js.size;
+    }).catch(()=>{});
   }
+
 
   // Complete Karnataka District → Taluk mapping (all 31 districts)
   const KA_TALUKS = {
@@ -520,31 +1740,61 @@
   window._workerMap = {}; // Global map: wid -> worker data (avoids onclick string escaping bugs)
 
   function renderWorkers(workers) {
-    const grid = document.getElementById('workers-grid');
-    document.getElementById('result-count').innerHTML = `<strong>${workers.length}</strong> workers found`;
+    // ── All reads first (no interleaved read/write) ──
+    const countEl = document.getElementById('result-count');
+    if (countEl) countEl.innerHTML = `<strong>${workers.length}</strong> workers found`;
+
     if (!workers.length) {
-      grid.innerHTML = `<div class="state-box" style="grid-column:1/-1">👷 No workers found. <a href="login.html?role=worker" style="color:var(--saffron)">Register as a Worker →</a></div>`;
-      document.getElementById('pagination')?.remove();
+      requestAnimationFrame(() => {
+        document.getElementById('workers-grid').innerHTML =
+          `<div class="state-box" style="grid-column:1/-1">👷 No workers found. <a href="login.html?role=worker" style="color:var(--saffron)">Register as a Worker →</a></div>`;
+        document.getElementById('pagination')?.remove();
+      });
       return;
     }
-    // Pagination
     const totalPages = Math.ceil(workers.length / PAGE_SIZE);
     if (currentPage > totalPages) currentPage = 1;
     const pageWorkers = workers.slice((currentPage-1)*PAGE_SIZE, currentPage*PAGE_SIZE);
 
-    grid.innerHTML = pageWorkers.map(w => {
+    // ── Build HTML string (pure computation, zero DOM access) ──
+    // Vibrant avatar color palettes — inspired by Swiggy/Urban Company
+    const AVATAR_PALETTES = [
+      'linear-gradient(135deg,#E8600A,#C04E06)',
+      'linear-gradient(135deg,#7C3AED,#5B21B6)',
+      'linear-gradient(135deg,#0EA5E9,#0369A1)',
+      'linear-gradient(135deg,#10B981,#047857)',
+      'linear-gradient(135deg,#F59E0B,#D97706)',
+      'linear-gradient(135deg,#EC4899,#BE185D)',
+      'linear-gradient(135deg,#EF4444,#B91C1C)',
+      'linear-gradient(135deg,#14B8A6,#0F766E)',
+    ];
+    const BANNER_PALETTES = [
+      'linear-gradient(135deg,#FFF3EC,#FFD9BC)',
+      'linear-gradient(135deg,#F5F0FF,#DDD6FE)',
+      'linear-gradient(135deg,#F0F9FF,#BAE6FD)',
+      'linear-gradient(135deg,#F0FDF4,#A7F3D0)',
+      'linear-gradient(135deg,#FFFBEB,#FDE68A)',
+      'linear-gradient(135deg,#FDF2F8,#FBCFE8)',
+      'linear-gradient(135deg,#FEF2F2,#FECACA)',
+      'linear-gradient(135deg,#F0FDFA,#99F6E4)',
+    ];
+
+    const cardsHtml = pageWorkers.map((w, idx) => {
       const initials = (w.name||'U').split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase();
       const wid = w.uid || w.email || initials + (w.district||'');
-      // Store in global map — avoids passing data through onclick attributes
       window._workerMap[wid] = w;
 
       const isLiked = likedWorkers.has(wid);
       const isApproved = w.isApproved !== false;
       if (!isApproved) return '';
 
+      const colorIdx = (w.name||'U').charCodeAt(0) % AVATAR_PALETTES.length;
+      const avatarBg = AVATAR_PALETTES[colorIdx];
+      const bannerBg = BANNER_PALETTES[colorIdx];
+
       const avatar = w.photo
-        ? `<img class="wc-avatar" src="${esc(w.photo)}" alt="" onerror="this.style.display='none'"/>`
-        : `<div class="wc-avatar-ph">${initials}</div>`;
+        ? `<img class="wc-avatar" src="${esc(w.photo)}" alt="" loading="lazy" decoding="async" onerror="this.style.display='none'"/>`
+        : `<div class="wc-avatar-ph" style="background:${avatarBg}">${initials}</div>`;
       const skills = (w.skills||[]).slice(0,3).map(s=>`<span class="wc-skill">${esc(s)}</span>`).join('');
       const trade = (w.skills||[])[0] || 'Daily Worker';
       const rating = w.rating ? w.rating.toFixed(1) : null;
@@ -564,7 +1814,9 @@
           <button class="wc-like-btn${isLiked?' liked':''}" id="like-${esc(wid)}" onclick="toggleLike(event,decodeURIComponent('${safeId}'))" title="${isLiked?'Saved':'Save worker'}" aria-label="Like">
             <span class="heart-icon">${isLiked?'❤️':'🤍'}</span>
           </button>
-          <div class="wc-top">${avatar}<div style="min-width:0"><div class="wc-name">${esc(w.name||'Worker')}</div><div class="wc-trade">${esc(trade)}</div></div></div>
+          <div class="wc-top" style="background:${bannerBg}">${avatar}</div>
+          <div class="wc-name">${esc(w.name||'Worker')}</div>
+          <div class="wc-trade">${esc(trade)}</div>
           <div class="wc-location">📍 ${esc(locationText)}</div>
           <div class="wc-skills">${skills||'<span class="wc-skill">Available</span>'}</div>
           <div class="wc-stats">
@@ -574,27 +1826,32 @@
           </div>
           <div class="wc-actions">
             <button class="wc-btn-msg"  onclick="msgWorker(decodeURIComponent('${safeId}'))">${(window._i18n&&window._i18n['card.msg'])||'💬 Message'}</button>
-            <button class="wc-btn-book" onclick="bookWorker(decodeURIComponent('${safeId}'))">${(window._i18n&&window._i18n['card.book'])||'📅 Book Now'}</button>
+            <button class="wc-btn-book" onclick="bookWorker(decodeURIComponent('${safeId}'))">${(window._i18n&&window._i18n['card.book'])||'Book Now'}</button>
             ${currentUserRole ? `<button style="padding:6px 10px;background:rgba(239,68,68,0.08);color:#EF4444;border:1px solid rgba(239,68,68,0.2);border-radius:8px;font-size:0.72rem;font-weight:600;cursor:pointer;transition:all 0.2s" onclick="openReport('${safeId}','${esc(w.name||'Worker')}')" title="Report this worker">🚨</button>` : ''}
           </div>
         </div>`;
     }).join('');
 
-    // Render pagination
-    let pagEl = document.getElementById('pagination');
-    if (!pagEl) {
-      pagEl = document.createElement('div');
-      pagEl.id = 'pagination';
-      pagEl.className = 'pagination';
-      document.querySelector('.workers-section').appendChild(pagEl);
-    }
-    if (totalPages <= 1) { pagEl.innerHTML = ''; return; }
-    let pagHtml = '';
-    for (let i=1; i<=totalPages; i++) {
-      pagHtml += `<button class="page-btn${i===currentPage?' active':''}" onclick="goPage(${i})">${i}</button>`;
-    }
-    pagEl.innerHTML = pagHtml;
+    // ── Single rAF write: one paint, no thrash ──
+    requestAnimationFrame(() => {
+      document.getElementById('workers-grid').innerHTML = cardsHtml;
+
+      let pagEl = document.getElementById('pagination');
+      if (!pagEl) {
+        pagEl = document.createElement('div');
+        pagEl.id = 'pagination';
+        pagEl.className = 'pagination';
+        document.querySelector('.workers-section').appendChild(pagEl);
+      }
+      if (totalPages <= 1) { pagEl.innerHTML = ''; return; }
+      let pagHtml = '';
+      for (let i=1; i<=totalPages; i++) {
+        pagHtml += `<button class="page-btn${i===currentPage?' active':''}" onclick="goPage(${i})">${i}</button>`;
+      }
+      pagEl.innerHTML = pagHtml;
+    });
   }
+
 
   window.goPage = function(n) { currentPage = n; applyFilter(); window.scrollTo({top:400,behavior:'smooth'}); };
 
@@ -743,6 +2000,10 @@
           const dashUrl = data.role === 'worker' ? 'worker-dashboard.html' : 'hirer-dashboard.html';
           document.getElementById('menu-dashboard').href = dashUrl;
           document.getElementById('menu-profile').href = dashUrl;
+          // Update mobile bottom nav Account tab
+          if (window._updateMobAccountTab) {
+            window._updateMobAccountTab(displayName.split(' ')[0], true, dashUrl);
+          }
           // ── Check account status ──
           if (data.status === 'blocked') {
             const { signOut } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js");
@@ -883,13 +2144,10 @@ window._i18n = I18N[savedLang];
 
 <!-- PWA Init -->
 <script type="module">
-  import { registerSW, initInstallBanner, initBottomNav, haptic, showSkeletons } from './js/pwa.js';
+  import { registerSW, initBottomNav, haptic, showSkeletons } from './js/pwa.js';
 
   // Register service worker
   registerSW();
-
-  // Install banner
-  initInstallBanner();
 
   // Bottom navigation (mobile only)
   initBottomNav('home');
@@ -903,6 +2161,216 @@ window._i18n = I18N[savedLang];
 
   // Expose showSkeletons for worker loading
   window.showSkeletons = showSkeletons;
+
+  // ── Register SW after first paint (non-blocking) ──
+  if ('serviceWorker' in navigator) {
+    // Use rIC to defer SW registration until browser is idle
+    const registerWhenIdle = () => registerSW();
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(registerWhenIdle, { timeout: 3000 });
+    } else {
+      setTimeout(registerWhenIdle, 1000);
+    }
+  }
+
+</script>
+
+<!-- PWA Install Logic -->
+<script>
+(function() {
+  let deferredPrompt = null;
+  const MOB_BAR_KEY = 'kg_mob_bar_dismissed';
+  const isMobile = window.innerWidth <= 640;
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
+                       (window.navigator.standalone === true);
+
+  // Show mobile bottom nav always on mobile
+  if (isMobile) {
+    const mbn = document.getElementById('mobile-bottom-nav');
+    if (mbn) mbn.style.display = 'block';
+    // Add bottom padding to body for mobile nav
+    document.body.style.paddingBottom = '72px';
+    // Hide language buttons from nav (they take too much space)
+    document.querySelectorAll('.nav-lang-btns').forEach(el => el.style.display = 'none');
+    // Mark active tab based on current page
+    const page = location.pathname.split('/').pop() || 'index.html';
+    document.querySelectorAll('.bnav-item').forEach(el => el.classList.remove('bnav-active'));
+    if (page === '' || page === 'index.html') { document.getElementById('bnav-home')?.classList.add('bnav-active'); }
+    else if (page === 'find-jobs.html') { document.getElementById('bnav-jobs')?.classList.add('bnav-active'); }
+    else if (page === 'worker-dashboard.html') { document.getElementById('bnav-worker')?.classList.add('bnav-active'); }
+    else if (page === 'post-job.html') { document.getElementById('bnav-post')?.classList.add('bnav-active'); }
+  }
+
+  // Update mobile account tab when user logs in
+  window._updateMobAccountTab = function(name, loggedIn, dashUrl) {
+    const link = document.getElementById('mob-account-link');
+    const label = document.getElementById('mob-account-label');
+    const acctItem = link;
+    if (!link) return;
+    if (loggedIn) {
+      link.href = dashUrl || 'worker-dashboard.html';
+      if (label) { label.textContent = (name && name.length > 6) ? name.substring(0,6)+'…' : (name || 'Me'); }
+      acctItem?.classList.add('bnav-active');
+    } else {
+      link.href = 'login.html';
+      if (label) label.textContent = 'Login';
+      acctItem?.classList.remove('bnav-active');
+    }
+  };
+
+  // Already installed — show badge, hide all install UI
+  if (isStandalone) {
+    const cardAction = document.getElementById('pwa-card-action');
+    if (cardAction) cardAction.innerHTML = '<div class="pwa-installed-badge">✅ App Installed!</div>';
+    return;
+  }
+
+  const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent) && !window.MSStream;
+
+  // iOS: show mobile install bar with hint (no native prompt)
+  if (isIOS && isMobile && !sessionStorage.getItem(MOB_BAR_KEY)) {
+    setTimeout(() => {
+      const bar = document.getElementById('mob-install-bar');
+      if (bar) bar.style.display = 'flex';
+    }, 4000);
+  }
+
+  // Android/Chrome/Edge: capture native install prompt
+  window.addEventListener('beforeinstallprompt', e => {
+    e.preventDefault();
+    deferredPrompt = e;
+
+    if (isMobile) {
+      // Mobile: show bottom floating install bar
+      if (!sessionStorage.getItem(MOB_BAR_KEY)) {
+        const bar = document.getElementById('mob-install-bar');
+        if (bar) bar.style.display = 'flex';
+      }
+    } else {
+      // Desktop: show navbar button + top strip + in-page card
+      const navBtn = document.getElementById('pwa-install-btn');
+      if (navBtn) navBtn.style.display = 'flex';
+      const strip = document.getElementById('pwa-strip');
+      if (strip && !sessionStorage.getItem(MOB_BAR_KEY)) strip.style.display = 'flex';
+    }
+    // Always show in-page feature card
+    const card = document.getElementById('pwa-feature-card');
+    if (card) card.style.display = 'flex';
+  });
+
+  // Trigger install prompt
+  window.triggerPWAInstall = async function() {
+    if (!deferredPrompt) {
+      // iOS or no prompt available
+      alert('📱 To install:\n\niPhone/iPad:\nTap Share ⬆️ → "Add to Home Screen"\n\nAndroid:\nTap Chrome menu ⋮ → "Add to Home Screen" or "Install App"');
+      return;
+    }
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    deferredPrompt = null;
+    if (outcome === 'accepted') {
+      // Clean up all install UI
+      ['pwa-install-btn','pwa-strip','mob-install-bar'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = 'none';
+      });
+      const cardAction = document.getElementById('pwa-card-action');
+      if (cardAction) cardAction.innerHTML = '<div class="pwa-installed-badge">✅ Installed! Find KelasaGaara on your Home Screen.</div>';
+    }
+  };
+
+  window.dismissPWAStrip = function() {
+    const strip = document.getElementById('pwa-strip');
+    if (strip) { strip.style.opacity='0'; setTimeout(()=>strip.style.display='none',300); }
+    sessionStorage.setItem(MOB_BAR_KEY, '1');
+  };
+
+  window.dismissMobBar = function() {
+    const bar = document.getElementById('mob-install-bar');
+    if (bar) { bar.style.transform='translateY(120%)'; bar.style.transition='transform 0.3s ease'; setTimeout(()=>bar.style.display='none',300); }
+    sessionStorage.setItem(MOB_BAR_KEY, '1');
+  };
+
+  // appinstalled event
+  window.addEventListener('appinstalled', () => {
+    ['pwa-install-btn','pwa-strip','mob-install-bar'].forEach(id => {
+      const el = document.getElementById(id); if (el) el.style.display='none';
+    });
+  });
+})();
+</script>
+
+<!-- ⚡ ULTRA SMOOTH: Font load, passive scroll, haptic ripple -->
+<script>
+// 1. Mark fonts loaded (removes FOUT fallback class)
+if ('fonts' in document) {
+  document.fonts.ready.then(() => document.documentElement.classList.add('fonts-loaded'));
+}
+
+// ── HAMBURGER DRAWER ──
+function toggleDrawer() {
+  const ham = document.getElementById('hamburger');
+  const drawer = document.getElementById('mobile-drawer');
+  const open = drawer.classList.toggle('open');
+  ham.classList.toggle('open', open);
+  ham.setAttribute('aria-expanded', String(open));
+  document.body.style.overflow = open ? 'hidden' : '';
+}
+function closeDrawer(e) {
+  // Close if clicking the overlay (not the panel itself)
+  if (e && e.target.closest('#mobile-drawer-panel')) return;
+  const ham = document.getElementById('hamburger');
+  const drawer = document.getElementById('mobile-drawer');
+  drawer.classList.remove('open');
+  ham?.classList.remove('open');
+  ham?.setAttribute('aria-expanded', 'false');
+  document.body.style.overflow = '';
+}
+// Close drawer on Escape key
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
+// Close drawer on resize to desktop
+window.addEventListener('resize', () => {
+  if (window.innerWidth > 768) closeDrawer();
+}, { passive: true });
+
+// 2. Passive scroll listeners (never blocks scroll thread)
+
+['touchstart','touchmove','wheel'].forEach(evt =>
+  window.addEventListener(evt, () => {}, { passive: true })
+);
+
+// 3. Intersection Observer for card entrance animation replay
+// (re-triggers animation when scrolling back to cards)
+if ('IntersectionObserver' in window) {
+  const cardObserver = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.style.animationPlayState = 'running';
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+  // Observe new cards when grid updates
+  const gridEl = document.getElementById('workers-grid');
+  if (gridEl) {
+    new MutationObserver(() => {
+      gridEl.querySelectorAll('.worker-card').forEach(card => {
+        card.style.animationPlayState = 'paused';
+        cardObserver.observe(card);
+      });
+    }).observe(gridEl, { childList: true });
+  }
+}
+
+// 4. Instant visual feedback on tap (no 300ms delay)
+document.addEventListener('touchstart', function(){}, { passive: true });
+if ('visualViewport' in window) {
+  // Adjust fixed elements when virtual keyboard opens
+  window.visualViewport.addEventListener('resize', () => {
+    const vh = window.visualViewport.height;
+    document.documentElement.style.setProperty('--viewport-height', vh + 'px');
+  }, { passive: true });
+}
 </script>
 </body>
 </html>

@@ -113,6 +113,12 @@
     </div>
     <p class="back">← <a href="index.html">Back to Home</a></p>
     <p class="admin-l"><a href="admin-login.html">Admin Login →</a></p>
+    <!-- PWA Install option -->
+    <div id="pwa-login-install" style="display:none;margin-top:14px;background:linear-gradient(135deg,#1A1A2E,#2a1a3e);border-radius:14px;padding:14px 16px;text-align:center">
+      <div style="font-size:0.78rem;color:rgba(255,255,255,0.6);margin-bottom:8px">📲 Get the app on your phone</div>
+      <button onclick="triggerPWAInstall()" style="padding:9px 20px;background:linear-gradient(135deg,#E8600A,#D4450A);color:#fff;border:none;border-radius:9px;font-size:0.85rem;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;box-shadow:0 3px 12px rgba(232,96,10,0.4)">⬇️ Install App — Free</button>
+      <div id="pwa-ios-hint-login" style="display:none;font-size:0.72rem;color:rgba(255,255,255,0.45);margin-top:8px">Tap <strong>Share ⬆️</strong> → <strong>"Add to Home Screen"</strong></div>
+    </div>
   </div>
 
   <!-- SIGNUP TAB -->
@@ -462,6 +468,45 @@
     }
   };
 
+</script>
+
+<script>
+(function() {
+  let deferredPrompt = null;
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+  const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent) && !window.MSStream;
+
+  if (!isStandalone) {
+    window.addEventListener('beforeinstallprompt', e => {
+      e.preventDefault();
+      deferredPrompt = e;
+      const el = document.getElementById('pwa-login-install');
+      if (el) el.style.display = 'block';
+    });
+    if (isIOS) {
+      setTimeout(() => {
+        const el = document.getElementById('pwa-login-install');
+        const hint = document.getElementById('pwa-ios-hint-login');
+        if (el) el.style.display = 'block';
+        if (hint) hint.style.display = 'block';
+      }, 3000);
+    }
+  }
+
+  window.triggerPWAInstall = async function() {
+    if (!deferredPrompt) {
+      alert('To install:\n📱 iPhone: Tap Share ⬆️ → "Add to Home Screen"\n🤖 Android: Tap Menu ⋮ → "Add to Home Screen"');
+      return;
+    }
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    deferredPrompt = null;
+    if (outcome === 'accepted') {
+      const el = document.getElementById('pwa-login-install');
+      if (el) el.innerHTML = '<div style="color:#4ade80;font-weight:700;font-size:0.85rem">✅ App Installed! Check your Home Screen.</div>';
+    }
+  };
+})();
 </script>
 </body>
 </html>
