@@ -215,7 +215,8 @@ DISTRICTS.forEach(d=>{const o=document.createElement('option');o.value=d;o.textC
 onAuthStateChanged(auth, async user=>{
   if(!user){window.location.href='admin-login.html';return;}
   if(!ADMINS.includes(user.email)){await signOut(auth);window.location.href='admin-login.html';return;}
-  document.getElementById('admin-name').textContent=user.displayName||user.email;
+  // Always show Ananda Valmiki as admin name
+  document.getElementById('admin-name').textContent = 'Ananda Valmiki';
   await Promise.all([loadUsers(),loadJobs()]);
 });
 
@@ -395,20 +396,41 @@ async function loadBookings(){
   }catch(e){document.getElementById('bookings-list').innerHTML='<div class="loading">Error loading bookings</div>';}
 }
 
+function getName(uid){const u=allUsers.find(x=>x.uid===uid);return u?(u.name||u.email||uid):uid;}
+function getEmail(uid){const u=allUsers.find(x=>x.uid===uid);return u?(u.email||''):'';}  
 function renderBookings(list){
   const el=document.getElementById('bookings-list');
   if(!list.length){el.innerHTML='<div class="loading">No bookings found.</div>';return;}
   el.innerHTML=list.map(b=>{
     const sc={PENDING:'#F59E0B',CONFIRMED:'#34D399',DECLINED:'#EF4444',COMPLETED:'#60A5FA',EXPIRED:'#9CA3AF'};
-    const rate=b.proposedRate?`₹${b.proposedRate} ${b.rateType||''}`:'—';
-    return `<div class="job-row" style="flex-wrap:wrap;gap:8px">
+    const rate=b.proposedRate?`₹${b.proposedRate} ${(b.rateType||'').replace('_',' ')}`:'—';
+    const hirerName=getName(b.hirerId);
+    const workerName=getName(b.workerId);
+    const hirerEmail=getEmail(b.hirerId);
+    const workerEmail=getEmail(b.workerId);
+    return `<div class="job-row" style="flex-wrap:wrap;gap:8px;padding:14px 0;border-bottom:1px solid var(--bdr)">
       <div style="flex:1;min-width:200px">
-        <div class="job-title">${esc(b.jobTitle||'Booking')}</div>
-        <div class="job-meta">📍 ${esc(b.location||'—')} · 📅 ${b.date||'—'} · 💰 ${rate}</div>
-        <div class="job-meta" style="margin-top:3px">Hirer: ${esc(b.hirerId)} → Worker: ${esc(b.workerId)}</div>
+        <div class="job-title" style="font-size:.95rem">${esc(b.jobTitle||'Booking')} <span style="color:#F59E0B;font-size:.78rem;font-weight:600">${b.duration||''}</span></div>
+        <div class="job-meta" style="margin-top:4px">📍 ${esc(b.location||'—')} &nbsp;·&nbsp; 📅 ${b.date||'—'} ${b.time||''} &nbsp;·&nbsp; 💰 ${rate}</div>
+        <div style="margin-top:8px;display:flex;gap:16px;flex-wrap:wrap">
+          <div style="background:rgba(96,165,250,.08);border:1px solid rgba(96,165,250,.2);border-radius:8px;padding:6px 12px">
+            <div style="font-size:.7rem;color:var(--mut);margin-bottom:2px">🏗️ HIRER (booked)</div>
+            <div style="font-weight:700;font-size:.88rem">${esc(hirerName)}</div>
+            <div style="font-size:.74rem;color:var(--mut)">${esc(hirerEmail)}</div>
+          </div>
+          <div style="font-size:1.2rem;align-self:center;color:var(--mut)">→</div>
+          <div style="background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.2);border-radius:8px;padding:6px 12px">
+            <div style="font-size:.7rem;color:var(--mut);margin-bottom:2px">👷 WORKER (hired)</div>
+            <div style="font-weight:700;font-size:.88rem">${esc(workerName)}</div>
+            <div style="font-size:.74rem;color:var(--mut)">${esc(workerEmail)}</div>
+          </div>
+        </div>
+        ${b.instructions?`<div style="font-size:.78rem;color:var(--mut);margin-top:6px">📝 ${esc(b.instructions)}</div>`:''}
       </div>
-      <span style="color:${sc[b.status]||'#9CA3AF'};font-weight:700;font-size:.82rem">${b.status||'PENDING'}</span>
-      <button class="btn btn-red" onclick="deleteBooking('${b.id}')">🗑️</button>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">
+        <span style="color:${sc[b.status]||'#9CA3AF'};font-weight:800;font-size:.85rem;background:rgba(255,255,255,.05);padding:4px 10px;border-radius:8px">${b.status||'PENDING'}</span>
+        <button class="btn btn-red" onclick="deleteBooking('${b.id}')">🗑️ Delete</button>
+      </div>
     </div>`;
   }).join('');
 }
@@ -471,19 +493,35 @@ async function loadChatThreads(){
     const snap=await getDocs(collection(db,'direct_threads'));
     const threads=snap.docs.map(d=>({...d.data(),id:d.id}));
     const el=document.getElementById('messages-list');
-    if(!threads.length){el.innerHTML='<div style="padding:30px;text-align:center;color:var(--mut)">No direct message threads found.</div>';return;}
+    if(!threads.length){el.innerHTML='<div style="padding:30px;text-align:center;color:var(--mut)">No message threads found.</div>';return;}
     el.innerHTML=threads.map(t=>{
       const ts=t.createdAt?new Date(t.createdAt).toLocaleDateString('en-IN'):'—';
-      return `<div class="job-row">
-        <span style="font-size:1.2rem">💬</span>
-        <div style="flex:1">
-          <div class="job-title">Thread: ${t.id.slice(0,20)}…</div>
-          <div class="job-meta">Hirer: ${esc(t.hirerId||'—')} → Worker: ${esc(t.workerId||'—')} · ${ts}</div>
+      const hirerName=getName(t.hirerId);
+      const workerName=getName(t.workerId);
+      const hirerEmail=getEmail(t.hirerId);
+      const workerEmail=getEmail(t.workerId);
+      return `<div class="job-row" style="flex-wrap:wrap;gap:12px;padding:14px 0;border-bottom:1px solid var(--bdr)">
+        <span style="font-size:1.4rem">💬</span>
+        <div style="flex:1;min-width:200px">
+          <div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:6px">
+            <div style="background:rgba(96,165,250,.08);border:1px solid rgba(96,165,250,.2);border-radius:8px;padding:6px 12px">
+              <div style="font-size:.7rem;color:var(--mut);margin-bottom:2px">🏗️ HIRER</div>
+              <div style="font-weight:700;font-size:.88rem">${esc(hirerName)}</div>
+              <div style="font-size:.74rem;color:var(--mut)">${esc(hirerEmail)}</div>
+            </div>
+            <div style="font-size:1.1rem;align-self:center;color:var(--mut)">↔️</div>
+            <div style="background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.2);border-radius:8px;padding:6px 12px">
+              <div style="font-size:.7rem;color:var(--mut);margin-bottom:2px">👷 WORKER</div>
+              <div style="font-weight:700;font-size:.88rem">${esc(workerName)}</div>
+              <div style="font-size:.74rem;color:var(--mut)">${esc(workerEmail)}</div>
+            </div>
+          </div>
+          <div style="font-size:.76rem;color:var(--mut)">Thread started: ${ts} &nbsp;·&nbsp; ID: ${t.id.slice(0,18)}…</div>
         </div>
-        <button class="btn btn-red" onclick="deleteThread('${t.id}')">🗑️</button>
+        <button class="btn btn-red" onclick="deleteThread('${t.id}')">🗑️ Delete</button>
       </div>`;
     }).join('');
-  }catch(e){document.getElementById('messages-list').innerHTML='<div class="loading">Error</div>';}
+  }catch(e){document.getElementById('messages-list').innerHTML='<div class="loading">Error loading threads</div>';}
 }
 window.deleteThread=async function(id){
   if(!confirm('Delete this chat thread?')) return;
