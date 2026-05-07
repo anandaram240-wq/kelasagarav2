@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Offline — KelasaGaara</title>
+<meta name="theme-color" content="#E25519"/>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',system-ui,sans-serif;background:#fff;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;color:#1a1a1a}
+  .logo{font-size:2.2rem;font-weight:900;color:#1a1a1a;margin-bottom:4px}
+  .logo span{color:#E25519}
+  .icon-wrap{width:90px;height:90px;background:linear-gradient(135deg,#E25519,#D4450A);border-radius:24px;display:flex;align-items:center;justify-content:center;margin:0 auto 24px;box-shadow:0 8px 32px rgba(226,85,25,.35)}
+  .icon-wrap svg{width:44px;height:44px;fill:#fff}
+  h1{font-size:1.5rem;font-weight:800;text-align:center;margin-bottom:8px}
+  .kn{font-size:1rem;color:#E25519;font-weight:700;text-align:center;margin-bottom:20px}
+  p{font-size:0.9rem;color:#666;text-align:center;max-width:300px;line-height:1.6;margin-bottom:28px}
+  .retry-btn{background:linear-gradient(135deg,#E25519,#D4450A);color:#fff;border:none;border-radius:14px;padding:14px 32px;font-size:1rem;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 4px 16px rgba(226,85,25,.35);transition:.2s;margin-bottom:16px}
+  .retry-btn:active{transform:scale(.97)}
+  .home-link{font-size:.85rem;color:#E25519;text-decoration:none;font-weight:600}
+  /* Animated wifi-off */
+  .wifi-anim{position:relative;width:64px;height:64px;margin:0 auto 24px}
+  .wifi-ring{position:absolute;border:3px solid #E25519;border-radius:50%;animation:pulse 2s ease-in-out infinite}
+  .wifi-ring:nth-child(1){width:100%;height:100%;top:0;left:0;opacity:.3;animation-delay:0s}
+  .wifi-ring:nth-child(2){width:70%;height:70%;top:15%;left:15%;opacity:.5;animation-delay:.4s}
+  .wifi-ring:nth-child(3){width:40%;height:40%;top:30%;left:30%;opacity:.8;animation-delay:.8s}
+  .wifi-dot{position:absolute;width:10px;height:10px;background:#E25519;border-radius:50%;bottom:4px;left:50%;transform:translateX(-50%)}
+  @keyframes pulse{0%,100%{transform:scale(1);opacity:.3}50%{transform:scale(1.1);opacity:.7}}
+  .status{font-size:.8rem;color:#9ca3af;margin-bottom:24px;text-align:center}
+  #status-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#ef4444;margin-right:6px;animation:blink 1.5s infinite}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+</style>
+</head>
+<body>
+  <div class="icon-wrap">
+    <svg viewBox="0 0 24 24"><path d="M1 1l22 22M16.72 11.06A10.94 10.94 0 0 1 19 12.55M5 12.55a10.94 10.94 0 0 1 5.17-2.39M10.71 5.05A16 16 0 0 1 22.56 9M1.42 9a15.91 15.91 0 0 1 4.7-2.88M8.53 16.11a6 6 0 0 1 6.95 0M12 20h.01" stroke="#fff" stroke-width="2" stroke-linecap="round" fill="none"/></svg>
+  </div>
+  <div class="logo">Kelasa<span>Gaara</span></div>
+  <h1>You are Offline</h1>
+  <div class="kn">ನೀವು ಆಫ್ಲೈನ್ ಆಗಿದ್ದೀರಿ</div>
+  <div class="wifi-anim">
+    <div class="wifi-ring"></div>
+    <div class="wifi-ring"></div>
+    <div class="wifi-ring"></div>
+    <div class="wifi-dot"></div>
+  </div>
+  <div class="status"><span id="status-dot"></span><span id="status-text">Waiting for connection…</span></div>
+  <p>No internet connection. Please check your network and try again. Your last viewed workers are still available.</p>
+  <button class="retry-btn" onclick="retryConnection()">🔄 Try Again</button>
+  <a href="/" class="home-link">← Go to Home</a>
+
+<script>
+  function retryConnection() {
+    const btn = document.querySelector('.retry-btn');
+    btn.textContent = '⏳ Checking…';
+    fetch('/?check=' + Date.now(), { method: 'HEAD', cache: 'no-store' })
+      .then(() => window.location.href = '/')
+      .catch(() => {
+        btn.textContent = '🔄 Try Again';
+        document.getElementById('status-text').textContent = 'Still offline… retrying';
+      });
+  }
+  // Auto-retry every 5 seconds
+  setInterval(() => {
+    fetch('/?check=' + Date.now(), { method: 'HEAD', cache: 'no-store' })
+      .then(() => window.location.href = '/')
+      .catch(() => {});
+  }, 5000);
+  // Online event listener
+  window.addEventListener('online', () => window.location.href = '/');
+</script>
+</body>
+</html>

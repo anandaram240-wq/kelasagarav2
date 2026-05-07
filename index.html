@@ -2,10 +2,25 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
   <title>KelasaGaara — Karnataka Daily Worker Marketplace</title>
   <meta name="description" content="Find skilled daily wage workers across all 31 Karnataka districts. Painters, plumbers, electricians, masons and 40+ trades. 0% commission."/>
+  <!-- PWA -->
+  <link rel="manifest" href="/manifest.json"/>
+  <meta name="theme-color" content="#E25519"/>
+  <meta name="mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+  <meta name="apple-mobile-web-app-title" content="KelasaGaara"/>
+  <link rel="apple-touch-icon" href="/icons/icon-192.png"/>
+  <meta name="msapplication-TileImage" content="/icons/icon-192.png"/>
+  <meta name="msapplication-TileColor" content="#E25519"/>
+  <!-- Performance: Preconnect -->
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://firestore.googleapis.com"/>
+  <link rel="preconnect" href="https://firebase.googleapis.com"/>
+  <link rel="preconnect" href="https://storage.googleapis.com"/>
+  <!-- Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Baloo+Tamma+2:wght@500;700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -143,7 +158,37 @@
   .nav-btn.outline{background:transparent;color:var(--saffron);border:1.5px solid var(--saffron)}
   .nav-btn.outline:hover{background:var(--saffron);color:#fff}
   #account-menu a,#account-menu button{transition:background 0.15s}
-</style>
+    /* ── PWA & Performance CSS ─────────────────────────── */
+    html { scroll-behavior: smooth; }
+    /* GPU-accelerate animated elements */
+    .worker-card { will-change: transform, opacity; contain: layout style; }
+    .bottom-nav  { will-change: transform; }
+    .modal       { will-change: transform, opacity; }
+    /* Card entrance animation */
+    @keyframes fadeSlideUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .worker-card { animation: fadeSlideUp .35s ease both; }
+    /* Button press feedback */
+    button:active, .nav-btn:active, .pill:active {
+      transform: scale(0.96);
+      transition: transform .1s ease;
+    }
+    /* Safe-area padding for notched phones */
+    nav, .topbar { padding-top: env(safe-area-inset-top); }
+    /* Reduced motion accessibility */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+    }
+    /* Stagger card animations */
+    .worker-card:nth-child(1)  { animation-delay: 0ms; }
+    .worker-card:nth-child(2)  { animation-delay: 40ms; }
+    .worker-card:nth-child(3)  { animation-delay: 80ms; }
+    .worker-card:nth-child(4)  { animation-delay: 120ms; }
+    .worker-card:nth-child(5)  { animation-delay: 160ms; }
+    .worker-card:nth-child(6+) { animation-delay: 200ms; }
+  </style>
 </head>
 <body>
 
@@ -801,6 +846,30 @@ const savedLang = localStorage.getItem('kelasa_lang') || 'en';
 initLang();
 syncButtons(savedLang);
 window._i18n = I18N[savedLang];
+</script>
+
+<!-- PWA Init -->
+<script type="module">
+  import { registerSW, initInstallBanner, initBottomNav, haptic, showSkeletons } from './js/pwa.js';
+
+  // Register service worker
+  registerSW();
+
+  // Install banner
+  initInstallBanner();
+
+  // Bottom navigation (mobile only)
+  initBottomNav('home');
+
+  // Haptic on all buttons
+  document.addEventListener('click', e => {
+    if (e.target.closest('button, .nav-btn, .pill, .sort-btn, .gbtn')) {
+      haptic('tap');
+    }
+  });
+
+  // Expose showSkeletons for worker loading
+  window.showSkeletons = showSkeletons;
 </script>
 </body>
 </html>
