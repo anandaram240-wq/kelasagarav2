@@ -339,15 +339,52 @@
     applyFilter();
   }
 
-  // Build/refresh taluk dropdown (filtered by selected district)
+  // Complete Karnataka District → Taluk mapping (all 31 districts)
+  const KA_TALUKS = {
+    "Bagalkot":         ["Bagalkot","Badami","Bilagi","Hungund","Jamkhandi","Mudhol"],
+    "Ballari":          ["Ballari","Hagaribommanahalli","Hospet","Kudligi","Sandur","Siruguppa"],
+    "Belagavi":         ["Belagavi","Athani","Bailhongal","Chikodi","Gokak","Hukkeri","Khanapur","Mudalgi","Raibag","Ramdurg","Savadatti"],
+    "Bengaluru Rural":  ["Devanahalli","Doddaballapura","Hosakote","Nelamangala"],
+    "Bengaluru Urban":  ["Anekal","Bengaluru East","Bengaluru North","Bengaluru South","Bengaluru West","Yelahanka"],
+    "Bidar":            ["Bidar","Aurad","Basavakalyan","Bhalki","Humnabad"],
+    "Chamarajanagar":   ["Chamarajanagar","Gundlupet","Kollegal","Yelandur"],
+    "Chikkaballapura":  ["Chikkaballapura","Bagepalli","Chintamani","Gauribidanur","Gudibanda","Sidlaghatta"],
+    "Chikkamagaluru":   ["Chikkamagaluru","Kadur","Kalasa","Koppa","Mudigere","N.R. Pura","Sringeri","Tarikere"],
+    "Chitradurga":      ["Chitradurga","Challakere","Hiriyur","Holalkere","Hosadurga","Molakalmuru"],
+    "Dakshina Kannada": ["Mangaluru","Bantwal","Belthangady","Puttur","Sullia","Kadaba"],
+    "Davanagere":       ["Davanagere","Channagiri","Harihara","Honnali","Jagalur","Nyamathi"],
+    "Dharwad":          ["Dharwad","Hubli","Kalghatgi","Navalgund","Kundgol"],
+    "Gadag":            ["Gadag","Mundargi","Nargund","Ron","Shirahatti"],
+    "Hassan":           ["Hassan","Alur","Arakalagudu","Arkalgud","Belur","Channarayapatna","Holenarasipura","Sakleshpur"],
+    "Haveri":           ["Haveri","Byadgi","Hanagal","Hirekerur","Ranibennur","Savanur","Shiggaon"],
+    "Kalaburagi":       ["Kalaburagi","Afzalpur","Aland","Chincholi","Chittapur","Jevargi","Sedam"],
+    "Kodagu":           ["Madikeri","Somwarpet","Virajpet"],
+    "Kolar":            ["Kolar","Bangarpet","Malur","Mulbagal","Srinivasapur"],
+    "Koppal":           ["Koppal","Gangavathi","Kustagi","Yelburga"],
+    "Mandya":           ["Mandya","Krishnarajapete","Maddur","Malavalli","Nagamangala","Pandavapura","Srirangapatna"],
+    "Mysuru":           ["Mysuru","H.D. Kote","Heggadadevankote","Hunsur","K.R. Nagar","Nanjangud","Periyapatna","T. Narasipura"],
+    "Raichur":          ["Raichur","Deodurga","Lingsugur","Manvi","Sindhanur"],
+    "Ramanagara":       ["Ramanagara","Channapatna","Kanakapura","Magadi"],
+    "Shivamogga":       ["Shivamogga","Bhadravati","Hosanagara","Sagar","Shikaripura","Sorab","Tirthahalli"],
+    "Tumakuru":         ["Tumakuru","Chiknayakanhalli","Gubbi","Koratagere","Kunigal","Madhugiri","Pavagada","Sira","Tiptur","Turuvekere"],
+    "Udupi":            ["Udupi","Kundapura","Karkala"],
+    "Uttara Kannada":   ["Karwar","Ankola","Bhatkal","Dandeli","Haliyal","Honavar","Joida","Kumta","Mundgod","Siddapur","Sirsi","Yellapur"],
+    "Vijayapura":       ["Vijayapura","Basavana Bagewadi","Indi","Muddebihal","Sindagi"],
+    "Vijayanagara":     ["Hosapete","Hagaribommanahalli","Harapanahalli","Kudligi","Sandur"],
+    "Yadgir":           ["Yadgir","Gurmitkal","Shahapur","Shorapur","Wadagera"]
+  };
+
+  // Build taluk dropdown — uses hardcoded map if district selected, otherwise all taluks
   function buildTalukOptions(selectedDistrict) {
     const talukSel = document.getElementById('filter-taluk');
     const prev = talukSel.value;
-    const taluks = [...new Set(
-      allWorkers
-        .filter(w => !selectedDistrict || w.district === selectedDistrict)
-        .map(w => w.taluk).filter(Boolean)
-    )].sort();
+    let taluks = [];
+    if (selectedDistrict && KA_TALUKS[selectedDistrict]) {
+      taluks = KA_TALUKS[selectedDistrict];
+    } else {
+      // All districts: flatten and sort all taluks
+      taluks = [...new Set(Object.values(KA_TALUKS).flat())].sort();
+    }
     talukSel.innerHTML = '<option value="">All Taluks</option>';
     taluks.forEach(t => {
       const o = document.createElement('option');
