@@ -157,19 +157,19 @@
     </div>
   </a>
   <div class="nav-links">
-    <a href="index.html" class="nav-link active">🏠 Home</a>
+    <a href="index.html" class="nav-link active" data-i18n="nav.home">🏠 Home</a>
     <a href="find-jobs.html" class="nav-link">💼 Jobs</a>
     <a href="worker-dashboard.html" class="nav-link">👷 Worker</a>
     <a href="hirer-dashboard.html" class="nav-link">🏗️ Hirer</a>
     <a href="admin-login.html" class="nav-link">🛡️ Admin</a>
     <!-- Auth nav: shown/hidden by JS -->
     <div id="nav-guest" style="display:flex;align-items:center;gap:6px">
-      <button id="lang-toggle" onclick="window.toggleLang&&toggleLang()" style="background:rgba(232,96,10,0.08);border:1.5px solid var(--saffron);color:var(--saffron);border-radius:8px;padding:5px 13px;font-size:0.8rem;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:.2s">ಕನ್ನಡ</button>
+      <div style="display:flex;gap:4px"><button id="btn-lang-en" onclick="window._setLang('en')" style="padding:5px 13px;border:1.5px solid #E25519;border-radius:8px;font-size:0.8rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:.2s;background:#E25519;color:#fff">English</button><button id="btn-lang-kn" onclick="window._setLang('kn')" style="padding:5px 13px;border:1.5px solid #E25519;border-radius:8px;font-size:0.8rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:.2s;background:transparent;color:#E25519">ಕನ್ನಡ</button></div>
       <a href="login.html" class="nav-btn outline" data-i18n="nav.login">Login</a>
       <a href="login.html" class="nav-btn" data-i18n="nav.signup">Sign Up</a>
     </div>
     <div id="nav-user" style="display:none;position:relative">
-      <button id="lang-toggle2" onclick="window.toggleLang&&toggleLang()" style="background:rgba(232,96,10,0.08);border:1.5px solid var(--saffron);color:var(--saffron);border-radius:8px;padding:5px 13px;font-size:0.8rem;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:.2s;margin-right:4px">ಕನ್ನಡ</button>
+      <div style="display:flex;gap:4px;margin-right:4px"><button id="btn-lang-en2" onclick="window._setLang('en')" style="padding:5px 13px;border:1.5px solid #E25519;border-radius:8px;font-size:0.8rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:.2s;background:#E25519;color:#fff">English</button><button id="btn-lang-kn2" onclick="window._setLang('kn')" style="padding:5px 13px;border:1.5px solid #E25519;border-radius:8px;font-size:0.8rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:.2s;background:transparent;color:#E25519">ಕನ್ನಡ</button></div>
       <button id="account-btn" onclick="toggleAccountMenu()" style="display:flex;align-items:center;gap:8px;padding:7px 14px;background:var(--paper);border:1.5px solid var(--border);border-radius:10px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:0.85rem;font-weight:600;color:var(--ink);transition:all 0.2s" onmouseenter="this.style.borderColor='var(--saffron)'" onmouseleave="this.style.borderColor='var(--border)'">
         <span id="nav-avatar-circle" style="width:28px;height:28px;border-radius:50%;background:var(--saffron);color:#fff;display:flex;align-items:center;justify-content:center;font-size:0.8rem;font-weight:700;flex-shrink:0">👤</span>
         <span id="nav-user-name">My Account</span>
@@ -256,10 +256,10 @@
 <div class="sort-bar">
   <div id="result-count" style="font-weight:600;color:var(--ink)">Loading workers…</div>
   <div class="sort-options">
-    <span style="margin-right:8px" data-i18n="sort.label">Sort by:</span>
+    <span style="margin-right:8px" data-i18n="sort.by">Sort by:</span>
     <button class="sort-btn active" id="sort-rating" onclick="sortWorkers('rating',this)">⭐ <span data-i18n="sort.rating">Rating</span></button>
-    <button class="sort-btn" id="sort-price-asc" onclick="sortWorkers('price-asc',this)">💰 <span data-i18n="sort.priceu">Price ↑</span></button>
-    <button class="sort-btn" id="sort-price-desc" onclick="sortWorkers('price-desc',this)">💰 <span data-i18n="sort.priced">Price ↓</span></button>
+    <button class="sort-btn" id="sort-price-asc" onclick="sortWorkers('price-asc',this)">💰 <span data-i18n="sort.pu">Price ↑</span></button>
+    <button class="sort-btn" id="sort-price-desc" onclick="sortWorkers('price-desc',this)">💰 <span data-i18n="sort.pd">Price ↓</span></button>
     <button class="sort-btn" id="sort-exp" onclick="sortWorkers('experience',this)">🏆 <span data-i18n="sort.exp">Experience</span></button>
   </div>
 </div>
@@ -309,20 +309,29 @@
     distSel.appendChild(o);
   });
 
-  // Build category pills
+  // Build category pills — respects current language
   const pillsEl = document.getElementById('category-pills');
-  CATEGORIES.forEach(c => {
-    const btn = document.createElement('button');
-    btn.className = 'pill' + (c.en === 'All' ? ' active' : '');
-    btn.textContent = c.label;
-    btn.onclick = () => {
-      activeCategory = c.en;
-      document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
-      btn.classList.add('active');
-      applyFilter();
-    };
-    pillsEl.appendChild(btn);
-  });
+  function buildPills() {
+    const lang = localStorage.getItem('kelasa_lang') || 'en';
+    pillsEl.innerHTML = '';
+    CATEGORIES.forEach(cat => {
+      const btn = document.createElement('button');
+      btn.className = 'pill' + (cat.en === activeCategory ? ' active' : '');
+      btn.textContent = lang === 'kn' ? cat.label : (cat.enLabel || cat.en);
+      btn.setAttribute('data-cat-en', cat.en);
+      btn.setAttribute('data-cat-kn', cat.label);
+      btn.onclick = () => {
+        activeCategory = cat.en;
+        document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        applyFilter();
+      };
+      pillsEl.appendChild(btn);
+    });
+  }
+  buildPills();
+  // Window bridge for dynamic card translations
+  window._i18n = null; // will be set by i18n module
 
   // Load workers from Firestore
   async function loadWorkers() {
@@ -387,7 +396,7 @@
       // All districts: flatten and sort all taluks
       taluks = [...new Set(Object.values(KA_TALUKS).flat())].sort();
     }
-    talukSel.innerHTML = '<option value="">All Taluks</option>';
+    talukSel.innerHTML = '<option value="" data-i18n-opt="filter.taluks">All Taluks</option>';
     taluks.forEach(t => {
       const o = document.createElement('option');
       o.value = t; o.textContent = t;
@@ -486,8 +495,8 @@
             <span class="wc-exp">${esc(expText)}</span>
           </div>
           <div class="wc-actions">
-            <button class="wc-btn-msg"  onclick="msgWorker(decodeURIComponent('${safeId}'))">💬 Message</button>
-            <button class="wc-btn-book" onclick="bookWorker(decodeURIComponent('${safeId}'))">📅 Book Now</button>
+            <button class="wc-btn-msg"  onclick="msgWorker(decodeURIComponent('${safeId}'))">${(window._i18n&&window._i18n['card.msg'])||'💬 Message'}</button>
+            <button class="wc-btn-book" onclick="bookWorker(decodeURIComponent('${safeId}'))">${(window._i18n&&window._i18n['card.book'])||'📅 Book Now'}</button>
             ${currentUserRole ? `<button style="padding:6px 10px;background:rgba(239,68,68,0.08);color:#EF4444;border:1px solid rgba(239,68,68,0.2);border-radius:8px;font-size:0.72rem;font-weight:600;cursor:pointer;transition:all 0.2s" onclick="openReport('${safeId}','${esc(w.name||'Worker')}')" title="Report this worker">🚨</button>` : ''}
           </div>
         </div>`;
@@ -759,17 +768,39 @@
   };
 </script>
 <script type="module">
-import { applyLang, toggleLang, currentLang } from './js/i18n.js';
-window.toggleLang = function(){
-  const next = localStorage.getItem('kelasa_lang')==='kn'?'en':'kn';
-  applyLang(next);
-  // Sync both toggle buttons
-  ['lang-toggle','lang-toggle2'].forEach(id=>{
-    const b=document.getElementById(id);
-    if(b) b.textContent=next==='en'?'ಕನ್ನಡ':'English';
+import { applyLang, initLang, I18N } from './js/i18n.js';
+
+function syncButtons(lang) {
+  ['btn-lang-en','btn-lang-en2'].forEach(id=>{
+    const b=document.getElementById(id); if(!b) return;
+    b.style.background=lang==='en'?'#E25519':'transparent';
+    b.style.color=lang==='en'?'#fff':'#E25519';
+    b.style.fontWeight=lang==='en'?'800':'600';
   });
+  ['btn-lang-kn','btn-lang-kn2'].forEach(id=>{
+    const b=document.getElementById(id); if(!b) return;
+    b.style.background=lang==='kn'?'#E25519':'transparent';
+    b.style.color=lang==='kn'?'#fff':'#E25519';
+    b.style.fontWeight=lang==='kn'?'800':'600';
+  });
+}
+
+window._setLang = function(lang) {
+  applyLang(lang);
+  syncButtons(lang);
+  // Make translations available for dynamic card buttons
+  window._i18n = I18N[lang];
+  // Rebuild category pills in new language
+  if(typeof buildPills==='function') buildPills();
+  // Re-render worker cards so Message/Book buttons translate
+  if(typeof applyFilter==='function') applyFilter();
 };
-applyLang(currentLang);
+
+// Init: apply saved lang & sync buttons
+const savedLang = localStorage.getItem('kelasa_lang') || 'en';
+initLang();
+syncButtons(savedLang);
+window._i18n = I18N[savedLang];
 </script>
 </body>
 </html>
