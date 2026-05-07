@@ -264,7 +264,17 @@
 
 <!-- WORKERS GRID -->
 <div class="workers-section">
-  <div class="workers-grid" id="workers-grid">
+  <!-- Login gate shown to non-logged-in visitors -->
+  <div id="workers-login-gate" style="display:none;grid-column:1/-1;text-align:center;padding:60px 20px">
+    <div style="font-size:3.5rem;margin-bottom:16px">🔐</div>
+    <div style="font-size:1.4rem;font-weight:800;color:var(--ink);margin-bottom:8px">Login to Browse Workers</div>
+    <p style="color:var(--muted);font-size:0.95rem;margin-bottom:28px;max-width:400px;margin-left:auto;margin-right:auto">Create a free account to see all available skilled workers near you across Karnataka.</p>
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+      <a href="login.html" style="padding:13px 32px;background:linear-gradient(135deg,var(--saffron),#D4920A);color:#fff;border-radius:12px;font-weight:700;text-decoration:none;font-size:0.95rem;box-shadow:0 4px 16px rgba(232,89,12,0.35)">Login / Sign Up Free →</a>
+      <a href="login.html?role=worker" style="padding:13px 32px;background:#fff;border:2px solid var(--border);color:var(--ink);border-radius:12px;font-weight:600;text-decoration:none;font-size:0.95rem">Register as Worker</a>
+    </div>
+  </div>
+  <div class="workers-grid" id="workers-grid" style="display:none">
     <div class="state-box" style="grid-column:1/-1">
       <div class="spinner"></div>
       Loading workers from Firestore…
@@ -604,17 +614,30 @@
           currentUserRole = data.role || null;
           if (data.role === 'hirer') { currentHirer = { uid: user.uid, ...data }; }
           likedWorkers = new Set(data.likedWorkers || []);
-          if (allWorkers.length) applyFilter();
           // ── Show My Account button ──
           document.getElementById('nav-guest').style.display = 'none';
           document.getElementById('nav-user').style.display = 'block';
           const displayName = data.name || user.displayName || 'Account';
           document.getElementById('nav-user-name').textContent = displayName.split(' ')[0];
           document.getElementById('nav-avatar-circle').textContent = displayName[0]?.toUpperCase() || '👤';
-          // Set correct dashboard link
           const dashUrl = data.role === 'worker' ? 'worker-dashboard.html' : 'hirer-dashboard.html';
           document.getElementById('menu-dashboard').href = dashUrl;
           document.getElementById('menu-profile').href = dashUrl;
+          // ── Check account status ──
+          if (data.status === 'blocked') {
+            const { signOut } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js");
+            await signOut(auth);
+            alert('⛔ Your account has been blocked. Contact admin for support.');
+            window.location.href = 'login.html';
+            return;
+          }
+          if (data.status === 'suspended') {
+            alert('⏸️ Your account is temporarily suspended. Contact admin.');
+          }
+          // ── Show worker grid ──
+          document.getElementById('workers-login-gate').style.display = 'none';
+          document.getElementById('workers-grid').style.display = 'grid';
+          if (!allWorkers.length) { loadWorkers(); } else { applyFilter(); }
         }
       } catch(e) { console.warn('Auth check error:', e); }
     } else {
@@ -623,11 +646,13 @@
       likedWorkers = new Set();
       document.getElementById('nav-guest').style.display = 'flex';
       document.getElementById('nav-user').style.display = 'none';
+      // Show login gate, hide grid
+      document.getElementById('workers-login-gate').style.display = 'block';
+      document.getElementById('workers-grid').style.display = 'none';
+      document.getElementById('result-count').innerHTML = '<span style="color:var(--muted)">Login to see workers</span>';
     }
   });
-  // Pre-select sort by rating on load
-  loadWorkers();
-  // Check if we have a pending intent from a previous redirect
+  // Intent check after login
   try {
     const intent = JSON.parse(sessionStorage.getItem('kelasa_intent') || 'null');
     if (intent && currentUserRole === 'hirer') {
