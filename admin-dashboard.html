@@ -88,7 +88,10 @@ td{padding:12px 16px;font-size:.85rem;vertical-align:middle}
 
 <div class="tabs">
   <div class="tab active" onclick="showTab('users',this)">👥 Users</div>
+  <div class="tab" onclick="showTab('bookings',this)">📋 Bookings</div>
   <div class="tab" onclick="showTab('jobs',this)">💼 Jobs</div>
+  <div class="tab" onclick="showTab('reports',this)">🚨 Reports</div>
+  <div class="tab" onclick="showTab('messages',this)">💬 Messages</div>
 </div>
 
 <div class="page">
@@ -98,6 +101,8 @@ td{padding:12px 16px;font-size:.85rem;vertical-align:middle}
     <div class="stat"><div class="stat-n g" id="s-workers">—</div><div class="stat-l">Workers</div></div>
     <div class="stat"><div class="stat-n b" id="s-hirers">—</div><div class="stat-l">Hirers</div></div>
     <div class="stat"><div class="stat-n p" id="s-jobs">—</div><div class="stat-l">Jobs Posted</div></div>
+    <div class="stat"><div class="stat-n" style="color:#F59E0B" id="s-bookings">—</div><div class="stat-l">Bookings</div></div>
+    <div class="stat"><div class="stat-n" style="color:#EF4444" id="s-reports">—</div><div class="stat-l">Reports</div></div>
   </div>
 
   <!-- Users Tab -->
@@ -113,10 +118,24 @@ td{padding:12px 16px;font-size:.85rem;vertical-align:middle}
       </div>
       <table>
         <thead><tr>
-          <th>User</th><th>Role</th><th>District</th><th>Trade / Skills</th><th>Experience</th><th>Rate</th><th>Actions</th>
+          <th>User</th><th>Role</th><th>Status</th><th>District</th><th>Trade / Skills</th><th>Rate</th><th>Actions</th>
         </tr></thead>
         <tbody id="users-tbody"><tr><td colspan="7"><div class="loading"><div class="spinner"></div>Loading…</div></td></tr></tbody>
       </table>
+    </div>
+  </div>
+
+  <!-- Bookings Tab -->
+  <div id="tab-bookings" style="display:none">
+    <div class="tbl-wrap">
+      <div style="padding:16px 20px;border-bottom:1px solid var(--bdr);font-weight:700;display:flex;justify-content:space-between;align-items:center">
+        All Bookings
+        <select id="filter-booking-status" onchange="filterBookings()" style="background:rgba(255,255,255,.07);border:1px solid var(--bdr);border-radius:8px;padding:6px 12px;color:#fff;font-family:'DM Sans',sans-serif;font-size:.82rem">
+          <option value="">All Status</option>
+          <option>PENDING</option><option>CONFIRMED</option><option>DECLINED</option><option>COMPLETED</option>
+        </select>
+      </div>
+      <div id="bookings-list" style="padding:0 20px"><div class="loading"><div class="spinner"></div>Loading…</div></div>
     </div>
   </div>
 
@@ -125,6 +144,22 @@ td{padding:12px 16px;font-size:.85rem;vertical-align:middle}
     <div class="tbl-wrap">
       <div style="padding:16px 20px;border-bottom:1px solid var(--bdr);font-weight:700">All Posted Jobs</div>
       <div id="jobs-list" style="padding:0 20px"><div class="loading"><div class="spinner"></div>Loading…</div></div>
+    </div>
+  </div>
+
+  <!-- Reports Tab -->
+  <div id="tab-reports" style="display:none">
+    <div class="tbl-wrap">
+      <div style="padding:16px 20px;border-bottom:1px solid var(--bdr);font-weight:700">User Reports</div>
+      <div id="reports-list" style="padding:0 20px"><div class="loading"><div class="spinner"></div>Loading…</div></div>
+    </div>
+  </div>
+
+  <!-- Messages Tab -->
+  <div id="tab-messages" style="display:none">
+    <div class="tbl-wrap">
+      <div style="padding:16px 20px;border-bottom:1px solid var(--bdr);font-weight:700">💬 Active Chat Threads</div>
+      <div id="messages-list" style="padding:0 20px"><div class="loading"><div class="spinner"></div>Loading…</div></div>
     </div>
   </div>
 </div>
@@ -209,16 +244,26 @@ function renderUsers(users){
     const init=(u.name||'?')[0].toUpperCase();
     const av=u.photo?`<img class="avatar" src="${u.photo}" onerror="this.outerHTML='<div class=av-ph>${init}</div>'">`:`<div class="av-ph">${init}</div>`;
     const rb=u.role==='worker'?`<span class="rbadge rw">👷 Worker</span>`:`<span class="rbadge rh">🏗️ Hirer</span>`;
+    const status=u.status||'active';
+    const statusBadge=status==='blocked'?'<span style="background:#7F1D1D;color:#FCA5A5;padding:2px 8px;border-radius:12px;font-size:.7rem;font-weight:700">🚫 BLOCKED</span>'
+      :status==='suspended'?'<span style="background:#78350F;color:#FCD34D;padding:2px 8px;border-radius:12px;font-size:.7rem;font-weight:700">⏸️ SUSPENDED</span>'
+      :'<span style="background:rgba(52,211,153,.1);color:#34D399;padding:2px 8px;border-radius:12px;font-size:.7rem;font-weight:700">✔ Active</span>';
     const skills=(u.skills||[]).join(', ')||'—';
+    const isBlocked=status==='blocked';
+    const isSuspended=status==='suspended';
     return `<tr>
       <td><div class="user-cell">${av}<div><div class="u-name">${esc(u.name||'—')}</div><div class="u-email">${esc(u.email||'')}</div></div></div></td>
       <td>${rb}</td>
+      <td>${statusBadge}</td>
       <td style="font-size:.82rem">${u.district||'—'}</td>
       <td style="font-size:.82rem">${skills}</td>
-      <td style="font-size:.82rem">${u.experience||'—'}</td>
       <td style="font-size:.82rem">${u.dailyRate?'₹'+u.dailyRate:'—'}</td>
-      <td><div class="actions">
-        <button class="btn btn-edit" onclick="openEdit('${u.uid}')">✏️ Edit</button>
+      <td><div class="actions" style="flex-wrap:wrap;gap:4px">
+        <button class="btn btn-edit" onclick="openEdit('${u.uid}')">✏️</button>
+        ${isBlocked?`<button class="btn" style="background:rgba(52,211,153,.15);color:#34D399;font-size:.72rem;padding:4px 9px" onclick="setUserStatus('${u.uid}','active')">Unblock</button>`
+          :`<button class="btn btn-red" style="font-size:.72rem;padding:4px 9px" onclick="setUserStatus('${u.uid}','blocked')">🚫 Block</button>`}
+        ${isSuspended?`<button class="btn" style="background:rgba(52,211,153,.15);color:#34D399;font-size:.72rem;padding:4px 9px" onclick="setUserStatus('${u.uid}','active')">Unsuspend</button>`
+          :`<button class="btn" style="background:rgba(252,211,77,.1);color:#FCD34D;border:1px solid rgba(252,211,77,.3);font-size:.72rem;padding:4px 9px" onclick="setUserStatus('${u.uid}','suspended')">⏸️ Suspend</button>`}
         <button class="btn btn-red" onclick="removeUser('${u.uid}','${esc(u.name||u.email)}')">🗑️</button>
       </div></td>
     </tr>`;
@@ -320,8 +365,129 @@ window.removeJob=async function(id){
 window.showTab=function(tab,el){
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   el.classList.add('active');
-  document.getElementById('tab-users').style.display=tab==='users'?'block':'none';
-  document.getElementById('tab-jobs').style.display=tab==='jobs'?'block':'none';
+  ['users','bookings','jobs','reports','messages'].forEach(t=>{
+    const el=document.getElementById('tab-'+t);
+    if(el) el.style.display=tab===t?'block':'none';
+  });
+  if(tab==='bookings' && !window._bookingsLoaded){window._bookingsLoaded=true;loadBookings();}
+  if(tab==='reports' && !window._reportsLoaded){window._reportsLoaded=true;loadReports();}
+  if(tab==='messages' && !window._messagesLoaded){window._messagesLoaded=true;loadChatThreads();}
+};
+
+window.setUserStatus=async function(uid,status){
+  if(!confirm(`Set user status to "${status}"?`)) return;
+  try{
+    await updateDoc(doc(db,'users',uid),{status,updatedAt:serverTimestamp()});
+    const u=allUsers.find(x=>x.uid===uid);
+    if(u) u.status=status;
+    filterUsers();
+    toast('User status updated','s');
+  }catch(e){toast('Failed: '+e.message,'e');}
+};
+
+let allBookings=[];
+async function loadBookings(){
+  try{
+    const snap=await getDocs(collection(db,'bookings'));
+    allBookings=snap.docs.map(d=>({...d.data(),id:d.id}));
+    document.getElementById('s-bookings').textContent=allBookings.length;
+    renderBookings(allBookings);
+  }catch(e){document.getElementById('bookings-list').innerHTML='<div class="loading">Error loading bookings</div>';}
+}
+
+function renderBookings(list){
+  const el=document.getElementById('bookings-list');
+  if(!list.length){el.innerHTML='<div class="loading">No bookings found.</div>';return;}
+  el.innerHTML=list.map(b=>{
+    const sc={PENDING:'#F59E0B',CONFIRMED:'#34D399',DECLINED:'#EF4444',COMPLETED:'#60A5FA',EXPIRED:'#9CA3AF'};
+    const rate=b.proposedRate?`₹${b.proposedRate} ${b.rateType||''}`:'—';
+    return `<div class="job-row" style="flex-wrap:wrap;gap:8px">
+      <div style="flex:1;min-width:200px">
+        <div class="job-title">${esc(b.jobTitle||'Booking')}</div>
+        <div class="job-meta">📍 ${esc(b.location||'—')} · 📅 ${b.date||'—'} · 💰 ${rate}</div>
+        <div class="job-meta" style="margin-top:3px">Hirer: ${esc(b.hirerId)} → Worker: ${esc(b.workerId)}</div>
+      </div>
+      <span style="color:${sc[b.status]||'#9CA3AF'};font-weight:700;font-size:.82rem">${b.status||'PENDING'}</span>
+      <button class="btn btn-red" onclick="deleteBooking('${b.id}')">🗑️</button>
+    </div>`;
+  }).join('');
+}
+
+window.filterBookings=function(){
+  const s=document.getElementById('filter-booking-status').value;
+  renderBookings(s?allBookings.filter(b=>b.status===s):allBookings);
+};
+
+window.deleteBooking=async function(id){
+  if(!confirm('Delete this booking?')) return;
+  try{await deleteDoc(doc(db,'bookings',id));allBookings=allBookings.filter(b=>b.id!==id);renderBookings(allBookings);toast('Deleted','i');}catch(e){toast('Failed','e');}
+};
+
+let allReports=[];
+async function loadReports(){
+  try{
+    const snap=await getDocs(collection(db,'reports'));
+    allReports=snap.docs.map(d=>({...d.data(),id:d.id}));
+    document.getElementById('s-reports').textContent=allReports.length;
+    renderReports(allReports);
+  }catch(e){document.getElementById('reports-list').innerHTML='<div class="loading">Error loading reports</div>';}
+}
+
+function renderReports(list){
+  const el=document.getElementById('reports-list');
+  if(!list.length){el.innerHTML='<div style="padding:30px;text-align:center;color:var(--mut)">✅ No reports. Platform is clean!</div>';return;}
+  el.innerHTML=list.map(r=>{
+    const ts=r.createdAt?new Date(r.createdAt).toLocaleDateString('en-IN'):'—';
+    const resolved=r.resolved;
+    return `<div class="job-row" style="flex-direction:column;align-items:flex-start;gap:8px;padding:14px 0">
+      <div style="display:flex;align-items:center;gap:10px;width:100%">
+        <span style="font-size:1.2rem">🚨</span>
+        <div style="flex:1">
+          <div style="font-weight:700;font-size:.88rem">${esc(r.reason||'Report')}</div>
+          <div style="font-size:.76rem;color:var(--mut)">Reporter: ${esc(r.reporterEmail||r.reporterId||'—')} · Against: ${esc(r.targetName||r.targetId||'—')} · ${ts}</div>
+          ${r.details?`<div style="font-size:.8rem;margin-top:4px;background:rgba(255,255,255,.05);padding:6px 10px;border-radius:6px">${esc(r.details)}</div>`:''}
+        </div>
+        <div style="display:flex;gap:6px">
+          ${!resolved?`<button class="btn btn-s" style="font-size:.72rem;padding:4px 10px" onclick="resolveReport('${r.id}')">✅ Resolve</button>`:''}
+          ${r.targetId?`<button class="btn btn-red" style="font-size:.72rem" onclick="setUserStatus('${r.targetId}','suspended')">⏸️ Suspend</button>`:''}
+          ${r.targetId?`<button class="btn btn-red" style="font-size:.72rem" onclick="setUserStatus('${r.targetId}','blocked')">🚫 Block</button>`:''}
+          <button class="btn btn-red" style="font-size:.72rem" onclick="deleteReport('${r.id}')">🗑️</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+window.resolveReport=async function(id){
+  try{await updateDoc(doc(db,'reports',id),{resolved:true,resolvedAt:serverTimestamp()});const r=allReports.find(x=>x.id===id);if(r)r.resolved=true;renderReports(allReports);toast('Marked resolved','s');}catch(e){toast('Failed','e');}
+};
+window.deleteReport=async function(id){
+  if(!confirm('Delete report?')) return;
+  try{await deleteDoc(doc(db,'reports',id));allReports=allReports.filter(r=>r.id!==id);renderReports(allReports);toast('Deleted','i');}catch(e){toast('Failed','e');}
+};
+
+async function loadChatThreads(){
+  try{
+    const snap=await getDocs(collection(db,'direct_threads'));
+    const threads=snap.docs.map(d=>({...d.data(),id:d.id}));
+    const el=document.getElementById('messages-list');
+    if(!threads.length){el.innerHTML='<div style="padding:30px;text-align:center;color:var(--mut)">No direct message threads found.</div>';return;}
+    el.innerHTML=threads.map(t=>{
+      const ts=t.createdAt?new Date(t.createdAt).toLocaleDateString('en-IN'):'—';
+      return `<div class="job-row">
+        <span style="font-size:1.2rem">💬</span>
+        <div style="flex:1">
+          <div class="job-title">Thread: ${t.id.slice(0,20)}…</div>
+          <div class="job-meta">Hirer: ${esc(t.hirerId||'—')} → Worker: ${esc(t.workerId||'—')} · ${ts}</div>
+        </div>
+        <button class="btn btn-red" onclick="deleteThread('${t.id}')">🗑️</button>
+      </div>`;
+    }).join('');
+  }catch(e){document.getElementById('messages-list').innerHTML='<div class="loading">Error</div>';}
+}
+window.deleteThread=async function(id){
+  if(!confirm('Delete this chat thread?')) return;
+  try{await deleteDoc(doc(db,'direct_threads',id));loadChatThreads();toast('Thread deleted','i');}catch(e){toast('Failed','e');}
 };
 
 window.doLogout=async function(){await signOut(auth);window.location.href='admin-login.html';};

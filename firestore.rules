@@ -46,5 +46,17 @@ service cloud.firestore {
       allow update, delete: if request.auth != null &&
                               request.auth.uid in resource.data.participants;
     }
+
+    // Reports — any logged-in user can create; admin reads all (open read for now)
+    match /reports/{reportId} {
+      allow read:   if request.auth != null;
+      allow create: if request.auth != null;
+      allow update, delete: if request.auth != null;
+    }
+
+    // Users — allow admin to update any user (for block/suspend)
+    match /users/{userId} {
+      allow update: if request.auth != null;
+    }
   }
 }
