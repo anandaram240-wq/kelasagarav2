@@ -164,10 +164,12 @@
     <a href="admin-login.html" class="nav-link">🛡️ Admin</a>
     <!-- Auth nav: shown/hidden by JS -->
     <div id="nav-guest" style="display:flex;align-items:center;gap:6px">
-      <a href="login.html" class="nav-btn outline">Login</a>
-      <a href="login.html" class="nav-btn">Sign Up</a>
+      <button id="lang-toggle" onclick="window.toggleLang&&toggleLang()" style="background:rgba(232,96,10,0.08);border:1.5px solid var(--saffron);color:var(--saffron);border-radius:8px;padding:5px 13px;font-size:0.8rem;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:.2s">ಕನ್ನಡ</button>
+      <a href="login.html" class="nav-btn outline" data-i18n="nav.login">Login</a>
+      <a href="login.html" class="nav-btn" data-i18n="nav.signup">Sign Up</a>
     </div>
     <div id="nav-user" style="display:none;position:relative">
+      <button id="lang-toggle2" onclick="window.toggleLang&&toggleLang()" style="background:rgba(232,96,10,0.08);border:1.5px solid var(--saffron);color:var(--saffron);border-radius:8px;padding:5px 13px;font-size:0.8rem;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:.2s;margin-right:4px">ಕನ್ನಡ</button>
       <button id="account-btn" onclick="toggleAccountMenu()" style="display:flex;align-items:center;gap:8px;padding:7px 14px;background:var(--paper);border:1.5px solid var(--border);border-radius:10px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:0.85rem;font-weight:600;color:var(--ink);transition:all 0.2s" onmouseenter="this.style.borderColor='var(--saffron)'" onmouseleave="this.style.borderColor='var(--border)'">
         <span id="nav-avatar-circle" style="width:28px;height:28px;border-radius:50%;background:var(--saffron);color:#fff;display:flex;align-items:center;justify-content:center;font-size:0.8rem;font-weight:700;flex-shrink:0">👤</span>
         <span id="nav-user-name">My Account</span>
@@ -238,13 +240,13 @@
   <div class="search-inner">
     <div class="search-row">
       <select class="search-select" id="filter-district" onchange="applyFilter()">
-        <option value="">All Districts</option>
+        <option value="" data-i18n-opt="filter.districts">All Districts</option>
       </select>
       <select class="search-select" id="filter-taluk" onchange="applyFilter()" style="min-width:140px">
-        <option value="">All Taluks</option>
+        <option value="" data-i18n-opt="filter.taluks">All Taluks</option>
       </select>
       <input class="search-input" id="search-name" type="text" placeholder="🔍 Search name, trade..." oninput="applyFilter()"/>
-      <button class="btn-search" onclick="applyFilter()">🔍 Search</button>
+      <button class="btn-search" onclick="applyFilter()">🔍 <span data-i18n="filter.btn">Search</span></button>
     </div>
     <div class="category-pills" id="category-pills"></div>
   </div>
@@ -254,11 +256,11 @@
 <div class="sort-bar">
   <div id="result-count" style="font-weight:600;color:var(--ink)">Loading workers…</div>
   <div class="sort-options">
-    <span style="margin-right:8px">Sort by:</span>
-    <button class="sort-btn active" id="sort-rating" onclick="sortWorkers('rating',this)">⭐ Rating</button>
-    <button class="sort-btn" id="sort-price-asc" onclick="sortWorkers('price-asc',this)">💰 Price ↑</button>
-    <button class="sort-btn" id="sort-price-desc" onclick="sortWorkers('price-desc',this)">💰 Price ↓</button>
-    <button class="sort-btn" id="sort-exp" onclick="sortWorkers('experience',this)">🏆 Experience</button>
+    <span style="margin-right:8px" data-i18n="sort.label">Sort by:</span>
+    <button class="sort-btn active" id="sort-rating" onclick="sortWorkers('rating',this)">⭐ <span data-i18n="sort.rating">Rating</span></button>
+    <button class="sort-btn" id="sort-price-asc" onclick="sortWorkers('price-asc',this)">💰 <span data-i18n="sort.priceu">Price ↑</span></button>
+    <button class="sort-btn" id="sort-price-desc" onclick="sortWorkers('price-desc',this)">💰 <span data-i18n="sort.priced">Price ↓</span></button>
+    <button class="sort-btn" id="sort-exp" onclick="sortWorkers('experience',this)">🏆 <span data-i18n="sort.exp">Experience</span></button>
   </div>
 </div>
 
@@ -755,6 +757,19 @@
       alert('Failed to submit report: ' + e.message);
     }
   };
+</script>
+<script type="module">
+import { applyLang, toggleLang, currentLang } from './js/i18n.js';
+window.toggleLang = function(){
+  const next = localStorage.getItem('kelasa_lang')==='kn'?'en':'kn';
+  applyLang(next);
+  // Sync both toggle buttons
+  ['lang-toggle','lang-toggle2'].forEach(id=>{
+    const b=document.getElementById(id);
+    if(b) b.textContent=next==='en'?'ಕನ್ನಡ':'English';
+  });
+};
+applyLang(currentLang);
 </script>
 </body>
 </html>
