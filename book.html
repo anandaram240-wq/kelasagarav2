@@ -1,386 +1,647 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
   <title>Book a Worker — KelasaGaara</title>
-  <link href="https://fonts.googleapis.com/css2?family=Baloo+Tamma+2:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
-  <link rel="stylesheet" href="css/style.css"/>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Baloo+Tamma+2:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
   <style>
-    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    body{font-family:'DM Sans',sans-serif;background:var(--paper);min-height:100vh}
-    .navbar{background:#fff;border-bottom:1px solid var(--border);padding:0 28px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 1px 6px rgba(0,0,0,0.06)}
-    .brand{font-family:'Baloo Tamma 2',sans-serif;font-weight:800;font-size:1.1rem;color:var(--ink);text-decoration:none}
-    .brand span{color:var(--saffron)}
-    .wrap{max-width:680px;margin:32px auto;padding:0 16px}
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--paper);
+      min-height: 100vh
+    }
+
+    .navbar {
+      background: #fff;
+      border-bottom: 1px solid var(--border);
+      padding: 0 28px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 1px 6px rgba(0, 0, 0, 0.06)
+    }
+
+    .brand {
+      font-family: 'Baloo Tamma 2', sans-serif;
+      font-weight: 800;
+      font-size: 1.1rem;
+      color: var(--ink);
+      text-decoration: none
+    }
+
+    .brand span {
+      color: var(--saffron)
+    }
+
+    .wrap {
+      max-width: 680px;
+      margin: 32px auto;
+      padding: 0 16px
+    }
+
     /* Worker mini profile */
-    .worker-mini{background:#fff;border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:24px;display:flex;align-items:center;gap:16px;box-shadow:0 2px 12px rgba(0,0,0,0.06)}
-    .wm-avatar{width:64px;height:64px;border-radius:50%;border:3px solid var(--saffron);object-fit:cover;flex-shrink:0;background:var(--saffron-light,#FEF0E6);display:flex;align-items:center;justify-content:center;font-size:1.4rem;font-weight:700;color:var(--saffron)}
-    .wm-name{font-family:'Baloo Tamma 2',sans-serif;font-size:1.15rem;font-weight:800;color:var(--ink);margin-bottom:4px}
-    .wm-meta{font-size:0.82rem;color:var(--muted);display:flex;flex-wrap:wrap;gap:8px}
-    .wm-tag{padding:3px 10px;background:rgba(27,107,69,0.1);color:var(--jade);border-radius:20px;font-weight:600;font-size:0.75rem}
-    .wm-stars{color:#F59E0B;font-size:0.85rem}
+    .worker-mini {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06)
+    }
+
+    .wm-avatar {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      border: 3px solid var(--saffron);
+      object-fit: cover;
+      flex-shrink: 0;
+      background: var(--saffron-light, #FEF0E6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--saffron)
+    }
+
+    .wm-name {
+      font-family: 'Baloo Tamma 2', sans-serif;
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--ink);
+      margin-bottom: 4px
+    }
+
+    .wm-meta {
+      font-size: 0.82rem;
+      color: var(--muted);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px
+    }
+
+    .wm-tag {
+      padding: 3px 10px;
+      background: rgba(27, 107, 69, 0.1);
+      color: var(--jade);
+      border-radius: 20px;
+      font-weight: 600;
+      font-size: 0.75rem
+    }
+
+    .wm-stars {
+      color: #F59E0B;
+      font-size: 0.85rem
+    }
+
     /* Form */
-    .book-form{background:#fff;border:1px solid var(--border);border-radius:16px;padding:28px;box-shadow:0 2px 12px rgba(0,0,0,0.06)}
-    .form-title{font-family:'Baloo Tamma 2',sans-serif;font-size:1.2rem;font-weight:800;margin-bottom:6px;color:var(--ink)}
-    .form-subtitle{font-size:0.82rem;color:var(--muted);margin-bottom:24px}
-    .fg{margin-bottom:18px}
-    .fg label{display:block;font-size:0.82rem;font-weight:700;color:var(--ink);margin-bottom:6px}
-    .fg input,.fg select,.fg textarea{width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:0.9rem;font-family:'DM Sans',sans-serif;outline:none;transition:border 0.2s;background:#fff;color:var(--ink)}
-    .fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--saffron);box-shadow:0 0 0 3px rgba(232,89,12,0.09)}
-    .fg textarea{resize:vertical;min-height:90px}
-    .fg-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-    .btn-book{width:100%;padding:14px;background:linear-gradient(135deg,var(--saffron),#D4920A);color:#fff;border:none;border-radius:12px;font-size:1rem;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s;letter-spacing:0.02em;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:8px}
-    .btn-book:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(232,89,12,0.35)}
-    .btn-book:disabled{opacity:0.6;cursor:not-allowed;transform:none;box-shadow:none}
+    .book-form {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06)
+    }
+
+    .form-title {
+      font-family: 'Baloo Tamma 2', sans-serif;
+      font-size: 1.2rem;
+      font-weight: 800;
+      margin-bottom: 6px;
+      color: var(--ink)
+    }
+
+    .form-subtitle {
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin-bottom: 24px
+    }
+
+    .fg {
+      margin-bottom: 18px
+    }
+
+    .fg label {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--ink);
+      margin-bottom: 6px
+    }
+
+    .fg input,
+    .fg select,
+    .fg textarea {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-family: 'DM Sans', sans-serif;
+      outline: none;
+      transition: border 0.2s;
+      background: #fff;
+      color: var(--ink)
+    }
+
+    .fg input:focus,
+    .fg select:focus,
+    .fg textarea:focus {
+      border-color: var(--saffron);
+      box-shadow: 0 0 0 3px rgba(232, 89, 12, 0.09)
+    }
+
+    .fg textarea {
+      resize: vertical;
+      min-height: 90px
+    }
+
+    .fg-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px
+    }
+
+    .btn-book {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, var(--saffron), #D4920A);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      transition: all 0.2s;
+      letter-spacing: 0.02em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 8px
+    }
+
+    .btn-book:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(232, 89, 12, 0.35)
+    }
+
+    .btn-book:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none
+    }
+
     /* Success state */
-    .success-box{background:#fff;border:1px solid var(--border);border-radius:16px;padding:40px 28px;text-align:center;display:none}
-    .success-icon{font-size:3.5rem;margin-bottom:16px}
-    .success-title{font-family:'Baloo Tamma 2',sans-serif;font-size:1.5rem;font-weight:800;color:var(--ink);margin-bottom:8px}
-    .success-sub{color:var(--muted);font-size:0.9rem;margin-bottom:24px}
+    .success-box {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 40px 28px;
+      text-align: center;
+      display: none
+    }
+
+    .success-icon {
+      font-size: 3.5rem;
+      margin-bottom: 16px
+    }
+
+    .success-title {
+      font-family: 'Baloo Tamma 2', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--ink);
+      margin-bottom: 8px
+    }
+
+    .success-sub {
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-bottom: 24px
+    }
+
     /* Login redirect banner */
-    .login-banner{background:linear-gradient(135deg,rgba(232,89,12,0.08),rgba(212,146,10,0.08));border:1px solid rgba(232,89,12,0.2);border-radius:12px;padding:16px;margin-bottom:20px;display:none}
-    .spin{display:inline-block;width:18px;height:18px;border:3px solid rgba(255,255,255,0.35);border-top-color:#fff;border-radius:50%;animation:spin 0.7s linear infinite}
-    @keyframes spin{to{transform:rotate(360deg)}}
-    @media(max-width:600px){.fg-row{grid-template-columns:1fr}}
+    .login-banner {
+      background: linear-gradient(135deg, rgba(232, 89, 12, 0.08), rgba(212, 146, 10, 0.08));
+      border: 1px solid rgba(232, 89, 12, 0.2);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 20px;
+      display: none
+    }
+
+    .spin {
+      display: inline-block;
+      width: 18px;
+      height: 18px;
+      border: 3px solid rgba(255, 255, 255, 0.35);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg)
+      }
+    }
+
+    @media(max-width:600px) {
+      .fg-row {
+        grid-template-columns: 1fr
+      }
+    }
   </style>
 </head>
+
 <body>
-<nav class="navbar">
-  <a href="javascript:history.back()" style="font-size:0.85rem;color:var(--muted);text-decoration:none">← Back</a>
-  <a href="index.html" class="brand">Kelasa<span>Gaara</span></a>
-  <div style="width:60px"></div>
-</nav>
+  <nav class="navbar">
+    <a href="javascript:history.back()" style="font-size:0.85rem;color:var(--muted);text-decoration:none">← Back</a>
+    <a href="index.html" class="brand">Kelasa<span>Gaara</span></a>
+    <div style="width:60px"></div>
+  </nav>
 
-<div class="wrap">
-  <div id="loading-state" style="text-align:center;padding:60px;color:var(--muted)">⏳ Loading…</div>
+  <div class="wrap">
+    <div id="loading-state" style="text-align:center;padding:60px;color:var(--muted)">⏳ Loading…</div>
 
-  <div id="login-required" style="display:none;text-align:center;padding:40px 16px">
-    <div style="font-size:3rem;margin-bottom:12px">🔐</div>
-    <div style="font-family:'Baloo Tamma 2',sans-serif;font-size:1.3rem;font-weight:800;margin-bottom:8px">Login Required</div>
-    <p style="color:var(--muted);margin-bottom:20px">Please log in as a Hirer to book this worker.</p>
-    <a href="login.html?role=hirer" class="btn-book" style="display:inline-flex;text-decoration:none">Login / Register as Hirer →</a>
-  </div>
-
-  <div id="book-content" style="display:none">
-    <!-- Worker mini profile -->
-    <div class="worker-mini">
-      <div class="wm-avatar" id="wm-avatar">👤</div>
-      <div>
-        <div class="wm-name" id="wm-name">Loading…</div>
-        <div class="wm-meta">
-          <span id="wm-location">📍 —</span>
-          <span class="wm-stars" id="wm-stars">★ —</span>
-          <span id="wm-rate">₹—/hr</span>
-          <span id="wm-exp">— yrs exp</span>
-        </div>
-        <div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:8px" id="wm-skills"></div>
-      </div>
+    <div id="login-required" style="display:none;text-align:center;padding:40px 16px">
+      <div style="font-size:3rem;margin-bottom:12px">🔐</div>
+      <div style="font-family:'Baloo Tamma 2',sans-serif;font-size:1.3rem;font-weight:800;margin-bottom:8px">Login
+        Required</div>
+      <p style="color:var(--muted);margin-bottom:20px">Please log in as a Hirer to book this worker.</p>
+      <a href="login.html?role=hirer" class="btn-book" style="display:inline-flex;text-decoration:none">Login / Register
+        as Hirer →</a>
     </div>
 
-    <!-- Booking form -->
-    <div class="book-form" id="form-area">
-      <div class="form-title">📅 Book This Worker</div>
-      <div class="form-subtitle">Fill in the details below. Worker will be notified instantly.</div>
+    <div id="book-content" style="display:none">
+      <!-- Worker mini profile -->
+      <div class="worker-mini">
+        <div class="wm-avatar" id="wm-avatar">👤</div>
+        <div>
+          <div class="wm-name" id="wm-name">Loading…</div>
+          <div class="wm-meta">
+            <span id="wm-location">📍 —</span>
+            <span class="wm-stars" id="wm-stars">★ —</span>
+            <span id="wm-rate">₹—/hr</span>
+            <span id="wm-exp">— yrs exp</span>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:8px" id="wm-skills"></div>
+        </div>
+      </div>
 
-      <div class="fg">
-        <label>💼 Job Title / What work is needed *</label>
-        <input type="text" id="jobTitle" placeholder="e.g. Paint 2 rooms, Fix plumbing leak" maxlength="100"/>
-      </div>
-      <div class="fg-row">
+      <!-- Booking form -->
+      <div class="book-form" id="form-area">
+        <div class="form-title">📅 Book This Worker</div>
+        <div class="form-subtitle">Fill in the details below. Worker will be notified instantly.</div>
+
         <div class="fg">
-          <label>📅 Date of Work *</label>
-          <input type="date" id="workDate" min=""/>
+          <label>💼 Job Title / What work is needed *</label>
+          <input type="text" id="jobTitle" placeholder="e.g. Paint 2 rooms, Fix plumbing leak" maxlength="100" />
+        </div>
+        <div class="fg-row">
+          <div class="fg">
+            <label>📅 Date of Work *</label>
+            <input type="date" id="workDate" min="" />
+          </div>
+          <div class="fg">
+            <label>🕐 Start Time *</label>
+            <input type="time" id="startTime" value="09:00" />
+          </div>
         </div>
         <div class="fg">
-          <label>🕐 Start Time *</label>
-          <input type="time" id="startTime" value="09:00"/>
-        </div>
-      </div>
-      <div class="fg">
-        <label>⏱ Estimated Duration *</label>
-        <select id="duration">
-          <option value="">Select duration</option>
-          <option value="1 hour">1 Hour</option>
-          <option value="2 hours">2 Hours</option>
-          <option value="3 hours">3 Hours</option>
-          <option value="4 hours">4 Hours</option>
-          <option value="Full day">Full Day</option>
-        </select>
-      </div>
-      <div class="fg">
-        <label>💰 Proposed Rate (Negotiable)</label>
-        <div style="display:flex;gap:8px;align-items:center">
-          <span style="padding:10px 12px;background:rgba(27,107,69,0.08);border:1.5px solid var(--border);border-radius:10px;font-size:1rem;color:var(--jade);font-weight:700">₹</span>
-          <input type="number" id="proposed-rate" placeholder="e.g. 500" min="0" style="flex:1"/>
-          <select id="rate-type" style="min-width:110px">
-            <option value="per_day">per day</option>
-            <option value="per_hour">per hour</option>
-            <option value="fixed">fixed total</option>
+          <label>⏱ Estimated Duration *</label>
+          <select id="duration">
+            <option value="">Select duration</option>
+            <option value="1 hour">1 Hour</option>
+            <option value="2 hours">2 Hours</option>
+            <option value="3 hours">3 Hours</option>
+            <option value="4 hours">4 Hours</option>
+            <option value="Full day">Full Day</option>
           </select>
         </div>
-        <div id="worker-rate-hint" style="font-size:0.78rem;color:var(--muted);margin-top:6px"></div>
-      </div>
-      <div class="fg">
-        <label>📍 Work Location / Address *</label>
-        <div style="display:flex;gap:8px;align-items:stretch">
-          <input type="text" id="location" placeholder="e.g. 12 MG Road, Davangere, Karnataka" style="flex:1"/>
-          <button type="button" id="locate-btn" onclick="useMyLocation()" title="Use current location" style="padding:0 14px;background:var(--jade);color:#fff;border:none;border-radius:10px;font-size:1.1rem;cursor:pointer;transition:all 0.2s;flex-shrink:0" onmouseenter="this.style.background='#1B5E3A'" onmouseleave="this.style.background='var(--jade)'">📍</button>
+        <div class="fg">
+          <label>💰 Proposed Rate (Negotiable)</label>
+          <div style="display:flex;gap:8px;align-items:center">
+            <span
+              style="padding:10px 12px;background:rgba(27,107,69,0.08);border:1.5px solid var(--border);border-radius:10px;font-size:1rem;color:var(--jade);font-weight:700">₹</span>
+            <input type="number" id="proposed-rate" placeholder="e.g. 500" min="0" style="flex:1" />
+            <select id="rate-type" style="min-width:110px">
+              <option value="per_day">per day</option>
+              <option value="per_hour">per hour</option>
+              <option value="fixed">fixed total</option>
+            </select>
+          </div>
+          <div id="worker-rate-hint" style="font-size:0.78rem;color:var(--muted);margin-top:6px"></div>
         </div>
-        <div id="map-preview" style="display:none;margin-top:8px">
-          <a id="map-link" href="#" target="_blank" style="font-size:0.82rem;color:var(--jade);text-decoration:none;display:inline-flex;align-items:center;gap:5px;background:rgba(27,107,69,0.08);padding:5px 12px;border-radius:8px;border:1px solid rgba(27,107,69,0.2)">
-            🗺️ View on Google Maps →
-          </a>
+        <div class="fg">
+          <label>📍 Work Location / Address *</label>
+          <div style="display:flex;gap:8px;align-items:stretch">
+            <input type="text" id="location" placeholder="e.g. 12 MG Road, Davangere, Karnataka" style="flex:1" />
+            <button type="button" id="locate-btn" onclick="useMyLocation()" title="Use current location"
+              style="padding:0 14px;background:var(--jade);color:#fff;border:none;border-radius:10px;font-size:1.1rem;cursor:pointer;transition:all 0.2s;flex-shrink:0"
+              onmouseenter="this.style.background='#1B5E3A'"
+              onmouseleave="this.style.background='var(--jade)'">📍</button>
+          </div>
+          <div id="map-preview" style="display:none;margin-top:8px">
+            <a id="map-link" href="#" target="_blank"
+              style="font-size:0.82rem;color:var(--jade);text-decoration:none;display:inline-flex;align-items:center;gap:5px;background:rgba(27,107,69,0.08);padding:5px 12px;border-radius:8px;border:1px solid rgba(27,107,69,0.2)">
+              🗺️ View on Google Maps →
+            </a>
+          </div>
         </div>
+        <div class="fg">
+          <label>📝 Additional Instructions (optional)</label>
+          <textarea id="instructions" placeholder="Any special requirements, tools needed, access details…"></textarea>
+        </div>
+        <button class="btn-book" id="btn-book" onclick="confirmBooking()">
+          📅 Confirm Booking →
+        </button>
       </div>
-      <div class="fg">
-        <label>📝 Additional Instructions (optional)</label>
-        <textarea id="instructions" placeholder="Any special requirements, tools needed, access details…"></textarea>
+
+      <!-- Success screen -->
+      <div class="success-box" id="success-box">
+        <div class="success-icon">🎉</div>
+        <div class="success-title">Booking Request Sent!</div>
+        <p class="success-sub">
+          Your booking request has been sent to <strong id="success-worker-name">the worker</strong>!<br>
+          You'll be notified when they respond. Redirecting to dashboard in <strong id="countdown">3</strong>s…
+        </p>
+        <a href="hirer-dashboard.html" class="btn-book"
+          style="text-decoration:none;display:inline-flex;width:auto;padding:12px 28px">Go to Dashboard →</a>
       </div>
-      <button class="btn-book" id="btn-book" onclick="confirmBooking()">
-        📅 Confirm Booking →
-      </button>
-    </div>
 
-    <!-- Success screen -->
-    <div class="success-box" id="success-box">
-      <div class="success-icon">🎉</div>
-      <div class="success-title">Booking Request Sent!</div>
-      <p class="success-sub">
-        Your booking request has been sent to <strong id="success-worker-name">the worker</strong>!<br>
-        You'll be notified when they respond. Redirecting to dashboard in <strong id="countdown">3</strong>s…
-      </p>
-      <a href="hirer-dashboard.html" class="btn-book" style="text-decoration:none;display:inline-flex;width:auto;padding:12px 28px">Go to Dashboard →</a>
-    </div>
-
-    <!-- No booking yet (when mode=message) -->
-    <div id="no-booking-box" style="display:none;background:#fff;border:1px solid var(--border);border-radius:16px;padding:40px 28px;text-align:center;box-shadow:0 2px 12px rgba(0,0,0,0.06)">
-      <div style="font-size:3rem;margin-bottom:14px">💬</div>
-      <div style="font-family:'Baloo Tamma 2',sans-serif;font-size:1.3rem;font-weight:800;margin-bottom:10px;color:var(--ink)">Book First to Message</div>
-      <p style="color:var(--muted);font-size:0.9rem;margin-bottom:24px;max-width:360px;margin-left:auto;margin-right:auto">
-        You don't have an active booking with <strong id="no-book-worker-name">this worker</strong> yet.<br><br>
-        Chat opens automatically once your booking is confirmed. Book them now to get started!
-      </p>
-      <button class="btn-book" onclick="switchToBook()" style="display:inline-flex;width:auto;padding:12px 28px">📅 Book This Worker</button>
-      <br/><a href="index.html" style="color:var(--muted);font-size:0.82rem;display:block;margin-top:16px">← Browse other workers</a>
+      <!-- No booking yet (when mode=message) -->
+      <div id="no-booking-box"
+        style="display:none;background:#fff;border:1px solid var(--border);border-radius:16px;padding:40px 28px;text-align:center;box-shadow:0 2px 12px rgba(0,0,0,0.06)">
+        <div style="font-size:3rem;margin-bottom:14px">💬</div>
+        <div
+          style="font-family:'Baloo Tamma 2',sans-serif;font-size:1.3rem;font-weight:800;margin-bottom:10px;color:var(--ink)">
+          Book First to Message</div>
+        <p
+          style="color:var(--muted);font-size:0.9rem;margin-bottom:24px;max-width:360px;margin-left:auto;margin-right:auto">
+          You don't have an active booking with <strong id="no-book-worker-name">this worker</strong> yet.<br><br>
+          Chat opens automatically once your booking is confirmed. Book them now to get started!
+        </p>
+        <button class="btn-book" onclick="switchToBook()" style="display:inline-flex;width:auto;padding:12px 28px">📅
+          Book This Worker</button>
+        <br /><a href="index.html" style="color:var(--muted);font-size:0.82rem;display:block;margin-top:16px">← Browse
+          other workers</a>
+      </div>
     </div>
   </div>
-</div>
 
-<div id="toast-container"></div>
+  <div id="toast-container"></div>
 
-<script type="module">
-  import { auth, db, rtdb } from './js/firebase-config.js';
-  import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-  import { doc, getDoc, collection, query, where, getDocs, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-  import { createBooking } from './js/bookings.js';
+  <script type="module">
+    import { auth, db, rtdb } from './js/firebase-config.js';
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { doc, getDoc, collection, query, where, getDocs, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { createBooking } from './js/bookings.js';
 
-  const params   = new URLSearchParams(window.location.search);
-  const workerId = params.get('worker');
-  const mode     = params.get('mode'); // 'message' or null (book)
-  if (!workerId) { window.location.href = 'index.html'; }
+    const params = new URLSearchParams(window.location.search);
+    const workerId = params.get('worker');
+    const mode = params.get('mode'); // 'message' or null (book)
+    if (!workerId) { window.location.href = 'index.html'; }
 
-  // Set min date to today
-  const todayStr = new Date().toISOString().split('T')[0];
-  document.getElementById('workDate').min = todayStr;
+    // Set min date to today
+    const todayStr = new Date().toISOString().split('T')[0];
+    document.getElementById('workDate').min = todayStr;
 
-  let workerData = null, currentUser = null, hirerId = null;
+    let workerData = null, currentUser = null, hirerId = null;
 
-  function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+    function esc(s) { return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
 
-  function showToast(msg, type='info') {
-    const c = document.getElementById('toast-container');
-    const cols = { success:'#1B6B45', error:'#C0392B', info:'#E8590C' };
-    const t = document.createElement('div');
-    t.style.cssText = `min-width:240px;padding:11px 16px;background:${cols[type]||cols.info};color:#fff;border-radius:10px;font-size:0.88rem;font-weight:500;display:flex;align-items:center;gap:8px;animation:toastIn 0.3s ease;box-shadow:0 8px 24px rgba(0,0,0,0.15)`;
-    t.innerHTML = `<span>${msg}</span>`;
-    c.appendChild(t);
-    setTimeout(() => t.remove(), 3500);
-  }
-
-  async function loadWorker() {
-    try {
-      const snap = await getDoc(doc(db,'users',workerId));
-      if (!snap.exists()) { document.getElementById('loading-state').textContent='Worker not found.'; return; }
-      workerData = snap.data();
-
-      // Avatar
-      const avatarEl = document.getElementById('wm-avatar');
-      if (workerData.photo) {
-        avatarEl.outerHTML = `<img class="wm-avatar" id="wm-avatar" src="${esc(workerData.photo)}" alt="" onerror="this.style.display='none'"/>`;
-      } else {
-        const initials = (workerData.name||'W').split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase();
-        avatarEl.textContent = initials;
-      }
-
-      document.getElementById('wm-name').textContent = workerData.name || 'Worker';
-      document.getElementById('wm-location').textContent = `📍 ${workerData.district||'Karnataka'}, ${workerData.taluk||''}`.trim().replace(/,\s*$/,'');
-      document.getElementById('wm-rate').textContent = workerData.hourlyRate ? `₹${workerData.hourlyRate}/hr` : (workerData.dailyRate ? `₹${workerData.dailyRate}/day` : '₹—');
-      document.getElementById('wm-exp').textContent = workerData.experience ? `${workerData.experience} exp` : '—';
-
-      const rating = workerData.rating || 0;
-      const reviews = workerData.reviewCount || 0;
-      document.getElementById('wm-stars').textContent = rating ? `★ ${rating.toFixed(1)} · ${reviews} reviews` : '★ New';
-
-      const skillsEl = document.getElementById('wm-skills');
-      (workerData.skills||[]).slice(0,5).forEach(s => {
-        const span = document.createElement('span');
-        span.className = 'wm-tag';
-        span.textContent = s;
-        skillsEl.appendChild(span);
-      });
-      // Pre-fill proposed rate with worker's listed rate
-      if (workerData.dailyRate) {
-        document.getElementById('proposed-rate').value = workerData.dailyRate;
-        document.getElementById('worker-rate-hint').innerHTML =
-          `💡 Worker's listed rate: <strong style="color:var(--jade)">₹${workerData.dailyRate}/day</strong> — you can negotiate below or above`;
-      } else if (workerData.hourlyRate) {
-        document.getElementById('proposed-rate').value = workerData.hourlyRate;
-        document.getElementById('rate-type').value = 'per_hour';
-        document.getElementById('worker-rate-hint').innerHTML =
-          `💡 Worker's listed rate: <strong style="color:var(--jade)">₹${workerData.hourlyRate}/hr</strong> — you can negotiate`;
-      }
-    } catch(e) {
-      console.error(e);
-      showToast('Failed to load worker', 'error');
-    }
-  }
-
-  onAuthStateChanged(auth, async user => {
-    document.getElementById('loading-state').style.display = 'none';
-    if (!user) {
-      sessionStorage.setItem('kelasa_intent', JSON.stringify({ workerId, action: mode || 'book', workerName: workerData?.name || '' }));
-      document.getElementById('login-required').style.display = 'block';
-      return;
-    }
-    const snap = await getDoc(doc(db,'users',user.uid));
-    if (!snap.exists() || snap.data().role !== 'hirer') {
-      document.getElementById('login-required').style.display = 'block';
-      return;
-    }
-    currentUser = user;
-    hirerId = user.uid;
-    document.getElementById('book-content').style.display = 'block';
-    await loadWorker();
-    if (workerData?.name) {
-      document.getElementById('success-worker-name').textContent = workerData.name;
-      document.getElementById('no-book-worker-name').textContent = workerData.name;
+    function showToast(msg, type = 'info') {
+      const c = document.getElementById('toast-container');
+      const cols = { success: '#1B6B45', error: '#C0392B', info: '#E8590C' };
+      const t = document.createElement('div');
+      t.style.cssText = `min-width:240px;padding:11px 16px;background:${cols[type] || cols.info};color:#fff;border-radius:10px;font-size:0.88rem;font-weight:500;display:flex;align-items:center;gap:8px;animation:toastIn 0.3s ease;box-shadow:0 8px 24px rgba(0,0,0,0.15)`;
+      t.innerHTML = `<span>${msg}</span>`;
+      c.appendChild(t);
+      setTimeout(() => t.remove(), 3500);
     }
 
-    // --- MESSAGE MODE ---
-    if (mode === 'message') {
-      const threadId = [user.uid, workerId].sort().join('_');
+    async function loadWorker() {
       try {
-        await setDoc(doc(db,'direct_threads', threadId), {
-          participants: [user.uid, workerId],
-          hirerId: user.uid,
-          workerId: workerId,
-          createdAt: Date.now()
-        }, { merge: true });
-      } catch(e) { console.error(e); }
-      window.location.href = 'chat.html?direct=' + threadId + '&worker=' + encodeURIComponent(workerId) + '&hirer=' + encodeURIComponent(user.uid);
-      return;
-    }
-  });
+        const snap = await getDoc(doc(db, 'users', workerId));
+        if (!snap.exists()) { document.getElementById('loading-state').textContent = 'Worker not found.'; return; }
+        workerData = snap.data();
 
-  // ── GOOGLE MAPS LOCATION ──
-  let _locationUrl = '';
-
-  window.useMyLocation = function() {
-    const btn = document.getElementById('locate-btn');
-    btn.textContent = '⏳';
-    btn.disabled = true;
-    if (!navigator.geolocation) {
-      showToast('Geolocation not supported by your browser', 'error');
-      btn.textContent = '📍'; btn.disabled = false; return;
-    }
-    navigator.geolocation.getCurrentPosition(
-      async pos => {
-        const { latitude: lat, longitude: lng } = pos.coords;
-        const mapsUrl = `https://www.google.com/maps?q=${lat},${lng}`;
-        _locationUrl = mapsUrl;
-        // Reverse geocode using free Nominatim API (no key needed)
-        try {
-          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`);
-          const data = await res.json();
-          const addr = data.display_name || `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
-          document.getElementById('location').value = addr;
-        } catch(e) {
-          document.getElementById('location').value = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+        // Avatar
+        const avatarEl = document.getElementById('wm-avatar');
+        if (workerData.photo) {
+          avatarEl.outerHTML = `<img class="wm-avatar" id="wm-avatar" src="${esc(workerData.photo)}" alt="" onerror="this.style.display='none'"/>`;
+        } else {
+          const initials = (workerData.name || 'W').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+          avatarEl.textContent = initials;
         }
-        // Show map preview link
+
+        document.getElementById('wm-name').textContent = workerData.name || 'Worker';
+        document.getElementById('wm-location').textContent = `📍 ${workerData.district || 'Karnataka'}, ${workerData.taluk || ''}`.trim().replace(/,\s*$/, '');
+        document.getElementById('wm-rate').textContent = workerData.hourlyRate ? `₹${workerData.hourlyRate}/hr` : (workerData.dailyRate ? `₹${workerData.dailyRate}/day` : '₹—');
+        document.getElementById('wm-exp').textContent = workerData.experience ? `${workerData.experience} exp` : '—';
+
+        const rating = workerData.rating || 0;
+        const reviews = workerData.reviewCount || 0;
+        document.getElementById('wm-stars').textContent = rating ? `★ ${rating.toFixed(1)} · ${reviews} reviews` : '★ New';
+
+        const skillsEl = document.getElementById('wm-skills');
+        (workerData.skills || []).slice(0, 5).forEach(s => {
+          const span = document.createElement('span');
+          span.className = 'wm-tag';
+          span.textContent = s;
+          skillsEl.appendChild(span);
+        });
+        // Pre-fill proposed rate with worker's listed rate
+        if (workerData.dailyRate) {
+          document.getElementById('proposed-rate').value = workerData.dailyRate;
+          document.getElementById('worker-rate-hint').innerHTML =
+            `💡 Worker's listed rate: <strong style="color:var(--jade)">₹${workerData.dailyRate}/day</strong> — you can negotiate below or above`;
+        } else if (workerData.hourlyRate) {
+          document.getElementById('proposed-rate').value = workerData.hourlyRate;
+          document.getElementById('rate-type').value = 'per_hour';
+          document.getElementById('worker-rate-hint').innerHTML =
+            `💡 Worker's listed rate: <strong style="color:var(--jade)">₹${workerData.hourlyRate}/hr</strong> — you can negotiate`;
+        }
+      } catch (e) {
+        console.error(e);
+        showToast('Failed to load worker', 'error');
+      }
+    }
+
+    onAuthStateChanged(auth, async user => {
+      document.getElementById('loading-state').style.display = 'none';
+      if (!user) {
+        sessionStorage.setItem('kelasa_intent', JSON.stringify({ workerId, action: mode || 'book', workerName: workerData?.name || '' }));
+        document.getElementById('login-required').style.display = 'block';
+        return;
+      }
+      const snap = await getDoc(doc(db, 'users', user.uid));
+      if (!snap.exists() || snap.data().role !== 'hirer') {
+        document.getElementById('login-required').style.display = 'block';
+        return;
+      }
+      currentUser = user;
+      hirerId = user.uid;
+      document.getElementById('book-content').style.display = 'block';
+      await loadWorker();
+      if (workerData?.name) {
+        document.getElementById('success-worker-name').textContent = workerData.name;
+        document.getElementById('no-book-worker-name').textContent = workerData.name;
+      }
+
+      // --- MESSAGE MODE ---
+      if (mode === 'message') {
+        const threadId = [user.uid, workerId].sort().join('_');
+        try {
+          await setDoc(doc(db, 'direct_threads', threadId), {
+            participants: [user.uid, workerId],
+            hirerId: user.uid,
+            workerId: workerId,
+            createdAt: Date.now()
+          }, { merge: true });
+        } catch (e) { console.error(e); }
+        window.location.href = 'chat.html?direct=' + threadId + '&worker=' + encodeURIComponent(workerId) + '&hirer=' + encodeURIComponent(user.uid);
+        return;
+      }
+    });
+
+    // ── GOOGLE MAPS LOCATION ──
+    let _locationUrl = '';
+
+    window.useMyLocation = function () {
+      const btn = document.getElementById('locate-btn');
+      btn.textContent = '⏳';
+      btn.disabled = true;
+      if (!navigator.geolocation) {
+        showToast('Geolocation not supported by your browser', 'error');
+        btn.textContent = '📍'; btn.disabled = false; return;
+      }
+      navigator.geolocation.getCurrentPosition(
+        async pos => {
+          const { latitude: lat, longitude: lng } = pos.coords;
+          const mapsUrl = `https://www.google.com/maps?q=${lat},${lng}`;
+          _locationUrl = mapsUrl;
+          // Reverse geocode using free Nominatim API (no key needed)
+          try {
+            const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`);
+            const data = await res.json();
+            const addr = data.display_name || `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+            document.getElementById('location').value = addr;
+          } catch (e) {
+            document.getElementById('location').value = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+          }
+          // Show map preview link
+          document.getElementById('map-link').href = mapsUrl;
+          document.getElementById('map-preview').style.display = 'block';
+          btn.textContent = '✅'; btn.disabled = false;
+          showToast('Location detected! 📍', 'success');
+        },
+        err => {
+          showToast('Could not get location. Enter address manually.', 'error');
+          btn.textContent = '📍'; btn.disabled = false;
+        },
+        { enableHighAccuracy: true, timeout: 10000 }
+      );
+    };
+
+    // Also update map link when user types manually
+    document.getElementById('location').addEventListener('input', function () {
+      const val = this.value.trim();
+      if (val.length > 5) {
+        const mapsUrl = `https://www.google.com/maps/search/${encodeURIComponent(val)}`;
+        _locationUrl = mapsUrl;
         document.getElementById('map-link').href = mapsUrl;
         document.getElementById('map-preview').style.display = 'block';
-        btn.textContent = '✅'; btn.disabled = false;
-        showToast('Location detected! 📍', 'success');
-      },
-      err => {
-        showToast('Could not get location. Enter address manually.', 'error');
-        btn.textContent = '📍'; btn.disabled = false;
-      },
-      { enableHighAccuracy: true, timeout: 10000 }
-    );
-  };
+      } else {
+        document.getElementById('map-preview').style.display = 'none';
+        _locationUrl = '';
+      }
+    });
 
-  // Also update map link when user types manually
-  document.getElementById('location').addEventListener('input', function() {
-    const val = this.value.trim();
-    if (val.length > 5) {
-      const mapsUrl = `https://www.google.com/maps/search/${encodeURIComponent(val)}`;
-      _locationUrl = mapsUrl;
-      document.getElementById('map-link').href = mapsUrl;
-      document.getElementById('map-preview').style.display = 'block';
-    } else {
-      document.getElementById('map-preview').style.display = 'none';
-      _locationUrl = '';
+    window.confirmBooking = async function () {
+      const jobTitle = document.getElementById('jobTitle').value.trim();
+      const workDate = document.getElementById('workDate').value;
+      const startTime = document.getElementById('startTime').value;
+      const duration = document.getElementById('duration').value;
+      const location = document.getElementById('location').value.trim();
+      const instructions = document.getElementById('instructions').value.trim();
+
+      if (!jobTitle) return showToast('Enter job title / what work is needed', 'error');
+      if (!workDate) return showToast('Select date of work', 'error');
+      if (!startTime) return showToast('Select start time', 'error');
+      if (!duration) return showToast('Select estimated duration', 'error');
+      if (!location) return showToast('Enter work location', 'error');
+      if (!hirerId || !workerId) return showToast('Authentication error', 'error');
+
+      const btn = document.getElementById('btn-book');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spin"></span> Sending request…';
+
+      try {
+        await createBooking(hirerId, workerId, { jobTitle, date: workDate, time: startTime, duration, location, locationUrl: _locationUrl, instructions, proposedRate: parseInt(document.getElementById('proposed-rate').value) || null, rateType: document.getElementById('rate-type').value });
+        // Show success
+        document.getElementById('form-area').style.display = 'none';
+        document.getElementById('success-box').style.display = 'block';
+        document.querySelector('.worker-mini').style.display = 'none';
+        if (workerData?.name) document.getElementById('success-worker-name').textContent = workerData.name;
+
+        // Countdown redirect
+        let secs = 3;
+        const cdEl = document.getElementById('countdown');
+        const timer = setInterval(() => {
+          secs--;
+          if (cdEl) cdEl.textContent = secs;
+          if (secs <= 0) {
+            clearInterval(timer);
+            window.location.href = 'hirer-dashboard.html';
+          }
+        }, 1000);
+      } catch (e) {
+        console.error(e);
+        showToast('Failed to send booking. Try again.', 'error');
+        btn.disabled = false;
+        btn.innerHTML = '📅 Confirm Booking →';
+      }
+    };
+  </script>
+  <style>
+    @keyframes toastIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0)
+      }
     }
-  });
-
-  window.confirmBooking = async function() {
-    const jobTitle     = document.getElementById('jobTitle').value.trim();
-    const workDate     = document.getElementById('workDate').value;
-    const startTime    = document.getElementById('startTime').value;
-    const duration     = document.getElementById('duration').value;
-    const location     = document.getElementById('location').value.trim();
-    const instructions = document.getElementById('instructions').value.trim();
-
-    if (!jobTitle)   return showToast('Enter job title / what work is needed','error');
-    if (!workDate)   return showToast('Select date of work','error');
-    if (!startTime)  return showToast('Select start time','error');
-    if (!duration)   return showToast('Select estimated duration','error');
-    if (!location)   return showToast('Enter work location','error');
-    if (!hirerId || !workerId) return showToast('Authentication error','error');
-
-    const btn = document.getElementById('btn-book');
-    btn.disabled = true;
-    btn.innerHTML = '<span class="spin"></span> Sending request…';
-
-    try {
-      await createBooking(hirerId, workerId, { jobTitle, date: workDate, time: startTime, duration, location, locationUrl: _locationUrl, instructions, proposedRate: parseInt(document.getElementById('proposed-rate').value)||null, rateType: document.getElementById('rate-type').value });
-      // Show success
-      document.getElementById('form-area').style.display = 'none';
-      document.getElementById('success-box').style.display = 'block';
-      document.querySelector('.worker-mini').style.display = 'none';
-      if (workerData?.name) document.getElementById('success-worker-name').textContent = workerData.name;
-
-      // Countdown redirect
-      let secs = 3;
-      const cdEl = document.getElementById('countdown');
-      const timer = setInterval(() => {
-        secs--;
-        if (cdEl) cdEl.textContent = secs;
-        if (secs <= 0) {
-          clearInterval(timer);
-          window.location.href = 'hirer-dashboard.html';
-        }
-      }, 1000);
-    } catch(e) {
-      console.error(e);
-      showToast('Failed to send booking. Try again.','error');
-      btn.disabled = false;
-      btn.innerHTML = '📅 Confirm Booking →';
-    }
-  };
-</script>
-<style>@keyframes toastIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}</style>
+  </style>
 </body>
+
 </html>
