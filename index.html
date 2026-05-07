@@ -455,7 +455,7 @@
           <div class="wc-actions">
             <button class="wc-btn-msg"  onclick="msgWorker(decodeURIComponent('${safeId}'))">💬 Message</button>
             <button class="wc-btn-book" onclick="bookWorker(decodeURIComponent('${safeId}'))">📅 Book Now</button>
-            <button style="padding:6px 10px;background:rgba(239,68,68,0.08);color:#EF4444;border:1px solid rgba(239,68,68,0.2);border-radius:8px;font-size:0.72rem;font-weight:600;cursor:pointer;transition:all 0.2s" onclick="openReport('${safeId}','${esc(w.name||'Worker')}')" title="Report this worker">🚨</button>
+            ${currentUserRole ? `<button style="padding:6px 10px;background:rgba(239,68,68,0.08);color:#EF4444;border:1px solid rgba(239,68,68,0.2);border-radius:8px;font-size:0.72rem;font-weight:600;cursor:pointer;transition:all 0.2s" onclick="openReport('${safeId}','${esc(w.name||'Worker')}')" title="Report this worker">🚨</button>` : ''}
           </div>
         </div>`;
     }).join('');
@@ -694,7 +694,9 @@
   let _reportTargetId = '', _reportTargetName = '';
 
   window.openReport = function(safeId, name) {
-    if (!window.currentUserUid) { alert('Please login to report a user.'); return; }
+    if (!window.currentUserUid || !window.currentUserRole) {
+      return; // silently ignore — button shouldn't be visible anyway
+    }
     _reportTargetId = decodeURIComponent(safeId);
     _reportTargetName = name;
     document.getElementById('report-target-name').textContent = name;
