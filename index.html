@@ -33,20 +33,30 @@
     body{font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--ink);min-height:100vh}
 
     /* ── NAVBAR ── */
-    .navbar{background:#fff;border-bottom:1px solid var(--border);padding:0 32px;height:64px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 1px 8px rgba(0,0,0,0.06)}
-    .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
-    .brand-icon{width:40px;height:40px;background:var(--saffron);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;color:#fff;font-family:'Baloo Tamma 2',sans-serif;font-weight:800}
-    .brand-text{font-family:'Baloo Tamma 2',sans-serif;font-size:1.15rem;font-weight:800;color:var(--ink)}
+    .navbar{background:#fff;border-bottom:1px solid var(--border);padding:0 16px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 1px 8px rgba(0,0,0,0.06);gap:8px;overflow:visible}
+    .brand{display:flex;align-items:center;gap:8px;text-decoration:none;flex-shrink:0}
+    .brand-icon{width:36px;height:36px;background:var(--saffron);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:1rem;color:#fff;font-family:'Baloo Tamma 2',sans-serif;font-weight:800;flex-shrink:0}
+    .brand-text{font-family:'Baloo Tamma 2',sans-serif;font-size:1.05rem;font-weight:800;color:var(--ink)}
     .brand-text span{color:var(--saffron)}
-    .brand-sub{font-size:0.65rem;color:var(--muted);display:block;font-weight:400}
-    .nav-links{display:flex;align-items:center;gap:4px}
-    .nav-link{padding:8px 14px;border-radius:8px;text-decoration:none;font-size:0.85rem;font-weight:500;color:var(--muted);transition:all 0.2s}
+    .brand-sub{font-size:0.6rem;color:var(--muted);display:block;font-weight:400}
+    .nav-links{display:flex;align-items:center;gap:2px;flex:1;justify-content:flex-end;flex-wrap:nowrap;overflow:hidden;min-width:0}
+    .nav-link{padding:6px 10px;border-radius:8px;text-decoration:none;font-size:0.8rem;font-weight:500;color:var(--muted);transition:all 0.2s;white-space:nowrap}
     .nav-link:hover{background:var(--paper);color:var(--ink)}
     .nav-link.active{color:var(--saffron);background:var(--saffron-light)}
-    .nav-btn{padding:8px 18px;background:var(--saffron);color:#fff;border:none;border-radius:8px;font-size:0.85rem;font-weight:600;cursor:pointer;text-decoration:none;transition:all 0.2s;font-family:'DM Sans',sans-serif}
-    .nav-btn:hover{background:var(--saffron-dark);transform:translateY(-1px)}
+    .nav-btn{padding:7px 14px;background:var(--saffron);color:#fff;border:none;border-radius:8px;font-size:0.8rem;font-weight:600;cursor:pointer;text-decoration:none;transition:all 0.2s;font-family:'DM Sans',sans-serif;white-space:nowrap}
+    .nav-btn:hover{background:var(--saffron-dark)}
     .nav-btn.outline{background:transparent;color:var(--saffron);border:1.5px solid var(--saffron)}
     .nav-btn.outline:hover{background:var(--saffron-light)}
+    /* Account button — fixed width, no overflow */
+    #account-btn{max-width:160px;overflow:hidden}
+    #nav-user-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:80px;display:inline-block}
+    /* Mobile nav: hide text links, show hamburger */
+    @media(max-width:640px){
+      .nav-link:not(.active){display:none}
+      .brand-sub{display:none}
+      #nav-guest .nav-btn.outline{display:none}
+      .navbar{padding:0 12px;height:56px}
+    }
 
     /* ── HERO ── */
     .hero{background:linear-gradient(135deg,var(--ink) 0%,#2a1a3e 100%);color:#fff;padding:56px 32px 48px;position:relative;overflow:hidden}
@@ -188,6 +198,29 @@
     .worker-card:nth-child(4)  { animation-delay: 120ms; }
     .worker-card:nth-child(5)  { animation-delay: 160ms; }
     .worker-card:nth-child(6+) { animation-delay: 200ms; }
+
+    /* ── MOBILE RESPONSIVE ── */
+    @media(max-width:640px){
+      .hero{padding:32px 16px 24px}
+      .hero h1{font-size:2rem}
+      .hero-stats{gap:16px}
+      .stat-num{font-size:1.6rem}
+      .search-section{padding:16px}
+      .search-row{flex-direction:column;gap:10px}
+      .search-select,.search-input,.btn-search{width:100%;min-width:0}
+      .workers-grid{grid-template-columns:1fr;gap:14px;padding:16px}
+      .sort-bar{flex-direction:column;gap:10px;align-items:flex-start;padding:12px 16px}
+      .sort-options{flex-wrap:wrap;gap:6px}
+      .sort-btn{font-size:0.75rem;padding:6px 10px}
+      .category-pills{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:4px}
+      .category-pills::-webkit-scrollbar{display:none}
+    }
+    @media(min-width:641px){
+      .navbar{padding:0 24px}
+    }
+    @media(min-width:1024px){
+      .navbar{padding:0 40px}
+    }
   </style>
 </head>
 <body>
@@ -203,10 +236,10 @@
   </a>
   <div class="nav-links">
     <a href="index.html" class="nav-link active" data-i18n="nav.home">🏠 Home</a>
-    <a href="find-jobs.html" class="nav-link">💼 Jobs</a>
-    <a href="worker-dashboard.html" class="nav-link">👷 Worker</a>
-    <a href="hirer-dashboard.html" class="nav-link">🏗️ Hirer</a>
-    <a href="admin-login.html" class="nav-link">🛡️ Admin</a>
+    <a href="find-jobs.html" class="nav-link" data-i18n="nav.jobs">💼 Jobs</a>
+    <a href="worker-dashboard.html" class="nav-link" data-i18n="nav.worker">👷 Worker</a>
+    <a href="hirer-dashboard.html" class="nav-link" data-i18n="nav.hirer">🏗️ Hirer</a>
+    <a href="admin-login.html" class="nav-link" data-i18n="nav.admin">🛡️ Admin</a>
     <!-- Auth nav: shown/hidden by JS -->
     <div id="nav-guest" style="display:flex;align-items:center;gap:6px">
       <div style="display:flex;gap:4px"><button id="btn-lang-en" onclick="window._setLang('en')" style="padding:5px 13px;border:1.5px solid #E25519;border-radius:8px;font-size:0.8rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:.2s;background:#E25519;color:#fff">English</button><button id="btn-lang-kn" onclick="window._setLang('kn')" style="padding:5px 13px;border:1.5px solid #E25519;border-radius:8px;font-size:0.8rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:.2s;background:transparent;color:#E25519">ಕನ್ನಡ</button></div>
@@ -238,25 +271,25 @@
       <span class="hero-badge badge-green"><span class="pulse"></span><span id="worker-count">100</span> Workers across Karnataka</span>
       <span class="hero-badge badge-orange"><span class="pulse"></span><span id="online-count">0</span> online now</span>
     </div>
-    <h1>Find Skilled <span class="accent">Workers</span></h1>
-    <p class="hero-kannada">Find Skilled Workers Near You</p>
-    <p class="hero-sub">Painters, Plumbers, Electricians, Masons & 40+ trades<br>across all 31 Karnataka districts — 0% commission.</p>
+    <h1 data-i18n-html="hero.h1">Find Skilled <span class="accent">Workers</span></h1>
+    <p class="hero-kannada" data-i18n="hero.sub">Find Skilled Workers Near You</p>
+    <p class="hero-sub" data-i18n="hero.desc">Painters, Plumbers, Electricians, Masons & 40+ trades across all 31 Karnataka districts — 0% commission.</p>
     <div class="hero-stats">
       <div class="stat">
         <div class="stat-num" id="stat-workers">—</div>
-        <div class="stat-label">Workers</div>
+        <div class="stat-label" data-i18n="stat.workers">Workers</div>
       </div>
       <div class="stat">
         <div class="stat-num">31</div>
-        <div class="stat-label">Districts</div>
+        <div class="stat-label" data-i18n="stat.districts">Districts</div>
       </div>
       <div class="stat">
         <div class="stat-num" id="stat-jobs">—</div>
-        <div class="stat-label">Jobs Posted</div>
+        <div class="stat-label" data-i18n="stat.jobs">Jobs Posted</div>
       </div>
       <div class="stat">
         <div class="stat-num">0%</div>
-        <div class="stat-label">Commission</div>
+        <div class="stat-label" data-i18n="stat.commission">Commission</div>
       </div>
     </div>
   </div>
@@ -290,7 +323,7 @@
       <select class="search-select" id="filter-taluk" onchange="applyFilter()" style="min-width:140px">
         <option value="" data-i18n-opt="filter.taluks">All Taluks</option>
       </select>
-      <input class="search-input" id="search-name" type="text" placeholder="🔍 Search name, trade..." oninput="applyFilter()"/>
+      <input class="search-input" id="search-name" type="text" placeholder="🔍 Search name, trade..." data-i18n-ph="filter.ph" oninput="applyFilter()"/>
       <button class="btn-search" onclick="applyFilter()">🔍 <span data-i18n="filter.btn">Search</span></button>
     </div>
     <div class="category-pills" id="category-pills"></div>
